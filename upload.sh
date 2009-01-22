@@ -11,12 +11,10 @@
 # To make it easier on me, if a file "source.txt" exists, it is
 # automatically renamed using the current timestamp.
 
-# TODO: handle images (git add them and rewrite the URL dynamically)
 # TODO: generate an RSS feed, too
 # TODO: generate TOC
 # TODO: have a configurable maximum number of entries per page, and links
 #	to older pages
-# TODO: include the commit name in the URL, so that images will be found
 
 # make sure we're in the correct working directory
 cd "$(dirname "$0")"
@@ -127,10 +125,12 @@ markup_substitution () {
 
 # transform markup in stdin to HTML
 markup () {
+	image_pattern="\\[\\[Image:\([^]]*\)"
 	sed -e 's!^$!</p><p>!' \
 		-e 's!IMHO!in my humble opinion!g' \
 		-e 's!repo.or.cz!<a href=http://&>&</a>!g' \
 		-e 's!:-)!\&#x263a;!g' \
+		-e "s!$image_pattern\(\\|[^\]]*\)\?\]\]!<center><img src=$URL\1></center>!g" \
 		-e "$(markup_substitution "''" i)" \
 		-e "$(markup_substitution "_" u)"
 }
@@ -169,8 +169,26 @@ EOF
 	</body>
 </html>
 EOF
-
 }
+
+# never, ever have spaces in the file names
+commit_new_images () {
+	images=
+	for image in $(cat source-* |
+		tr ' ]|' '\n' |
+		sed -n 's/.*\[\[Image://p' |
+		sort |
+		uniq)
+	do
+		git add $image || die "Could not git add image $image"
+		images="$images $image"
+	done
+
+	git update-index --refresh &&
+	git diff --cached --quiet HEAD ||
+	git commit -s -m "Commit some images on $(make_date $now)" $images
+}
+
 
 # parse command line option
 case "$1" in
@@ -200,6 +218,15 @@ test ! -f $NEW || {
 } ||
 die "Could not rename source.txt"
 
+# commit the images that are referenced and not yet committed
+test ! -z "$DRYRUN" ||
+commit_new_images ||
+die "Could not commit new images"
+
+# to find the images reliably, we have to use the commit name, not the branch
+URL="$REMOTEREPOSITORY?a=blob_plain;hb=$(git rev-parse --verify $BRANCH);f="
+
+# Rewrite the URL in the .css file if we're not running dry
 if test -z "$DRYRUN"
 then
 	# rewrite URLs
