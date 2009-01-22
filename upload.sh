@@ -19,6 +19,7 @@ URL="dscho.git?a=blob_plain;hb=$BRANCH;f="
 CSS=blog.css
 NEW=new
 OUTPUT=index.html
+TEST=test.html
 TITLE="Dscho's blog"
 
 LC_ALL=C
@@ -149,16 +150,18 @@ EOF
 
 }
 
+# make sure we're in the correct working directory
+cd "$(dirname "$0")"
+
 # parse command line option
 case "$1" in
 *dry*) DRYRUN=1; shift;;
+*show*) firefox "$(pwd)"/$TEST; exit;;
+*remote*) firefox http://repo.or.cz/w/git/$URL$OUTPUT; exit;;
 esac
 
 test "$#" = 0 ||
 die "Usage: $0 [--dry-run]"
-
-# make sure we're in the correct working directory
-cd "$(dirname "$0")"
 
 # make sure we're on the correct branch
 test refs/heads/$BRANCH = $(git symbolic-ref HEAD) ||
@@ -185,7 +188,7 @@ then
 	git add $CSS ||
 	die "Rewriting $CSS failed"
 else
-	OUTPUT=test.html
+	OUTPUT=$TEST
 	CSS=$CSS.in
 	URL=
 fi
