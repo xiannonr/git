@@ -12,7 +12,6 @@
 # automatically renamed using the current timestamp.
 
 # TODO: generate an RSS feed, too
-# TODO: generate TOC
 # TODO: have a configurable maximum number of entries per page, and links
 #	to older pages
 
@@ -151,12 +150,32 @@ make_html () {
 			<h1>$TITLE</h1>
 EOF
 
+	# make toc
+	toc_width=400px
+	toc_style="position:absolute;top:50px;left:810px;width=$toc_width"
+	echo "<div style=\"$toc_style\">"
+	echo "<table width=$toc_width bgcolor=#e0e0e0 border=1><tr><td>"
+	echo '<p><ol>'
+	for file in $(ls -r source-*.txt)
+	do
+		basename=${file%.txt}
+		timestamp=${basename#source-}
+		date="$(date +"%d %b %Y" -d @$timestamp)"
+		title="$(sed 1q < $file | markup)"
+		echo "<li><a href=#$timestamp>$date $title</a>"
+	done
+	echo '</td></tr></table>'
+	echo '</ol></p>'
+	echo '</div>'
+
+
 	# timestamps will not need padding to sort correctly, for some time...
 	for file in $(ls -r source-*.txt)
 	do
 		basename=${file%.txt}
 		timestamp=${basename#source-}
 		echo "<h6>$(make_date $timestamp)</h6>"
+		echo "<a name=$timestamp>"
 		echo "<h2>$(sed 1q < $file | markup)</h2>"
 		echo ""
 		echo "<p>"
