@@ -132,6 +132,20 @@ markup () {
 		-e 's!repo.or.cz!<a href=http://&>&</a>!g' \
 		-e 's!:-)!\&#x263a;!g' \
 		-e "s!$image_pattern2!<center><img src=$URL\1></center>!g" \
+		-e 's!<bash>!<table\
+				border=1 bgcolor=black style="color:#ffffff;">\
+			<tr><td bgcolor=lightblue colspan=3>\
+				\&nbsp;\
+			</td></tr>\
+			<tr><td>\
+				<table cellspacing=5 border=0>\
+				<tr><td>\
+					<pre>!' \
+		-e 's!</bash>!		</pre>\
+				</td></tr>\
+				</table>\
+			</td></tr>\
+			</table>!' \
 		-e "$(markup_substitution "''" i)" \
 		-e "$(markup_substitution "_" u)"
 }
