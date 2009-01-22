@@ -1,0 +1,12 @@
+body {
+	width:800;
+	background-image:url(paper.jpg);
+	background-repeat:repeat-y;
+	background-attachment:scroll; padding:0px;
+}
+.content {
+	width:610px;
+	margin-left:120px;
+	align:left;
+	vertical-align:top;
+}

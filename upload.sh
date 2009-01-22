@@ -15,7 +15,8 @@
 # TODO: generate an RSS feed, too
 
 BRANCH=blog
-URL=http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=$BRANCH;f=
+URL="dscho.git?a=blob_plain;hb=$BRANCH;f="
+CSS=blog.css
 OUTPUT=index.html
 TITLE="Dscho's blog"
 
@@ -120,9 +121,11 @@ make_html () {
 		<title>$TITLE</title>
 		<meta http-equiv="Content-Type"
 			content="text/html; charset=UTF-8"/>
+		<link rel="stylesheet" type="text/css" href="$URL$CSS">
 	</head>
 	<body>
-		<h1>$TITLE</h1>
+		<div class=content>
+			<h1>$TITLE</h1>
 EOF
 
 	# timestamps will not need padding to sort correctly, for some time...
@@ -131,7 +134,7 @@ EOF
 		basename=${file%.txt}
 		timestamp=${basename#source-}
 		echo "<h6>$(make_date $timestamp)</h6>"
-		echo "<h2>$(sed 2q < $file | markup)</h2>"
+		echo "<h2>$(sed 1q < $file | markup)</h2>"
 		echo ""
 		echo "<p>"
 		sed 1d < $file | markup
@@ -140,6 +143,7 @@ EOF
 	sed -e 's/^./\t\t\t&/'
 
 	cat << EOF
+		</div>
 	</body>
 </html>
 EOF
@@ -164,10 +168,17 @@ test ! -f source.txt || {
 } ||
 die "Could not rename source.txt"
 
-test -z "$DRYRUN" || {
+if test -z "$DRYRUN"
+then
+	# rewrite URLs
+	sed -e "s/url(/&$URL/g" < $CSS.in > $CSS &&
+	git add $CSS ||
+	die "Rewriting $CSS failed"
+else
 	OUTPUT=test.html
+	CSS=$CSS.in
 	URL=
-}
+fi
 
 make_html > $OUTPUT || die "Could not write $OUTPUT"
 
