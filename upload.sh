@@ -183,7 +183,8 @@ EOF
 		sed 1d < $file | markup
 		echo "</p>"
 	done |
-	sed -e 's/^./\t\t\t&/'
+	sed -e 's/^./\t\t\t&/' \
+		-e '/<pre>/,/<\/pre>/s/^\t\t\t//'
 
 	cat << EOF
 		</div>
