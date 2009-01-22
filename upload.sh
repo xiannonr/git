@@ -17,6 +17,7 @@
 BRANCH=blog
 URL="dscho.git?a=blob_plain;hb=$BRANCH;f="
 CSS=blog.css
+NEW=new
 OUTPUT=index.html
 TITLE="Dscho's blog"
 
@@ -160,10 +161,10 @@ git diff-files --quiet &&
 git diff-index --quiet --cached HEAD ||
 die "Have uncommitted changes!"
 
-# rename source.txt if it exists
+# rename the new blog entry if it exists
 now=$(date +%s)
-test ! -f source.txt || {
-	mv -i source.txt source-$now.txt &&
+test ! -f $NEW || {
+	mv -i $NEW source-$now.txt &&
 	git add source-$now.txt
 } ||
 die "Could not rename source.txt"
