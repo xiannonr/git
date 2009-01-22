@@ -24,8 +24,6 @@ TITLE="Dscho's blog"
 LC_ALL=C
 export LC_ALL
 
-cd "$(dirname "$0")"
-
 die () {
 	echo "$*" >&2
 	exit 1
@@ -150,6 +148,17 @@ EOF
 EOF
 
 }
+
+# parse command line option
+case "$1" in
+*dry*) DRYRUN=1; shift;;
+esac
+
+test "$#" = 0 ||
+die "Usage: $0 [--dry-run]"
+
+# make sure we're in the correct working directory
+cd "$(dirname "$0")"
 
 # make sure we're on the correct branch
 test refs/heads/$BRANCH = $(git symbolic-ref HEAD) ||
