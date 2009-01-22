@@ -245,7 +245,12 @@ commit_new_images ||
 die "Could not commit new images"
 
 # to find the images reliably, we have to use the commit name, not the branch
-URL="$REMOTEREPOSITORY?a=blob_plain;hb=$(git rev-parse --verify $BRANCH);f="
+# we use the latest commit touching an image file.
+IMAGEFILES="$(git ls-files |
+	grep -v '\.\(css\|html\|gitignore\|in\|sh\|txt\)$')"
+REV=$(git rev-list -1 HEAD -- $IMAGEFILES)
+test -z "$REV" && REV=$BRANCH
+URL="$REMOTEREPOSITORY?a=blob_plain;hb=$REV;f="
 
 # Rewrite the URL in the .css file if we're not running dry
 if test -z "$DRYRUN"
