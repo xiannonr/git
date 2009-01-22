@@ -158,6 +158,7 @@ make_html () {
 	body_style="$body_style;padding:0px;"
 	text_style="width:610px"
 	text_style="$text_style;margin-left:120px"
+	text_style="$text_style;margin-top:50px"
 	text_style="$text_style;align:left"
 	text_style="$text_style;vertical-align:top;"
 	cat << EOF
