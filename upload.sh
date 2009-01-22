@@ -112,6 +112,40 @@ markup () {
 		-e "$(markup_substitution "_" u)"
 }
 
+# make HTML page
+make_html () {
+	cat << EOF
+<html>
+	<head>
+		<title>$TITLE</title>
+		<meta http-equiv="Content-Type"
+			content="text/html; charset=UTF-8"/>
+	</head>
+	<body>
+		<h1>$TITLE</h1>
+EOF
+
+	# timestamps will not need padding to sort correctly, for some time...
+	for file in $(ls -r source-*.txt)
+	do
+		basename=${file%.txt}
+		timestamp=${basename#source-}
+		echo "<h6>$(make_date $timestamp)</h6>"
+		echo "<h2>$(sed 2q < $file | markup)</h2>"
+		echo ""
+		echo "<p>"
+		sed 1d < $file | markup
+		echo "</p>"
+	done |
+	sed -e 's/^./\t\t\t&/'
+
+	cat << EOF
+	</body>
+</html>
+EOF
+
+}
+
 # make sure we're on the correct branch
 test refs/heads/$BRANCH = $(git symbolic-ref HEAD) ||
 die "Not on branch $BRANCH"
@@ -130,38 +164,15 @@ test ! -f source.txt || {
 } ||
 die "Could not rename source.txt"
 
-# make index.html
-cat > index.html << EOF || die "Could not write to index.html"
-<html>
-	<head>
-		<title>$TITLE</title>
-		<meta http-equiv="Content-Type"
-			content="text/html; charset=UTF-8"/>
-	</head>
-	<body>
-		<h1>$TITLE</h1>
-EOF
+test -z "$DRYRUN" || {
+	OUTPUT=test.html
+	URL=
+}
 
-# timestamps will not need padding to sort correctly, for quite some time...
-for file in $(ls -r source-*.txt)
-do
-	basename=${file%.txt}
-	timestamp=${basename#source-}
-	echo "<h6>$(make_date $timestamp)</h6>"
-	echo "<h2>$(sed 2q < $file | markup)</h2>"
-	echo ""
-	echo "<p>"
-	sed 1d < $file | markup
-	echo "</p>"
-done |
-sed -e 's/^./\t\t\t&/' >> index.html ||
-die "Could not write index.html"
+make_html > $OUTPUT || die "Could not write $OUTPUT"
 
-cat >> index.html << EOF || die "Could not write to index.html"
-	</body>
-</html>
-EOF
+test ! -z "$DRYRUN" && exit
 
-git add index.html &&
+git add $OUTPUT &&
 git commit -s -m "Update $(make_date $now)" &&
 git push origin +$BRANCH
