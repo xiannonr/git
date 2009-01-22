@@ -126,11 +126,12 @@ markup_substitution () {
 # transform markup in stdin to HTML
 markup () {
 	image_pattern="\\[\\[Image:\([^]]*\)"
+	image_pattern2="$image_pattern\(\\|[^\]]*\)\?\]\]"
 	sed -e 's!^$!</p><p>!' \
 		-e 's!IMHO!in my humble opinion!g' \
 		-e 's!repo.or.cz!<a href=http://&>&</a>!g' \
 		-e 's!:-)!\&#x263a;!g' \
-		-e "s!$image_pattern\(\\|[^\]]*\)\?\]\]!<center><img src=$URL\1></center>!g" \
+		-e "s!$image_pattern2!<center><img src=$URL\1></center>!g" \
 		-e "$(markup_substitution "''" i)" \
 		-e "$(markup_substitution "_" u)"
 }
