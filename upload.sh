@@ -40,7 +40,14 @@ TITLE="Dscho's blog"
 LC_ALL=C
 export LC_ALL
 
+move_new_entry_back () {
+	test -f source-$now.txt &&
+	mv source-$now.txt $NEW &&
+	git rm --cached -f source-$now.txt
+}
+
 die () {
+	move_new_entry_back
 	echo "$*" >&2
 	exit 1
 }
@@ -207,7 +214,10 @@ fi
 
 make_html > $OUTPUT || die "Could not write $OUTPUT"
 
-test ! -z "$DRYRUN" && exit
+test ! -z "$DRYRUN" && {
+	move_new_entry_back
+	exit
+}
 
 git add $OUTPUT &&
 git commit -s -m "Update $(make_date $now)" &&
