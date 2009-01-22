@@ -28,7 +28,6 @@ URLPREFIX="$(dirname "$GITWEBURL")"/
 REMOTEREPOSITORY="$(basename "$GITWEBURL")"
 BRANCH=blog
 URL="$REMOTEREPOSITORY?a=blob_plain;hb=$BRANCH;f="
-CSS=blog.css
 NEW=new
 OUTPUT=index.html
 TEST=test.html
@@ -152,16 +151,24 @@ markup () {
 
 # make HTML page
 make_html () {
+	body_style="width:800px"
+	body_style="$body_style;background-image:url(${URL}paper.jpg)"
+	body_style="$body_style;background-repeat:repeat-y"
+	body_style="$body_style;background-attachment:scroll"
+	body_style="$body_style;padding:0px;"
+	text_style="width:610px"
+	text_style="$text_style;margin-left:120px"
+	text_style="$text_style;align:left"
+	text_style="$text_style;vertical-align:top;"
 	cat << EOF
 <html>
 	<head>
 		<title>$TITLE</title>
 		<meta http-equiv="Content-Type"
 			content="text/html; charset=UTF-8"/>
-		<link rel="stylesheet" type="text/css" href="$URL$CSS">
 	</head>
-	<body>
-		<div class=content>
+	<body style="$body_style">
+		<div style="$text_style">
 			<h1>$TITLE</h1>
 EOF
 	indent='\t\t\t'
@@ -275,21 +282,15 @@ die "Could not commit new images"
 # to find the images reliably, we have to use the commit name, not the branch
 # we use the latest commit touching an image file.
 IMAGEFILES="$(git ls-files |
-	grep -v '\.\(css\|html\|gitignore\|in\|sh\|txt\)$')"
+	grep -v '\.\(html\|gitignore\|in\|sh\|txt\)$')"
 REV=$(git rev-list -1 HEAD -- $IMAGEFILES)
 test -z "$REV" && REV=$BRANCH
 URL="$REMOTEREPOSITORY?a=blob_plain;hb=$REV;f="
 
-# Rewrite the URL in the .css file if we're not running dry
-if test -z "$DRYRUN"
+if test ! -z "$DRYRUN"
 then
-	# rewrite URLs
-	sed -e "s/url(/&$URL/g" < $CSS.in > $CSS &&
-	git add $CSS ||
-	die "Rewriting $CSS failed"
-else
+	# Output to test.html and have local links into the current directory
 	OUTPUT=$TEST
-	CSS=$CSS.in
 	URL=
 fi
 
