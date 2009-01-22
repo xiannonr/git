@@ -13,9 +13,24 @@
 
 # TODO: handle images (git add them and rewrite the URL dynamically)
 # TODO: generate an RSS feed, too
+# TODO: generate TOC
+# TODO: have a configurable maximum number of entries per page, and links
+#	to older pages
+# TODO: include the commit name in the URL, so that images will be found
 
+# make sure we're in the correct working directory
+cd "$(dirname "$0")"
+
+GITWEBURL="$(git config gitweb.url)"
+test -z "$GITWEBURL" && {
+	echo "Please set gitweb.url in the Git config first!" >&2
+	exit 1
+}
+
+URLPREFIX="$(dirname "$GITWEBURL")"/
+REMOTEREPOSITORY="$(basename "$GITWEBURL")"
 BRANCH=blog
-URL="dscho.git?a=blob_plain;hb=$BRANCH;f="
+URL="$REMOTEREPOSITORY?a=blob_plain;hb=$BRANCH;f="
 CSS=blog.css
 NEW=new
 OUTPUT=index.html
@@ -150,14 +165,11 @@ EOF
 
 }
 
-# make sure we're in the correct working directory
-cd "$(dirname "$0")"
-
 # parse command line option
 case "$1" in
 *dry*) DRYRUN=1; shift;;
 *show*) firefox "$(pwd)"/$TEST; exit;;
-*remote*) firefox http://repo.or.cz/w/git/$URL$OUTPUT; exit;;
+*remote*) firefox $URLPREFIX$URL$OUTPUT; exit;;
 esac
 
 test "$#" = 0 ||
