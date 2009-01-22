@@ -19,9 +19,9 @@ scheduled, Shawn opened a series on <a href=http://moderator.appspot.com/>
 Google Moderator</a>, a nifty, yet simple application which allows a group
 to agree quickly on an agenda.
 
-It worked quite well, however, that little saboteur displayed his sense of
-humor so overtly that we had to put the question "Sverre should wear a hat"
-on the agenda.
+It worked quite well; However, that little saboteur displayed his sense of
+humor so overtly that some entertaining Gitter put the question "Should Sverre
+wear a hat?" on the agenda.
 
 Sure enough, the subject got voted up, and eventually, we got Sverre a hat:
 
