@@ -1,0 +1,46 @@
+The UGFWIINI contest
+
+Just in case somebody finds this blog, here is a challenge.  Inspired by my
+own little hack (this blog), I announce the "Using Git For What It Is Not
+Intended" contest.
+
+And it is especially cool, since the acronym sounds cool!  You might miss
+this fact if you do no know that I pronounce the "F" like an "A" so that
+it sounds cool.
+
+This will be a running contest; whenever I have 10 valid applications, I
+will announce a winner on the Git mailing list.
+
+So, what accounts for a valid application?
+
+<ul>
+<li> You must use a Git program (the term is used loosely here, GitWeb is
+     considered a Git program, for example).
+<li> The program must be intended for something completely different than
+     what you are using it for.  E.g. GitWeb -- which was intended to let
+     you browse through the history using your web browser -- is used
+     to serve a blog to the wide world.
+<li> You must be able to prove that you actually used the Git program to
+     the purpose you claim, preferably in a live demonstration like this
+     one.
+<li> Nobody and nothing must be harmed in the process (except your
+     laughing muscle, that's okay).
+</ul>
+
+So, how does such an abuse look like?
+
+<ul>
+<li> ... like this blog.
+<li> Managing your mail (in maildir format) in a Git repository.
+<li> Finding duplicate files by
+<bash>
+$ git init
+$ git add .
+$ git ls-files --stage | sort -k2 | uniq -d -s7 -w40
+</bash>
+<li> Abusing the Git alias mechanism to call scripts defined directly in
+     the config.
+</ul>
+
+I am really looking forward to all of your submissions... *chuckles*
+

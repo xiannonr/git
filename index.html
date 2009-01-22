@@ -11,6 +11,7 @@
 <div style="position:absolute;top:50px;left:810px;width=400px">
 <table width=400px bgcolor=#e0e0e0 border=1><tr><td>
 <p><ol>
+<li><a href=#1232626236>22 Jan 2009 The UGFWIINI contest</a>
 <li><a href=#1232611542>22 Jan 2009 Top-posting</a>
 <li><a href=#1232607201>22 Jan 2009 Sverre's hat</a>
 <li><a href=#1232604722>22 Jan 2009 Let there be images!</a>
@@ -19,6 +20,69 @@
 </td></tr></table>
 </ol></p>
 </div>
+			<h6>Thursday, 22nd of January, Anno Domini MMIX, at the hour of the Goat</h6>
+			<a name=1232626236>
+			<h2>The UGFWIINI contest</h2>
+
+			<p>
+			</p><p>
+			Just in case somebody finds this blog, here is a challenge.  Inspired by my
+			own little hack (this blog), I announce the "Using Git For What It Is Not
+			Intended" contest.
+			</p><p>
+			And it is especially cool, since the acronym sounds cool!  You might miss
+			this fact if you do no know that I pronounce the "F" like an "A" so that
+			it sounds cool.
+			</p><p>
+			This will be a running contest; whenever I have 10 valid applications, I
+			will announce a winner on the Git mailing list.
+			</p><p>
+			So, what accounts for a valid application?
+			</p><p>
+			<ul>
+			<li> You must use a Git program (the term is used loosely here, GitWeb is
+			     considered a Git program, for example).
+			<li> The program must be intended for something completely different than
+			     what you are using it for.  E.g. GitWeb -- which was intended to let
+			     you browse through the history using your web browser -- is used
+			     to serve a blog to the wide world.
+			<li> You must be able to prove that you actually used the Git program to
+			     the purpose you claim, preferably in a live demonstration like this
+			     one.
+			<li> Nobody and nothing must be harmed in the process (except your
+			     laughing muscle, that's okay).
+			</ul>
+			</p><p>
+			So, how does such an abuse look like?
+			</p><p>
+			<ul>
+			<li> ... like this blog.
+			<li> Managing your mail (in maildir format) in a Git repository.
+			<li> Finding duplicate files by
+			<table
+							border=1 bgcolor=black style="color:#ffffff;">
+						<tr><td bgcolor=lightblue colspan=3>
+							&nbsp;
+						</td></tr>
+						<tr><td>
+							<table cellspacing=5 border=0>
+							<tr><td>
+					<pre>
+$ git init
+$ git add .
+$ git ls-files --stage | sort -k2 | uniq -d -s7 -w40
+		</pre>
+							</td></tr>
+							</table>
+						</td></tr>
+						</table>
+			<li> Abusing the Git alias mechanism to call scripts defined directly in
+			     the config.
+			</ul>
+			</p><p>
+			I am really looking forward to all of your submissions... *chuckles*
+			</p><p>
+			</p>
 			<h6>Thursday, 22nd of January, Anno Domini MMIX, at the hour of the Snake</h6>
 			<a name=1232611542>
 			<h2>Top-posting</h2>
