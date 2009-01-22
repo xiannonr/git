@@ -164,24 +164,27 @@ make_html () {
 		<div class=content>
 			<h1>$TITLE</h1>
 EOF
+	indent='\t\t\t'
 
 	# make toc
 	toc_width=400px
 	toc_style="position:absolute;top:50px;left:810px;width=$toc_width"
-	echo "<div style=\"$toc_style\">"
-	echo "<table width=$toc_width bgcolor=#e0e0e0 border=1><tr><td>"
-	echo '<p><ol>'
-	for file in $(ls -r source-*.txt)
-	do
-		basename=${file%.txt}
-		timestamp=${basename#source-}
-		date="$(date +"%d %b %Y" -d @$timestamp)"
-		title="$(sed 1q < $file | markup)"
-		echo "<li><a href=#$timestamp>$date $title</a>"
-	done
-	echo '</td></tr></table>'
-	echo '</ol></p>'
-	echo '</div>'
+	{
+		echo "<div style=\"$toc_style\">"
+		echo "<table width=$toc_width bgcolor=#e0e0e0 border=1><tr><td>"
+		echo '<p><ol>'
+		for file in $(ls -r source-*.txt)
+		do
+			basename=${file%.txt}
+			timestamp=${basename#source-}
+			date="$(date +"%d %b %Y" -d @$timestamp)"
+			title="$(sed 1q < $file | markup)"
+			echo "<li><a href=#$timestamp>$date $title</a>"
+		done
+		echo '</td></tr></table>'
+		echo '</ol></p>'
+		echo '</div>'
+	} | sed -s "s/^/$indent/"
 
 
 	# timestamps will not need padding to sort correctly, for some time...
@@ -197,8 +200,8 @@ EOF
 		sed 1d < $file | markup
 		echo "</p>"
 	done |
-	sed -e 's/^./\t\t\t&/' \
-		-e '/<pre>/,/<\/pre>/s/^\t\t\t//'
+	sed -e "s/^./$indent&/" \
+		-e "/<pre>/,/<\/pre>/s/^$indent//"
 
 	cat << EOF
 		</div>
