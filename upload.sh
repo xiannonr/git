@@ -206,7 +206,8 @@ commit_new_images () {
 	done
 
 	git update-index --refresh &&
-	git diff --cached --quiet HEAD ||
+	git diff-files --quiet -- $images &&
+	git diff --cached --quiet HEAD -- $images ||
 	git commit -s -m "Commit some images on $(make_date $now)" $images
 }
 
@@ -227,9 +228,8 @@ die "Not on branch $BRANCH"
 
 # make sure there are no uncommitted changes
 git update-index --refresh &&
-git diff-files --quiet &&
-git diff-index --quiet --cached HEAD ||
-die "Have uncommitted changes!"
+git diff-files --quiet ||
+die "Have unstaged changes!"
 
 # rename the new blog entry if it exists
 now=$(date +%s)
