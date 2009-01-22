@@ -31,3 +31,5 @@ BTW another thing I like about this blog engine is that there are no
 comments...  Nothing is more annoying than leaving a comment on a blog,
 forgetting about it for a few months, and then finding somebody answered
 ages ago.
+
+Update: Sverre says it was dsymonds idea.
