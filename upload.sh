@@ -171,7 +171,9 @@ EOF
 	toc_style="position:absolute;top:50px;left:810px;width=$toc_width"
 	{
 		echo "<div style=\"$toc_style\">"
-		echo "<table width=$toc_width bgcolor=#e0e0e0 border=1><tr><td>"
+		echo "<table width=$toc_width bgcolor=#e0e0e0 border=1>"
+		echo "<tr><th>Table of contents:</th></tr>"
+		echo "<tr><td>"
 		echo '<p><ol>'
 		for file in $(ls -r source-*.txt)
 		do
@@ -181,8 +183,16 @@ EOF
 			title="$(sed 1q < $file | markup)"
 			echo "<li><a href=#$timestamp>$date $title</a>"
 		done
-		echo '</td></tr></table>'
 		echo '</ol></p>'
+		echo '</td></tr></table>'
+		test -f links.html && {
+			echo "<br>"
+			echo "<table width=$toc_width bgcolor=#e0e0e0 border=1>"
+			echo "<tr><th>Links:</th></tr>"
+			echo "<tr><td>"
+			cat links.html
+			echo "</td></tr></table>"
+		}
 		echo '</div>'
 	} | sed -s "s/^/$indent/"
 
