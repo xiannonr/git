@@ -132,12 +132,13 @@ markup () {
 		-e 's!:-)!\&#x263a;!g' \
 		-e "s!$image_pattern2!<center><img src=$URL\1></center>!g" \
 		-e 's!<bash>!<table\
-				border=1 bgcolor=black style="color:#ffffff;">\
+				border=1 bgcolor=black>\
 			<tr><td bgcolor=lightblue colspan=3>\
 				\&nbsp;\
 			</td></tr>\
 			<tr><td>\
-				<table cellspacing=5 border=0>\
+				<table cellspacing=5 border=0\
+					 style="color:#ffffff;">\
 				<tr><td>\
 					<pre>!' \
 		-e 's!</bash>!		</pre>\
