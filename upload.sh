@@ -76,8 +76,8 @@ make_roman_number () {
 	'') ;;
 	?) digit_to_roman $1 I V X;;
 	??) echo $(digit_to_roman ${1%?} X L C)$(make_roman_number ${1#?});;
-	???) echo $(digit_to_roman ${1%?} C D M)$(make_roman_number ${1#??});;
-	????) echo $(digit_to_roman ${1%?} M)$(make_roman_number ${1#???});;
+	???) echo $(digit_to_roman ${1%??} C D M)$(make_roman_number ${1#?});;
+	????) echo $(digit_to_roman ${1%???} M)$(make_roman_number ${1#?});;
 	esac
 }
 
