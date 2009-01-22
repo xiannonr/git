@@ -1,0 +1,33 @@
+Sverre's hat
+
+The fun part about a blog is that you can talk about less technical stuff.
+For example, Sverre's hat.
+
+Let me start a bit earlier, so that you get the context.
+
+Last year, at the <a href=http://git.or.cz/gitwiki/GitTogether>GitTogether</a>,
+we had an <a href=http://en.wikipedia.org/wiki/Unconference>unconference style
+conference</a>, which basically meant that it was our job to decide what
+we want to talk about.
+
+It turned out to be pretty hard, because there was so much we wanted to
+discuss, and because we wanted to get to know each other, and we wanted to
+do some hacking.
+
+So to help us decide what subjects, and in which order we wanted to have
+scheduled, Shawn opened a series on <a href=http://moderator.appspot.com/>
+Google Moderator</a>, a nifty, yet simple application which allows a group
+to agree quickly on an agenda.
+
+It worked quite well, however, that little saboteur displayed his sense of
+humor so overtly that we had to put the question "Sverre should wear a hat"
+on the agenda.
+
+Sure enough, the subject got voted up, and eventually, we got Sverre a hat:
+
+[[Image:sverre-hat.jpg]]
+
+BTW another thing I like about this blog engine is that there are no
+comments...  Nothing is more annoying than leaving a comment on a blog,
+forgetting about it for a few months, and then finding somebody answered
+ages ago.
