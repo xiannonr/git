@@ -107,7 +107,7 @@ markup () {
 	sed -e 's!^$!</p><p>!' \
 		-e 's!IMHO!in my humble opinion!g' \
 		-e 's!repo.or.cz!<a href=http://&>&</a>!g' \
-		-e 's!:-)!☺!g' \
+		-e 's!:-)!\&#x263a;!g' \
 		-e "$(markup_substitution "''" i)" \
 		-e "$(markup_substitution "_" u)"
 }
