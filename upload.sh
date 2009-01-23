@@ -242,7 +242,7 @@ EOF
 
 		# RSS feed
 		rss_style="background-color:orange;text-decoration:none"
-		rss_style="$rss_style;color:white;"
+		rss_style="$rss_style;color:white;font-family:sans-serif;"
 		echo '<br>'
 		echo '<div style="text-align:right;">'
 		echo "<a href=\"$ORIGURL$RSS\""
