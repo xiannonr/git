@@ -11,7 +11,6 @@
 # To make it easier on me, if a file "source.txt" exists, it is
 # automatically renamed using the current timestamp.
 
-# TODO: generate an RSS feed, too
 # TODO: have a configurable maximum number of entries per page, and links
 #	to older pages
 
