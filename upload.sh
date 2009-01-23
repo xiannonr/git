@@ -209,6 +209,17 @@ EOF
 		echo '</ol></p>'
 		echo '</td></tr></table>'
 
+		# RSS feed
+		rss_style="background-color:orange;text-decoration:none"
+		rss_style="$rss_style;color:white;font-family:sans-serif;"
+		echo '<br>'
+		echo '<div style="text-align:right;">'
+		echo "<a href=\"$ORIGURL$RSS\""
+		echo '   title="Subscribe to my RSS feed"'
+		echo '   class="rss" rel="nofollow"'
+		echo "   style=\"$rss_style\">RSS</a>"
+		echo '</div>'
+
 		# Links
 		test -f links.html && {
 			echo "<br>"
@@ -239,17 +250,6 @@ src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
 EOF
 			echo "</td></tr></table>"
 		}
-
-		# RSS feed
-		rss_style="background-color:orange;text-decoration:none"
-		rss_style="$rss_style;color:white;font-family:sans-serif;"
-		echo '<br>'
-		echo '<div style="text-align:right;">'
-		echo "<a href=\"$ORIGURL$RSS\""
-		echo '   title="Subscribe to my RSS feed"'
-		echo '   class="rss" rel="nofollow"'
-		echo "   style=\"$rss_style\">RSS</a>"
-		echo '</div>'
 
 		echo '</div>'
 	} | sed -s "s/^/$indent/"
