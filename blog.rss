@@ -5,7 +5,7 @@
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Fri, 23 Jan 2009 03:16:28 +0100</lastBuildDate>
+<lastBuildDate>Fri, 23 Jan 2009 14:01:35 +0100</lastBuildDate>
 <language>en-us</language>
 <item>
 <title>The UGFWIINI contest</title>
@@ -48,13 +48,13 @@ So, how does such an abuse look like?
 <li> Managing your mail (in maildir format) in a Git repository.
 <li> Finding duplicate files by
 <table
-				border=1 bgcolor=black>
+				border=1 bgcolor=white>
 			<tr><td bgcolor=lightblue colspan=3>
 				&nbsp;
 			</td></tr>
 			<tr><td>
 				<table cellspacing=5 border=0
-					 style="color:#ffffff;">
+					 style="color:black;">
 				<tr><td>
 					<pre>
 $ git init
