@@ -33,6 +33,7 @@ OUTPUT=index.html
 RSS=blog.rss
 TEST=test.html
 TITLE="Dscho's blog"
+THIS=$0
 
 LC_ALL=C
 export LC_ALL
@@ -131,11 +132,14 @@ markup () {
 	*) bash_bg=black; bash_fg=white;;
 	esac
 	sed -e 's!^$!</p><p>!' \
+		-e "$(markup_substitution "''" i)" \
+		-e "$(markup_substitution "_" u)" \
 		-e 's!IMHO!in my humble opinion!g' \
 		-e 's!BTW!By the way,!g' \
 		-e 's!repo.or.cz!<a href=http://&>&</a>!g' \
 		-e 's!:-)!\&#x263a;!g' \
 		-e "s!$image_pattern2!<center><img src=$URL\1></center>!g" \
+		-e "s!\\[\\[SVG:\\([^]]*\\)\]\]!$THIS handle &!e" \
 		-e 's!<bash>!<table\
 				border=1 bgcolor='$bash_bg'>\
 			<tr><td bgcolor=lightblue colspan=3>\
@@ -151,8 +155,7 @@ markup () {
 				</table>\
 			</td></tr>\
 			</table>!' \
-		-e "$(markup_substitution "''" i)" \
-		-e "$(markup_substitution "_" u)"
+
 }
 
 # output lines containing <timestamp> <filename> <title>
@@ -305,7 +308,7 @@ commit_new_images () {
 	images=
 	for image in $(cat source-* |
 		tr ' ]|' '\n' |
-		sed -n 's/.*\[\[Image://p' |
+		sed -n 's/.*\[\[\(Image\|SVG\)://p' |
 		sort |
 		uniq)
 	do
@@ -319,6 +322,31 @@ commit_new_images () {
 	git commit -s -m "Commit some images on $(make_date $now)" $images
 }
 
+handle_svg_file () {
+	# for some reason, Firefox adds scrollbars, so nudge the width a bit
+	width=$(sed -ne 's/.* width="\([^"]*\).*/\1/p' -e '/<metadata/q' < "$1")
+	test -z "$width" || width=" width=$(($width+5))"
+	REV=$(git rev-list -1 HEAD -- $1)
+	test -z "$REV" || URL="$REMOTEREPOSITORY?a=blob_plain;hb=$REV;f="
+	cat << EOF
+<center>
+	<table border=0>
+		<tr>
+			<td align=center>
+				<embed type="image/svg+xml"
+					src="$URL$1"$width />
+			</td>
+		</tr>
+		<tr>
+			<td align=center>
+				<a href=$URL$1>$1</a>
+			</td>
+		</tr>
+	</table>
+</center>
+EOF
+}
+
 
 
 # parse command line option
@@ -326,6 +354,12 @@ case "$1" in
 *dry*) DRYRUN=1; shift;;
 *show*) firefox "$(pwd)"/$TEST; exit;;
 *remote*) firefox $URLPREFIX$URL$OUTPUT; exit;;
+handle)
+	case "$2" in
+	"[[SVG:"*) file=${2#??SVG:}; file=${file%??}; handle_svg_file "$file";;
+	esac
+	exit
+;;
 esac
 
 test "$#" = 0 ||
