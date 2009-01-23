@@ -28,8 +28,10 @@ URLPREFIX="$(dirname "$GITWEBURL")"/
 REMOTEREPOSITORY="$(basename "$GITWEBURL")"
 BRANCH=blog
 URL="$REMOTEREPOSITORY?a=blob_plain;hb=$BRANCH;f="
+ORIGURL=$URL
 NEW=new
 OUTPUT=index.html
+RSS=blog.rss
 TEST=test.html
 TITLE="Dscho's blog"
 
@@ -150,6 +152,17 @@ markup () {
 		-e "$(markup_substitution "_" u)"
 }
 
+# output lines containing <timestamp> <filename> <title>
+get_blog_entries () {
+	for file in $(ls -r source-*.txt)
+	do
+		basename=${file%.txt}
+		timestamp=${basename#source-}
+		title="$(sed 1q < $file | markup)"
+		echo "$timestamp $file $title"
+	done
+}
+
 # make HTML page
 make_html () {
 	body_style="width:800px"
@@ -184,12 +197,10 @@ EOF
 		echo "<tr><th>Table of contents:</th></tr>"
 		echo "<tr><td>"
 		echo '<p><ol>'
-		for file in $(ls -r source-*.txt)
+		get_blog_entries |
+		while read timestamp filename title
 		do
-			basename=${file%.txt}
-			timestamp=${basename#source-}
 			date="$(date +"%d %b %Y" -d @$timestamp)"
-			title="$(sed 1q < $file | markup)"
 			echo "<li><a href=#$timestamp>$date $title</a>"
 		done
 		echo '</ol></p>'
@@ -226,21 +237,31 @@ EOF
 			echo "</td></tr></table>"
 		}
 
+		# RSS feed
+		rss_style="background-color:orange;text-decoration:none"
+		rss_style="$rss_style;color:white;"
+		echo '<br>'
+		echo '<div style="text-align:right;">'
+		echo "<a href=\"$ORIGURL$RSS\""
+		echo '   title="Subscribe to my RSS feed"'
+		echo '   class="rss" rel="nofollow"'
+		echo "   style=\"$rss_style\">RSS</a>"
+		echo '</div>'
+
 		echo '</div>'
 	} | sed -s "s/^/$indent/"
 
 
 	# timestamps will not need padding to sort correctly, for some time...
-	for file in $(ls -r source-*.txt)
+	get_blog_entries |
+	while read timestamp filename title
 	do
-		basename=${file%.txt}
-		timestamp=${basename#source-}
 		echo "<h6>$(make_date $timestamp)</h6>"
 		echo "<a name=$timestamp>"
-		echo "<h2>$(sed 1q < $file | markup)</h2>"
+		echo "<h2>$title</h2>"
 		echo ""
 		echo "<p>"
-		sed 1d < $file | markup
+		sed 1d < $filename | markup
 		echo "</p>"
 	done |
 	sed -e "s/^./$indent&/" \
@@ -253,8 +274,42 @@ EOF
 EOF
 }
 
+generate_rss () {
+	echo '<?xml version="1.0" encoding="utf-8"?>'
+	echo '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">'
+	echo '<channel>'
+	echo "<title>Dscho's blog</title>"
+	echo "<link>$URLPREFIX${URL}index.html</link>"
+	self="$URLPREFIX$ORIGURL$RSS"
+	selfattribs='rel="self" type="application/rss+xml"'
+	echo "<atom:link href=\"$self\" $selfattribs/>"
+	echo '<description>A few stories told by Dscho</description>'
+	echo "<lastBuildDate>$(date --rfc-2822)</lastBuildDate>"
+	echo '<language>en-us</language>'
+
+	get_blog_entries |
+	while read timestamp filename title
+	do
+		echo '<item>'
+		echo "<title>$title</title>"
+		echo "<link>$URLPREFIX${URL}index.html#$timestamp</link>"
+		echo "<guid>$URLPREFIX${URL}index.html#$timestamp</guid>"
+		echo "<pubDate>$(date --rfc-2822 -d @$timestamp)</pubDate>"
+		description="$(cat < $filename | markup)"
+		echo "<description><![CDATA[$description]]></description>"
+		echo "</item>"
+	done
+
+	echo '</channel>'
+	echo '</rss>'
+}
+
 # never, ever have spaces in the file names
 commit_new_images () {
+	generate_rss > $RSS &&
+	git add $RSS ||
+	die "Could not generate $RSS"
+
 	images=
 	for image in $(cat source-* |
 		tr ' ]|' '\n' |
@@ -271,6 +326,7 @@ commit_new_images () {
 	git diff --cached --quiet HEAD -- $images ||
 	git commit -s -m "Commit some images on $(make_date $now)" $images
 }
+
 
 
 # parse command line option
