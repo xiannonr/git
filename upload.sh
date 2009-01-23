@@ -194,6 +194,8 @@ EOF
 		done
 		echo '</ol></p>'
 		echo '</td></tr></table>'
+
+		# Links
 		test -f links.html && {
 			echo "<br>"
 			echo "<table width=$toc_width bgcolor=#e0e0e0 border=1>"
@@ -202,6 +204,25 @@ EOF
 			cat links.html
 			echo "</td></tr></table>"
 		}
+		# Google AdSense
+		echo "<br>"
+		echo "<table width=$toc_width bgcolor=#e0e0e0 border=1>"
+		echo "<tr><td align=center>"
+		cat << EOF
+<script type="text/javascript"><!--
+google_ad_client = "pub-5106407705643819";
+/* 300x250, created 1/22/09 */
+google_ad_slot = "6468207338";
+google_ad_width = 300;
+google_ad_height = 250;
+//-->
+</script>
+<script type="text/javascript"
+src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+EOF
+		echo "</td></tr></table>"
+
 		echo '</div>'
 	} | sed -s "s/^/$indent/"
 
