@@ -234,6 +234,7 @@ EOF
 		test -z "$DRYRUN" && {
 			echo "<br>"
 			echo "<table width=$toc_width bgcolor=#e0e0e0 border=1>"
+			echo "<tr><th>Google Ads:</th></tr>"
 			echo "<tr><td align=center>"
 			cat << EOF
 <script type="text/javascript"><!--
