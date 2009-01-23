@@ -126,6 +126,10 @@ markup_substitution () {
 markup () {
 	image_pattern="\\[\\[Image:\([^]]*\)"
 	image_pattern2="$image_pattern\(\\|[^\]]*\)\?\]\]"
+	case "$*" in
+	*invert-bash*) bash_bg=white; bash_fg=black;;
+	*) bash_bg=black; bash_fg=white;;
+	esac
 	sed -e 's!^$!</p><p>!' \
 		-e 's!IMHO!in my humble opinion!g' \
 		-e 's!BTW!By the way,!g' \
@@ -133,13 +137,13 @@ markup () {
 		-e 's!:-)!\&#x263a;!g' \
 		-e "s!$image_pattern2!<center><img src=$URL\1></center>!g" \
 		-e 's!<bash>!<table\
-				border=1 bgcolor=black>\
+				border=1 bgcolor='$bash_bg'>\
 			<tr><td bgcolor=lightblue colspan=3>\
 				\&nbsp;\
 			</td></tr>\
 			<tr><td>\
 				<table cellspacing=5 border=0\
-					 style="color:#ffffff;">\
+					 style="color:'$bash_fg';">\
 				<tr><td>\
 					<pre>!' \
 		-e 's!</bash>!		</pre>\
@@ -294,7 +298,7 @@ generate_rss () {
 		echo "<link>$URLPREFIX${URL}index.html#$timestamp</link>"
 		echo "<guid>$URLPREFIX${URL}index.html#$timestamp</guid>"
 		echo "<pubDate>$(date --rfc-2822 -d @$timestamp)</pubDate>"
-		description="$(cat < $filename | markup)"
+		description="$(cat < $filename | markup invert-bash)"
 		echo "<description><![CDATA[$description]]></description>"
 		echo "</item>"
 	done
