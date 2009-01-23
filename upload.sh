@@ -231,24 +231,12 @@ EOF
 		}
 
 		# Google AdSense
-		test -z "$DRYRUN" && {
+		test -z "$DRYRUN" && test -f google.adsense && {
 			echo "<br>"
 			echo "<table width=$toc_width bgcolor=#e0e0e0 border=1>"
 			echo "<tr><th>Google Ads:</th></tr>"
 			echo "<tr><td align=center>"
-			cat << EOF
-<script type="text/javascript"><!--
-google_ad_client = "pub-5106407705643819";
-/* 300x250, created 1/22/09 */
-google_ad_slot = "6468207338";
-google_ad_width = 300;
-google_ad_height = 250;
-//-->
-</script>
-<script type="text/javascript"
-src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
-</script>
-EOF
+			cat google.adsense
 			echo "</td></tr></table>"
 		}
 
@@ -368,7 +356,7 @@ die "Could not commit new images"
 # to find the images reliably, we have to use the commit name, not the branch
 # we use the latest commit touching an image file.
 IMAGEFILES="$(git ls-files |
-	grep -v '\.\(rss\|html\|gitignore\|in\|sh\|txt\)$')"
+	grep -v '\.\(rss\|html\|gitignore\|in\|sh\|txt\|adsense\)$')"
 REV=$(git rev-list -1 HEAD -- $IMAGEFILES)
 test -z "$REV" && REV=$BRANCH
 URL="$REMOTEREPOSITORY?a=blob_plain;hb=$REV;f="
