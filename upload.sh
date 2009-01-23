@@ -367,7 +367,7 @@ die "Could not commit new images"
 # to find the images reliably, we have to use the commit name, not the branch
 # we use the latest commit touching an image file.
 IMAGEFILES="$(git ls-files |
-	grep -v '\.\(html\|gitignore\|in\|sh\|txt\)$')"
+	grep -v '\.\(rss\|html\|gitignore\|in\|sh\|txt\)$')"
 REV=$(git rev-list -1 HEAD -- $IMAGEFILES)
 test -z "$REV" && REV=$BRANCH
 URL="$REMOTEREPOSITORY?a=blob_plain;hb=$REV;f="
