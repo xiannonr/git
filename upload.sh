@@ -8,10 +8,8 @@
 
 # The blog will then be served using gitweb.
 
-# To make it easier on me, if a file "source.txt" exists, it is
-# automatically renamed using the current timestamp.
-
-# TODO: make title, max-posts, background image and branch configurable
+# To make it easier on me, if a file "new" exists, it is automatically
+# renamed using the current timestamp.
 
 # make sure we're in the correct working directory
 cd "$(dirname "$0")"
@@ -22,18 +20,25 @@ test -z "$GITWEBURL" && {
 	exit 1
 }
 
+get_config () {
+	value=$(git config blog.$1)
+	test -z "$value" && value=$2
+	echo $value
+}
+
+BACKGROUNDIMG=$(get_config background paper.jpg)
+TITLE=$(get_config title "Dscho's blog")
+MAXENTRIES=$(get_config maxPostsPerPage 10)
+BRANCH=$(get_config branch blog)
+
 URLPREFIX="$(dirname "$GITWEBURL")"/
 REMOTEREPOSITORY="$(basename "$GITWEBURL")"
-BRANCH=blog
 URL="$REMOTEREPOSITORY?a=blob_plain;hb=$BRANCH;f="
 ORIGURL=$URL
 NEW=new
 OUTPUT=index.html
-BACKGROUNDIMG=paper.jpg
 RSS=blog.rss
 TEST=test.html
-TITLE="Dscho's blog"
-MAXENTRIES=10
 THIS=$0
 
 LC_ALL=C
