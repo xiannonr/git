@@ -5,8 +5,64 @@
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Sat, 24 Jan 2009 17:48:19 +0100</lastBuildDate>
+<lastBuildDate>Sat, 24 Jan 2009 21:25:15 +0100</lastBuildDate>
 <language>en-us</language>
+<item>
+<title>Ideas for a major revamp of the <i>--preserve-merges</i> handling in <i>git rebase</i></title>
+<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232828715</link>
+<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232828715</guid>
+<pubDate>Sat, 24 Jan 2009 21:25:15 +0100</pubDate>
+<description><![CDATA[Ideas for a major revamp of the <i>--preserve-merges</i> handling in <i>git rebase</i>
+</p><p>
+As probably everybody agrees, the code to preserve merges is a big mess 
+right now.
+</p><p>
+Worse, the whole concept of "pick <merge-sha1>" just does not fly well.
+</p><p>
+So I started a <u>major</u> cleanup, which happens to reduce the code very 
+nicely so far.
+</p><p>
+It will take a few days to flesh out, I guess, but these are the major 
+ideas of my work:
+</p><p>
+<b>pick $sha1</b><br>
+<blockquote>will only work on non-merges in the future.</blockquote>
+<b>merge $sha1 [$sha1...] was $sha1 Merge ...</b><br>
+<blockquote>will merge the given list of commits into the current HEAD, for 
+	the user's reference and to keep up-to-date what was rewritten, 
+	the original merge is shown after the keyword "was" (which is not 
+	a valid SHA-1, luckily).</blockquote>
+<b>goto $sha1</b><br>
+<blockquote>will reset the HEAD to the given commit.</blockquote>
+<b>$sha1'</b><br>
+<blockquote>for merge and goto, if a $sha1 ends in a single quote, the 
+	rewritten commit is substituted (if there is one).</blockquote>
+</p><p>
+Example:
+</p><p>
+<pre>
+A - B - - - E 
+  \       /
+    C - D
+</pre>
+</p><p>
+could yield this TODO script:
+</p><p>
+<pre>
+	pick A
+	pick C
+	pick D
+	goto A'
+	pick B
+	merge D' was E
+</pre>
+</p><p>
+This should lead to a much more intuitive user experience.
+</p><p>
+I am very sorry if somebody actually scripted <i>rebase -i -p</i> (by setting 
+GIT_EDITOR with a script), but I am very certain that this cleanup is 
+absolutely necessary to make <i>rebase -i -p</i> useful.]]></description>
+</item>
 <item>
 <title>Thoughts about <i>interactive rebase</i></title>
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232778113</link>
