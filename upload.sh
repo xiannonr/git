@@ -11,8 +11,7 @@
 # To make it easier on me, if a file "source.txt" exists, it is
 # automatically renamed using the current timestamp.
 
-# TODO: have a configurable maximum number of entries per page, and links
-#	to older pages
+# TODO: make title, max-posts, background image and branch configurable
 
 # make sure we're in the correct working directory
 cd "$(dirname "$0")"
@@ -30,9 +29,11 @@ URL="$REMOTEREPOSITORY?a=blob_plain;hb=$BRANCH;f="
 ORIGURL=$URL
 NEW=new
 OUTPUT=index.html
+BACKGROUNDIMG=paper.jpg
 RSS=blog.rss
 TEST=test.html
 TITLE="Dscho's blog"
+MAXENTRIES=10
 THIS=$0
 
 LC_ALL=C
@@ -172,7 +173,7 @@ get_blog_entries () {
 # make HTML page
 make_html () {
 	body_style="width:800px"
-	body_style="$body_style;background-image:url(${URL}paper.jpg)"
+	body_style="$body_style;background-image:url($URL$BACKGROUNDIMG)"
 	body_style="$body_style;background-repeat:repeat-y"
 	body_style="$body_style;background-attachment:scroll"
 	body_style="$body_style;padding:0px;"
@@ -299,13 +300,46 @@ generate_rss () {
 	echo '</rss>'
 }
 
+get_image_files () {
+	git ls-files |
+	grep -v '\.\(rss\|html\|gitignore\|in\|sh\|txt\|adsense\)$'
+}
+
+remove_old_entries () {
+	count=$(ls source-*.txt | wc -l)
+	test $MAXENTRIES -ge $count && return
+
+	for file in source-*.txt
+	do
+		test $MAXENTRIES -lt $count || break
+		git rm $file > /dev/null || return 1
+		count=$(($count-1))
+		echo $file
+	done
+
+	# remove no-longer referenced images
+	image_files=$(get_image_files)
+	referenced_files="$(cat source-*.txt |
+		tr ']|' '\n' |
+		sed -ne 's/\[\[\(Image\|SVG\)://p') $BACKGROUNDIMG"
+	for file in $(echo $image_files $referenced_files $referenced_files |
+			tr ' ' '\n' | sort | uniq -u)
+	do
+		git rm $file > /dev/null || return 1
+		echo $file
+	done
+}
+
 # never, ever have spaces in the file names
 commit_new_images () {
+	files="$(remove_old_entries) $RSS" ||
+	die "Could not remove old entries"
+
+
 	generate_rss > $RSS &&
 	git add $RSS ||
 	die "Could not generate $RSS"
 
-	images=
 	for image in $(cat source-* |
 		tr ' ]|' '\n' |
 		sed -n 's/.*\[\[\(Image\|SVG\)://p' |
@@ -313,13 +347,13 @@ commit_new_images () {
 		uniq)
 	do
 		git add $image || die "Could not git add image $image"
-		images="$images $image"
+		files="$files $image"
 	done
 
 	git update-index --refresh &&
-	git diff-files --quiet -- $images &&
-	git diff --cached --quiet HEAD -- $images ||
-	git commit -s -m "Commit some images on $(make_date $now)" $images
+	git diff-files --quiet -- $files &&
+	git diff --cached --quiet HEAD -- $files ||
+	git commit -s -m "Commit some images on $(make_date $now)" $files
 }
 
 handle_svg_file () {
@@ -394,8 +428,7 @@ die "Could not commit new images"
 
 # to find the images reliably, we have to use the commit name, not the branch
 # we use the latest commit touching an image file.
-IMAGEFILES="$(git ls-files |
-	grep -v '\.\(rss\|html\|gitignore\|in\|sh\|txt\|adsense\)$')"
+IMAGEFILES="$(get_image_files)"
 REV=$(git rev-list -1 HEAD -- $IMAGEFILES)
 test -z "$REV" && REV=$BRANCH
 URL="$REMOTEREPOSITORY?a=blob_plain;hb=$REV;f="
