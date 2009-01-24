@@ -56,6 +56,14 @@ die () {
 	exit 1
 }
 
+strip_prefix () {
+	echo "${1#$2}"
+}
+
+chomp () {
+	strip_prefix "${1%$3}" "$2"
+}
+
 nth () {
 	# add illogical suffix
 	case "$1" in
@@ -131,8 +139,6 @@ markup_substitution () {
 
 # transform markup in stdin to HTML
 markup () {
-	image_pattern="\\[\\[Image:\([^]]*\)"
-	image_pattern2="$image_pattern\(\\|[^\]]*\)\?\]\]"
 	case "$*" in
 	*invert-bash*) bash_bg=white; bash_fg=black;;
 	*) bash_bg=black; bash_fg=white;;
@@ -144,8 +150,7 @@ markup () {
 		-e 's!BTW!By the way,!g' \
 		-e 's!repo.or.cz!<a href=http://&>&</a>!g' \
 		-e 's!:-)!\&#x263a;!g' \
-		-e "s!$image_pattern2!<center><img src=$URL\1></center>!g" \
-		-e "s!\\[\\[SVG:\\([^]]*\\)\]\]!$THIS handle &!e" \
+		-e "s!\\[\\[\(Image\|SVG\):.*!$THIS handle &!e" \
 		-e 's!<bash>!<table\
 				border=1 bgcolor='$bash_bg'>\
 			<tr><td bgcolor=lightblue colspan=3>\
@@ -168,8 +173,7 @@ markup () {
 get_blog_entries () {
 	for file in $(ls -r source-*.txt)
 	do
-		basename=${file%.txt}
-		timestamp=${basename#source-}
+		timestamp=$(chomp $file source- .txt)
 		title="$(sed 1q < $file | markup)"
 		echo "$timestamp $file $title"
 	done
@@ -384,34 +388,39 @@ commit_new_images () {
 	git commit -s -m "Commit some images on $(make_date $now)" $files
 }
 
+get_image_url () {
+	test ! -z "$DRYRUN" && echo "$1" && return
+	rev=$(git rev-list -1 HEAD -- $1)
+	test -z "$rev" && die "No revision found for $1"
+	echo "$REMOTEREPOSITORY?a=blob_plain;hb=$rev;f=$1"
+}
+
 handle_svg_file () {
 	# for some reason, Firefox adds scrollbars, so nudge the width a bit
 	width=$(sed -ne 's/.* width="\([^"]*\).*/\1/p' -e '/<metadata/q' < "$1")
 	test -z "$width" || width=" width=$(($width+5))"
-	URL=
-	if test -z "$DRYRUN"
-	then
-		REV=$(git rev-list -1 HEAD -- $1)
-		test -z "$REV" ||
-		URL="$REMOTEREPOSITORY?a=blob_plain;hb=$REV;f="
-	fi
+	url=$(get_image_url "$1")
 	cat << EOF
 <center>
 	<table border=0>
 		<tr>
 			<td align=center>
 				<embed type="image/svg+xml"
-					src="$URL$1"$width />
+					src="$url"$width />
 			</td>
 		</tr>
 		<tr>
 			<td align=center>
-				<a href=$URL$1>$1</a>
+				<a href=$url>$1</a>
 			</td>
 		</tr>
 	</table>
 </center>
 EOF
+}
+
+handle_image_file () {
+	echo "<center><img src=$(get_image_url "${1%% *}") ${1#* }></center>"
 }
 
 
@@ -422,8 +431,10 @@ case "$1" in
 *show*) firefox "$(pwd)"/$TEST; exit;;
 *remote*) firefox $URLPREFIX$URL$OUTPUT; exit;;
 handle)
-	case "$2" in
-	"[[SVG:"*) file=${2#??SVG:}; file=${file%??}; handle_svg_file "$file";;
+	shift
+	case "$1" in
+	"[[SVG:"*) handle_svg_file "$(chomp "$*" '\[\[SVG:' '\]\]')";;
+	"[[Image:"*) handle_image_file "$(chomp "$*" '\[\[Image:' '\]\]')";;
 	esac
 	exit
 ;;
