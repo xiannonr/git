@@ -5,7 +5,7 @@
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Sat, 24 Jan 2009 07:21:53 +0100</lastBuildDate>
+<lastBuildDate>Sat, 24 Jan 2009 17:48:19 +0100</lastBuildDate>
 <language>en-us</language>
 <item>
 <title>Thoughts about <i>interactive rebase</i></title>
@@ -327,7 +327,7 @@ wear a hat?" on the agenda.
 </p><p>
 Sure enough, the subject got voted up, and eventually, we got Sverre a hat:
 </p><p>
-<center><img src=dscho.git?a=blob_plain;hb=blog;f=sverre-hat.jpg></center>
+<center><img src=dscho.git?a=blob_plain;hb=30319f7436828cd15db8a531a0057351d8e361c0;f=sverre-hat.jpg sverre-hat.jpg></center>
 </p><p>
 By the way, another thing I like about this blog engine is that there are no
 comments...  Nothing is more annoying than leaving a comment on a blog,
@@ -350,7 +350,7 @@ more than a thousand words?
 So here it goes, my first picture in this blog, taken from my Google Tech
 Talk in Mountain View:
 </p><p>
-<center><img src=dscho.git?a=blob_plain;hb=blog;f=all-your-rebase.png></center>
+<center><img src=dscho.git?a=blob_plain;hb=85b89d1cd73acd65ca4381be901d50287dde8170;f=all-your-rebase.png width=500px></center>
 </p><p>
 Now this blog starts to look like a real blog...]]></description>
 </item>
