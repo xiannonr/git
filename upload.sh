@@ -360,7 +360,7 @@ remove_old_entries () {
 
 # never, ever have spaces in the file names
 commit_new_images () {
-	files="$(remove_old_entries) $RSS" ||
+	files="$(remove_old_entries) $RSS $BACKGROUNDIMG" ||
 	die "Could not remove old entries"
 
 
