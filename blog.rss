@@ -5,8 +5,47 @@
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Sat, 24 Jan 2009 04:52:08 +0100</lastBuildDate>
+<lastBuildDate>Sat, 24 Jan 2009 07:21:53 +0100</lastBuildDate>
 <language>en-us</language>
+<item>
+<title>Thoughts about <i>interactive rebase</i></title>
+<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232778113</link>
+<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232778113</guid>
+<pubDate>Sat, 24 Jan 2009 07:21:53 +0100</pubDate>
+<description><![CDATA[Thoughts about <i>interactive rebase</i>
+</p><p>
+Somebody mentioned that my <i>my-next</i> branch is a mess, as it mixes all
+kinds of topics.
+</p><p>
+That is undeniably true, however, there is a good reason that I do not
+have a lot of topic branches: I work on more than just one computer.
+</p><p>
+To make sure that I do not lose a commit by mistake, I always <i>rebase -i</i>
+the <i>my-next</i> branch of the computer I happen to work on on top of the
+<i>my-next</i> branch I fetch from <a href=http://repo.or.cz>repo.or.cz</a>.
+</p><p>
+To rebase a lot of topic branches at the same time seems a bit complicated.
+But that is actually what the <i>-p</i> option (preserve merges) is all about.
+</p><p>
+The only problem is that the code for <i>rebase -i -p</i> has been messed up
+recently, quite successfully, I might add.
+</p><p>
+Worse, some people are pushing for a completely and total unintuitive syntax.
+</p><p>
+So maybe I will start to work on <i>-p</i> again, for my own use (I should learn
+to heed the principle more: work on things I can use myself).
+</p><p>
+My current idea is to implement a "goto" statement that will jump to another
+commit.  To make it easily usable, I will add the semantics that "goto" will
+always try to go to the <u>rewritten</u> version of the given commit; if the user
+wanted to have the original commit, she has to paste the unabbreviated commit
+name.
+</p><p>
+The more I think about it, the more I actually like this idea &#x263a;
+</p><p>
+Of course, working on this little project means that I will have to cope with
+that ugly code again.  *urgh*]]></description>
+</item>
 <item>
 <title>Git Logos</title>
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232745071</link>
@@ -15,89 +54,100 @@
 <description><![CDATA[Git Logos
 </p><p>
 The other day, when I did not exactly have too much time on my hands, but
-definitely too much motivation, I played around creating several logos:
+definitely too much motivation, I played around creating several logos.
+</p><p>
+An ambigram (if you turn it 180 degrees around the appropriate axis, it looks
+exactly the same as unrotated):
 </p><p>
 <center>
 	<table border=0>
 		<tr>
 			<td align=center>
 				<embed type="image/svg+xml"
-					src="dscho.git?a=blob_plain;hb=blog;f=git-ambigram.svg" width=317 />
+					src="dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-ambigram.svg" width=317 />
 			</td>
 		</tr>
 		<tr>
 			<td align=center>
-				<a href=dscho.git?a=blob_plain;hb=blog;f=git-ambigram.svg>git-ambigram.svg</a>
+				<a href=dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-ambigram.svg>git-ambigram.svg</a>
 			</td>
 		</tr>
 	</table>
 </center>
+</p><p>
+A play on gitk:
 </p><p>
 <center>
 	<table border=0>
 		<tr>
 			<td align=center>
 				<embed type="image/svg+xml"
-					src="dscho.git?a=blob_plain;hb=blog;f=gitlogo.svg" width=165 />
+					src="dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-gitk-logo.svg" width=325 />
 			</td>
 		</tr>
 		<tr>
 			<td align=center>
-				<a href=dscho.git?a=blob_plain;hb=blog;f=gitlogo.svg>gitlogo.svg</a>
+				<a href=dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-gitk-logo.svg>git-gitk-logo.svg</a>
 			</td>
 		</tr>
 	</table>
 </center>
+</p><p>
+A play on the test you have to go through before getting new glasses:
 </p><p>
 <center>
 	<table border=0>
 		<tr>
 			<td align=center>
 				<embed type="image/svg+xml"
-					src="dscho.git?a=blob_plain;hb=blog;f=original-git-logo.svg" width=165 />
+					src="dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-visual-test.svg" width=325 />
 			</td>
 		</tr>
 		<tr>
 			<td align=center>
-				<a href=dscho.git?a=blob_plain;hb=blog;f=original-git-logo.svg>original-git-logo.svg</a>
+				<a href=dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-visual-test.svg>git-visual-test.svg</a>
 			</td>
 		</tr>
 	</table>
 </center>
+</p><p>
+This is Henrik Nyh's logo (converted to .svg by yours truly):
 </p><p>
 <center>
 	<table border=0>
 		<tr>
 			<td align=center>
 				<embed type="image/svg+xml"
-					src="dscho.git?a=blob_plain;hb=blog;f=git-gitk-logo.svg" width=325 />
+					src="dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=gitlogo.svg" width=165 />
 			</td>
 		</tr>
 		<tr>
 			<td align=center>
-				<a href=dscho.git?a=blob_plain;hb=blog;f=git-gitk-logo.svg>git-gitk-logo.svg</a>
+				<a href=dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=gitlogo.svg>gitlogo.svg</a>
 			</td>
 		</tr>
 	</table>
 </center>
+</p><p>
+And of course, the original logo...
 </p><p>
 <center>
 	<table border=0>
 		<tr>
 			<td align=center>
 				<embed type="image/svg+xml"
-					src="dscho.git?a=blob_plain;hb=blog;f=git-visual-test.svg" width=325 />
+					src="dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=original-git-logo.svg" width=165 />
 			</td>
 		</tr>
 		<tr>
 			<td align=center>
-				<a href=dscho.git?a=blob_plain;hb=blog;f=git-visual-test.svg>git-visual-test.svg</a>
+				<a href=dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=original-git-logo.svg>original-git-logo.svg</a>
 			</td>
 		</tr>
 	</table>
 </center>
 </p><p>
-Maybe some of you have fun with it...]]></description>
+Maybe some of you have fun with them...]]></description>
 </item>
 <item>
 <title>How to deal with files that are not source code when merging</title>
