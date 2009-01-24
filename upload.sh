@@ -11,6 +11,39 @@
 # To make it easier on me, if a file "new" exists, it is automatically
 # renamed using the current timestamp.
 
+# How to use:
+#
+# $ mkdir my-blog
+# $ cd my-blog
+# $ git init
+#
+# Then symlink or copy this file (upload.sh); you can track it or add it
+# to .gitignore, does not matter.
+#
+# Add a remote "origin" (you might want to track only the appropriate branch
+# if the repository contains other branches, too), add a background image,
+# and then set the config variables gitweb.url, blog.title, blog.background
+# and blog.branch appropriately.
+#
+# Example:
+#
+# $ git remote add -t blog repo.or.cz:/srv/git/git/dscho.git/
+# $ git symbolic-ref HEAD refs/heads/blog
+# $ cp ~/images/background.jpg ./
+# $ git config gitweb.url http://repo.or.cz/w/git/dscho.git
+# $ git config blog.title "Dscho's blog"
+# $ git config blog.background background.jpg
+# $ git config blog.branch blog
+#
+# Now you can start writing posts, by creating a file called "new", and
+# calling ./upload.sh to commit the post together with the images and
+# push all.
+#
+# Note that no file names may contain spaces.
+
+# TODO: document the "syntax" of the source-*.txt files
+
+
 # make sure we're in the correct working directory
 cd "$(dirname "$0")"
 
