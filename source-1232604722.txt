@@ -7,6 +7,6 @@ more than a thousand words?
 So here it goes, my first picture in this blog, taken from my Google Tech
 Talk in Mountain View:
 
-[[Image:all-your-rebase.png]]
+[[Image:all-your-rebase.png width=500px]]
 
 Now this blog starts to look like a real blog...
