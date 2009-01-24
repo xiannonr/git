@@ -427,6 +427,8 @@ handle)
 	esac
 	exit
 ;;
+'') ;;
+*) die "Unknown command: $1";;
 esac
 
 test "$#" = 0 ||
