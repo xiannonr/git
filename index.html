@@ -12,6 +12,7 @@
 			<tr><th>Table of contents:</th></tr>
 			<tr><td>
 			<p><ul>
+			<li><a href=#1232828715>24 Jan 2009 Ideas for a major revamp of the <i>--preserve-merges</i> handling in <i>git rebase</i></a>
 			<li><a href=#1232778113>24 Jan 2009 Thoughts about <i>interactive rebase</i></a>
 			<li><a href=#1232745071>23 Jan 2009 Git Logos</a>
 			<li><a href=#1232742582>23 Jan 2009 How to deal with files that are not source code when merging</a>
@@ -69,6 +70,61 @@
 			</script>
 			</td></tr></table>
 			</div>
+			<h6>Saturday, 24th of January, Anno Domini MMIX, at the hour of the Pig</h6>
+			<a name=1232828715>
+			<h2>Ideas for a major revamp of the <i>--preserve-merges</i> handling in <i>git rebase</i></h2>
+
+			<p>
+			</p><p>
+			As probably everybody agrees, the code to preserve merges is a big mess 
+			right now.
+			</p><p>
+			Worse, the whole concept of "pick <merge-sha1>" just does not fly well.
+			</p><p>
+			So I started a <u>major</u> cleanup, which happens to reduce the code very 
+			nicely so far.
+			</p><p>
+			It will take a few days to flesh out, I guess, but these are the major 
+			ideas of my work:
+			</p><p>
+			<b>pick $sha1</b><br>
+			<blockquote>will only work on non-merges in the future.</blockquote>
+			<b>merge $sha1 [$sha1...] was $sha1 Merge ...</b><br>
+			<blockquote>will merge the given list of commits into the current HEAD, for 
+				the user's reference and to keep up-to-date what was rewritten, 
+				the original merge is shown after the keyword "was" (which is not 
+				a valid SHA-1, luckily).</blockquote>
+			<b>goto $sha1</b><br>
+			<blockquote>will reset the HEAD to the given commit.</blockquote>
+			<b>$sha1'</b><br>
+			<blockquote>for merge and goto, if a $sha1 ends in a single quote, the 
+				rewritten commit is substituted (if there is one).</blockquote>
+			</p><p>
+			Example:
+			</p><p>
+<pre>
+A - B - - - E 
+  \       /
+    C - D
+</pre>
+			</p><p>
+			could yield this TODO script:
+			</p><p>
+<pre>
+	pick A
+	pick C
+	pick D
+	goto A'
+	pick B
+	merge D' was E
+</pre>
+			</p><p>
+			This should lead to a much more intuitive user experience.
+			</p><p>
+			I am very sorry if somebody actually scripted <i>rebase -i -p</i> (by setting 
+			GIT_EDITOR with a script), but I am very certain that this cleanup is 
+			absolutely necessary to make <i>rebase -i -p</i> useful.
+			</p>
 			<h6>Saturday, 24th of January, Anno Domini MMIX, at the hour of the Dragon</h6>
 			<a name=1232778113>
 			<h2>Thoughts about <i>interactive rebase</i></h2>
