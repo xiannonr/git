@@ -170,6 +170,20 @@ get_blog_entries () {
 	done
 }
 
+get_last_removed_entry () {
+	git log --pretty=format: --name-only --diff-filter=D HEAD |
+	while read line
+	do
+		case "$line" in
+		source-*.txt) file=$line;;
+		'') test -z "$file" || {
+			echo "$file"
+			break
+		};;
+		esac
+	done
+}
+
 # make HTML page
 make_html () {
 	body_style="width:800px"
@@ -203,14 +217,23 @@ EOF
 		echo "<table width=$toc_width bgcolor=#e0e0e0 border=1>"
 		echo "<tr><th>Table of contents:</th></tr>"
 		echo "<tr><td>"
-		echo '<p><ol>'
+		echo '<p><ul>'
 		get_blog_entries |
 		while read timestamp filename title
 		do
 			date="$(date +"%d %b %Y" -d @$timestamp)"
 			echo "<li><a href=#$timestamp>$date $title</a>"
 		done
-		echo '</ol></p>'
+		echo '</ul></p>'
+		file=
+		last_removed_entry=$(get_last_removed_entry)
+		test -z "$last_removed_entry" || {
+			commit=$(git log --pretty=format:%H --diff-filter=AM \
+					-- $last_removed_entry |
+				head -n 1)
+			previous="$REMOTEREPOSITORY?a=blob_plain;hb=$commit"
+			echo "<a href=$previous;f=index.html>Older posts</a>"
+		}
 		echo '</td></tr></table>'
 
 		# RSS feed
