@@ -1,16 +1,27 @@
 Git Logos
 
 The other day, when I did not exactly have too much time on my hands, but
-definitely too much motivation, I played around creating several logos:
+definitely too much motivation, I played around creating several logos.
+
+An ambigram (if you turn it 180 degrees around the appropriate axis, it looks
+exactly the same as unrotated):
 
 [[SVG:git-ambigram.svg]]
 
-[[SVG:gitlogo.svg]]
-
-[[SVG:original-git-logo.svg]]
+A play on gitk:
 
 [[SVG:git-gitk-logo.svg]]
 
+A play on the test you have to go through before getting new glasses:
+
 [[SVG:git-visual-test.svg]]
 
-Maybe some of you have fun with it...
+This is Henrik Nyh's logo (converted to .svg by yours truly):
+
+[[SVG:gitlogo.svg]]
+
+And of course, the original logo...
+
+[[SVG:original-git-logo.svg]]
+
+Maybe some of you have fun with them...

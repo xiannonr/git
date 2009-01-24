@@ -1,0 +1,33 @@
+Thoughts about ''interactive rebase''
+
+Somebody mentioned that my ''my-next'' branch is a mess, as it mixes all
+kinds of topics.
+
+That is undeniably true, however, there is a good reason that I do not
+have a lot of topic branches: I work on more than just one computer.
+
+To make sure that I do not lose a commit by mistake, I always ''rebase -i''
+the ''my-next'' branch of the computer I happen to work on on top of the
+''my-next'' branch I fetch from repo.or.cz.
+
+To rebase a lot of topic branches at the same time seems a bit complicated.
+But that is actually what the ''-p'' option (preserve merges) is all about.
+
+The only problem is that the code for ''rebase -i -p'' has been messed up
+recently, quite successfully, I might add.
+
+Worse, some people are pushing for a completely and total unintuitive syntax.
+
+So maybe I will start to work on ''-p'' again, for my own use (I should learn
+to heed the principle more: work on things I can use myself).
+
+My current idea is to implement a "goto" statement that will jump to another
+commit.  To make it easily usable, I will add the semantics that "goto" will
+always try to go to the _rewritten_ version of the given commit; if the user
+wanted to have the original commit, she has to paste the unabbreviated commit
+name.
+
+The more I think about it, the more I actually like this idea :-)
+
+Of course, working on this little project means that I will have to cope with
+that ugly code again.  *urgh*
