@@ -326,8 +326,13 @@ handle_svg_file () {
 	# for some reason, Firefox adds scrollbars, so nudge the width a bit
 	width=$(sed -ne 's/.* width="\([^"]*\).*/\1/p' -e '/<metadata/q' < "$1")
 	test -z "$width" || width=" width=$(($width+5))"
-	REV=$(git rev-list -1 HEAD -- $1)
-	test -z "$REV" || URL="$REMOTEREPOSITORY?a=blob_plain;hb=$REV;f="
+	URL=
+	if test -z "$DRYRUN"
+	then
+		REV=$(git rev-list -1 HEAD -- $1)
+		test -z "$REV" ||
+		URL="$REMOTEREPOSITORY?a=blob_plain;hb=$REV;f="
+	fi
 	cat << EOF
 <center>
 	<table border=0>
@@ -351,7 +356,7 @@ EOF
 
 # parse command line option
 case "$1" in
-*dry*) DRYRUN=1; shift;;
+*dry*) DRYRUN=1; export DRYRUN; shift;;
 *show*) firefox "$(pwd)"/$TEST; exit;;
 *remote*) firefox $URLPREFIX$URL$OUTPUT; exit;;
 handle)
