@@ -1,0 +1,16 @@
+Git Logos
+
+The other day, when I did not exactly have too much time on my hands, but
+definitely too much motivation, I played around creating several logos:
+
+[[SVG:git-ambigram.svg]]
+
+[[SVG:gitlogo.svg]]
+
+[[SVG:original-git-logo.svg]]
+
+[[SVG:git-gitk-logo.svg]]
+
+[[SVG:git-visual-test.svg]]
+
+Maybe some of you have fun with it...

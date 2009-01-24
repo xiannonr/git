@@ -5,8 +5,100 @@
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Sat, 24 Jan 2009 01:19:54 +0100</lastBuildDate>
+<lastBuildDate>Sat, 24 Jan 2009 04:52:08 +0100</lastBuildDate>
 <language>en-us</language>
+<item>
+<title>Git Logos</title>
+<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232745071</link>
+<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232745071</guid>
+<pubDate>Fri, 23 Jan 2009 22:11:11 +0100</pubDate>
+<description><![CDATA[Git Logos
+</p><p>
+The other day, when I did not exactly have too much time on my hands, but
+definitely too much motivation, I played around creating several logos:
+</p><p>
+<center>
+	<table border=0>
+		<tr>
+			<td align=center>
+				<embed type="image/svg+xml"
+					src="dscho.git?a=blob_plain;hb=blog;f=git-ambigram.svg" width=317 />
+			</td>
+		</tr>
+		<tr>
+			<td align=center>
+				<a href=dscho.git?a=blob_plain;hb=blog;f=git-ambigram.svg>git-ambigram.svg</a>
+			</td>
+		</tr>
+	</table>
+</center>
+</p><p>
+<center>
+	<table border=0>
+		<tr>
+			<td align=center>
+				<embed type="image/svg+xml"
+					src="dscho.git?a=blob_plain;hb=blog;f=gitlogo.svg" width=165 />
+			</td>
+		</tr>
+		<tr>
+			<td align=center>
+				<a href=dscho.git?a=blob_plain;hb=blog;f=gitlogo.svg>gitlogo.svg</a>
+			</td>
+		</tr>
+	</table>
+</center>
+</p><p>
+<center>
+	<table border=0>
+		<tr>
+			<td align=center>
+				<embed type="image/svg+xml"
+					src="dscho.git?a=blob_plain;hb=blog;f=original-git-logo.svg" width=165 />
+			</td>
+		</tr>
+		<tr>
+			<td align=center>
+				<a href=dscho.git?a=blob_plain;hb=blog;f=original-git-logo.svg>original-git-logo.svg</a>
+			</td>
+		</tr>
+	</table>
+</center>
+</p><p>
+<center>
+	<table border=0>
+		<tr>
+			<td align=center>
+				<embed type="image/svg+xml"
+					src="dscho.git?a=blob_plain;hb=blog;f=git-gitk-logo.svg" width=325 />
+			</td>
+		</tr>
+		<tr>
+			<td align=center>
+				<a href=dscho.git?a=blob_plain;hb=blog;f=git-gitk-logo.svg>git-gitk-logo.svg</a>
+			</td>
+		</tr>
+	</table>
+</center>
+</p><p>
+<center>
+	<table border=0>
+		<tr>
+			<td align=center>
+				<embed type="image/svg+xml"
+					src="dscho.git?a=blob_plain;hb=blog;f=git-visual-test.svg" width=325 />
+			</td>
+		</tr>
+		<tr>
+			<td align=center>
+				<a href=dscho.git?a=blob_plain;hb=blog;f=git-visual-test.svg>git-visual-test.svg</a>
+			</td>
+		</tr>
+	</table>
+</center>
+</p><p>
+Maybe some of you have fun with it...]]></description>
+</item>
 <item>
 <title>How to deal with files that are not source code when merging</title>
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232742582</link>
