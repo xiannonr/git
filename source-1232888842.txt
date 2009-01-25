@@ -1,0 +1,56 @@
+Regular diff with word coloring (as opposed to word diff)
+
+You know, if I were a bit faster with everything I do, I could do so much more!
+
+For example, Junio's idea that you could keep showing a regular diff, only
+coloring the words that have been removed/deleted.
+
+Just imagine looking at the diff of a long line in LaTeX source code.  It
+should be much nicer to the eye to see the complete removed/added sentences
+instead of one sentence with colored words in between, disrupting your read
+flow.
+
+Compare these two versions:
+
+Regular diff with colored words:
+<blockquote><tt>
+-This sentence has a <font color=red>tyop</font> in it.<br>
++This sentence has a <font color=green>typo</font> in it.<br>
+</tt></blockquote>
+
+Word diff:
+<blockquote><tt>
+This sentence has a <font color=red>tyop</font><font color=green>typo</font> in it.<br>
+</tt></blockquote>
+
+And it should not be hard to do at all!
+
+In ''diff&#95;words&#95;show()'', we basically get the minus lines as
+''diff&#95;words->minus'' and the plus lines as ''diff&#95;words->plus''.  The
+function then prepares the word lists and calls the xdiff engine to do all the
+hard work, analyzing the result from xdiff and printing the lines in
+''fn&#95;out&#95;diff&#95;words&#95;aux()''.
+
+So all that would have to be changed would be to _record_ the positions
+of the removed/added words instead of outputting them, and at the end printing
+the minus/plus buffers using the recorded information to color the words.
+
+This would involve
+
+<ul>
+<li>adding two new members holding the offsets in the ''diff&#95;words''
+struct,
+<li>having a special handling for that mode in
+''fn&#95;out&#95;diff&#95;words&#95;aux()'' that appends the offsets and
+returns,
+<li>adding a function ''show&#95;lines&#95;with&#95;colored&#95;words()'' that
+outputs a buffer with a given prefix ('-' or '+') and coloring the words at
+given offsets with a given color,
+<li>modify ''diff&#95;words&#95;show()'' to call that function for the "special
+case: only removal" and at the end of the function, and
+<li> disabling the ''fwrite()'' at the end of ''diff_words_show()'' for that
+mode.
+</ul>
+
+Of course, the hardest part is to find a nice user interface for that.  Maybe
+''--colored-words''? :-)

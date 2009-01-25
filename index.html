@@ -12,6 +12,7 @@
 			<tr><th>Table of contents:</th></tr>
 			<tr><td>
 			<p><ul>
+			<li><a href=#1232888842>25 Jan 2009 Regular diff with word coloring (as opposed to word diff)</a>
 			<li><a href=#1232828715>24 Jan 2009 Ideas for a major revamp of the <i>--preserve-merges</i> handling in <i>git rebase</i></a>
 			<li><a href=#1232778113>24 Jan 2009 Thoughts about <i>interactive rebase</i></a>
 			<li><a href=#1232745071>23 Jan 2009 Git Logos</a>
@@ -21,8 +22,8 @@
 			<li><a href=#1232607201>22 Jan 2009 Sverre's hat</a>
 			<li><a href=#1232604722>22 Jan 2009 Let there be images!</a>
 			<li><a href=#1232599693>22 Jan 2009 My blog has style</a>
-			<li><a href=#1232589695>22 Jan 2009 My new blog system... bloGit</a>
 			</ul></p>
+			<a href=dscho.git?a=blob_plain;hb=d6f05382ca9cc377d05499544424e670acdfc7b9;f=index.html>Older posts</a>
 			</td></tr></table>
 			<br>
 			<div style="text-align:right;">
@@ -70,6 +71,67 @@
 			</script>
 			</td></tr></table>
 			</div>
+			<h6>Sunday, 25th of January, Anno Domini MMIX, at the hour of the Goat</h6>
+			<a name=1232888842>
+			<h2>Regular diff with word coloring (as opposed to word diff)</h2>
+
+			<p>
+			</p><p>
+			You know, if I were a bit faster with everything I do, I could do so much more!
+			</p><p>
+			For example, Junio's idea that you could keep showing a regular diff, only
+			coloring the words that have been removed/deleted.
+			</p><p>
+			Just imagine looking at the diff of a long line in LaTeX source code.  It
+			should be much nicer to the eye to see the complete removed/added sentences
+			instead of one sentence with colored words in between, disrupting your read
+			flow.
+			</p><p>
+			Compare these two versions:
+			</p><p>
+			Regular diff with colored words:
+			<blockquote><tt>
+			-This sentence has a <font color=red>tyop</font> in it.<br>
+			+This sentence has a <font color=green>typo</font> in it.<br>
+			</tt></blockquote>
+			</p><p>
+			Word diff:
+			<blockquote><tt>
+			This sentence has a <font color=red>tyop</font><font color=green>typo</font> in it.<br>
+			</tt></blockquote>
+			</p><p>
+			And it should not be hard to do at all!
+			</p><p>
+			In <i>diff&#95;words&#95;show()</i>, we basically get the minus lines as
+			<i>diff&#95;words->minus</i> and the plus lines as <i>diff&#95;words->plus</i>.  The
+			function then prepares the word lists and calls the xdiff engine to do all the
+			hard work, analyzing the result from xdiff and printing the lines in
+			<i>fn&#95;out&#95;diff&#95;words&#95;aux()</i>.
+			</p><p>
+			So all that would have to be changed would be to <u>record</u> the positions
+			of the removed/added words instead of outputting them, and at the end printing
+			the minus/plus buffers using the recorded information to color the words.
+			</p><p>
+			This would involve
+			</p><p>
+			<ul>
+			<li>adding two new members holding the offsets in the <i>diff&#95;words</i>
+			struct,
+			<li>having a special handling for that mode in
+			<i>fn&#95;out&#95;diff&#95;words&#95;aux()</i> that appends the offsets and
+			returns,
+			<li>adding a function <i>show&#95;lines&#95;with&#95;colored&#95;words()</i> that
+			outputs a buffer with a given prefix ('-' or '+') and coloring the words at
+			given offsets with a given color,
+			<li>modify <i>diff&#95;words&#95;show()</i> to call that function for the "special
+			case: only removal" and at the end of the function, and
+			<li> disabling the <i>fwrite()</i> at the end of <i>diff<u>words</u>show()</i> for that
+			mode.
+			</ul>
+			</p><p>
+			Of course, the hardest part is to find a nice user interface for that.  Maybe
+			<i>--colored-words</i>? &#x263a;
+			</p>
 			<h6>Saturday, 24th of January, Anno Domini MMIX, at the hour of the Pig</h6>
 			<a name=1232828715>
 			<h2>Ideas for a major revamp of the <i>--preserve-merges</i> handling in <i>git rebase</i></h2>
@@ -495,42 +557,6 @@ $ git ls-files --stage | sort -k2 | uniq -d -s7 -w40
 			images first, so that they can be in the commit that index.html
 			will link to, <u>before</u> it gets committed.  Oh well, that cannot be
 			helped! &#x263a;
-			</p>
-			<h6>Thursday, 22nd of January, Anno Domini MMIX, at the hour of the Tiger</h6>
-			<a name=1232589695>
-			<h2>My new blog system... bloGit</h2>
-
-			<p>
-			</p><p>
-			Nowadays, you got to have your blog.  Or better: your blogs.  Even Junio
-			blogs about Git.
-			</p><p>
-			So I felt a little left behind, having no blog to show off.  But then
-			I read about this fantastic new website on the mailing list, called
-			<i>git planet</i> which was supposed to be a place where you could have your
-			Git located blog.
-			</p><p>
-			Except that you could not have your blog <u>there</u>.  Instead, it is just an
-			aggregator site.
-			</p><p>
-			I was disappointed.
-			</p><p>
-			But then, I had this (in my humble opinion very cute) idea that I already used to "publish"
-			my slides from the talk "Contributing with Git (AKA All your rebase are
-			belong to us)": back then, I just created a new branch, committed the
-			file, and uploaded the result to <a href=http://repo.or.cz>repo.or.cz</a>, to be downloaded via Gitweb.
-			</p><p>
-			So I asked Pasky via IRC, if he would have any objections if I abused
-			<a href=http://repo.or.cz>repo.or.cz</a> as a blog server.  He understood at once, and found it "sounds
-			like a pretty cool idea".
-			</p><p>
-			Of course, just writing plain HTML and committing that is <i>too easy</i>,
-			therefore I decided to write a shell script that would turn some sort
-			of simple text file into proper HTML, commit it, and upload the result.
-			</p><p>
-			Well, about two hours later, I finished the first version of the script
-			turning plain text with minimal markup into an HTML page, and it obviously
-			worked -- otherwise nobody would be able to read this &#x263a;
 			</p>
 		</div>
 	</body>
