@@ -432,7 +432,7 @@ commit_new_images () {
 	git update-index --refresh &&
 	git diff-files --quiet -- $files &&
 	git diff --cached --quiet HEAD -- $files ||
-	git commit -s -m "Commit some images on $(make_date $now)" $files
+	git commit -s -m "Housekeeping on $(make_date $now)" $files
 }
 
 get_image_url () {
