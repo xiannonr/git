@@ -226,6 +226,19 @@ get_last_removed_entry () {
 	done
 }
 
+box_count=0
+begin_box () {
+	test $box_count = 0 || echo "<br>"
+	echo "<table width=$toc_width bgcolor=#e0e0e0 border=1>"
+	echo "<tr><th>$1</th></tr>"
+	echo "<tr><td>"
+}
+
+end_box () {
+	echo "</td></tr></table>"
+	box_count=$(($box_count+1))
+}
+
 # make HTML page
 make_html () {
 	body_style="width:800px"
@@ -256,9 +269,7 @@ EOF
 	toc_style="position:absolute;top:50px;left:810px;width=$toc_width"
 	{
 		echo "<div style=\"$toc_style\">"
-		echo "<table width=$toc_width bgcolor=#e0e0e0 border=1>"
-		echo "<tr><th>Table of contents:</th></tr>"
-		echo "<tr><td>"
+		begin_box "Table of contents:"
 		echo '<p><ul>'
 		get_blog_entries |
 		while read timestamp filename title
@@ -276,7 +287,7 @@ EOF
 			previous="$REMOTEREPOSITORY?a=blob_plain;hb=$commit"
 			echo "<a href=$previous;f=index.html>Older posts</a>"
 		}
-		echo '</td></tr></table>'
+		end_box
 
 		# RSS feed
 		rss_style="background-color:orange;text-decoration:none"
@@ -289,24 +300,25 @@ EOF
 		echo "   style=\"$rss_style\">RSS</a>"
 		echo '</div>'
 
+		# About
+		test -f about.html && {
+			begin_box "About this blog:"
+			cat about.html
+			end_box
+		}
+
 		# Links
 		test -f links.html && {
-			echo "<br>"
-			echo "<table width=$toc_width bgcolor=#e0e0e0 border=1>"
-			echo "<tr><th>Links:</th></tr>"
-			echo "<tr><td>"
+			begin_box "Links:"
 			cat links.html
-			echo "</td></tr></table>"
+			end_box
 		}
 
 		# Google AdSense
 		test -z "$DRYRUN" && test -f google.adsense && {
-			echo "<br>"
-			echo "<table width=$toc_width bgcolor=#e0e0e0 border=1>"
-			echo "<tr><th>Google Ads:</th></tr>"
-			echo "<tr><td align=center>"
+			begin_box "Google Ads:"
 			cat google.adsense
-			echo "</td></tr></table>"
+			end_box
 		}
 
 		echo '</div>'
