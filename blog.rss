@@ -5,8 +5,70 @@
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Sat, 24 Jan 2009 21:25:15 +0100</lastBuildDate>
+<lastBuildDate>Sun, 25 Jan 2009 14:07:22 +0100</lastBuildDate>
 <language>en-us</language>
+<item>
+<title>Regular diff with word coloring (as opposed to word diff)</title>
+<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232888842</link>
+<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232888842</guid>
+<pubDate>Sun, 25 Jan 2009 14:07:22 +0100</pubDate>
+<description><![CDATA[Regular diff with word coloring (as opposed to word diff)
+</p><p>
+You know, if I were a bit faster with everything I do, I could do so much more!
+</p><p>
+For example, Junio's idea that you could keep showing a regular diff, only
+coloring the words that have been removed/deleted.
+</p><p>
+Just imagine looking at the diff of a long line in LaTeX source code.  It
+should be much nicer to the eye to see the complete removed/added sentences
+instead of one sentence with colored words in between, disrupting your read
+flow.
+</p><p>
+Compare these two versions:
+</p><p>
+Regular diff with colored words:
+<blockquote><tt>
+-This sentence has a <font color=red>tyop</font> in it.<br>
++This sentence has a <font color=green>typo</font> in it.<br>
+</tt></blockquote>
+</p><p>
+Word diff:
+<blockquote><tt>
+This sentence has a <font color=red>tyop</font><font color=green>typo</font> in it.<br>
+</tt></blockquote>
+</p><p>
+And it should not be hard to do at all!
+</p><p>
+In <i>diff&#95;words&#95;show()</i>, we basically get the minus lines as
+<i>diff&#95;words->minus</i> and the plus lines as <i>diff&#95;words->plus</i>.  The
+function then prepares the word lists and calls the xdiff engine to do all the
+hard work, analyzing the result from xdiff and printing the lines in
+<i>fn&#95;out&#95;diff&#95;words&#95;aux()</i>.
+</p><p>
+So all that would have to be changed would be to <u>record</u> the positions
+of the removed/added words instead of outputting them, and at the end printing
+the minus/plus buffers using the recorded information to color the words.
+</p><p>
+This would involve
+</p><p>
+<ul>
+<li>adding two new members holding the offsets in the <i>diff&#95;words</i>
+struct,
+<li>having a special handling for that mode in
+<i>fn&#95;out&#95;diff&#95;words&#95;aux()</i> that appends the offsets and
+returns,
+<li>adding a function <i>show&#95;lines&#95;with&#95;colored&#95;words()</i> that
+outputs a buffer with a given prefix ('-' or '+') and coloring the words at
+given offsets with a given color,
+<li>modify <i>diff&#95;words&#95;show()</i> to call that function for the "special
+case: only removal" and at the end of the function, and
+<li> disabling the <i>fwrite()</i> at the end of <i>diff<u>words</u>show()</i> for that
+mode.
+</ul>
+</p><p>
+Of course, the hardest part is to find a nice user interface for that.  Maybe
+<i>--colored-words</i>? &#x263a;]]></description>
+</item>
 <item>
 <title>Ideas for a major revamp of the <i>--preserve-merges</i> handling in <i>git rebase</i></title>
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232828715</link>
@@ -441,43 +503,6 @@ Which in turn means that I'll have to parse the source for new
 images first, so that they can be in the commit that index.html
 will link to, <u>before</u> it gets committed.  Oh well, that cannot be
 helped! &#x263a;]]></description>
-</item>
-<item>
-<title>My new blog system... bloGit</title>
-<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232589695</link>
-<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232589695</guid>
-<pubDate>Thu, 22 Jan 2009 03:01:35 +0100</pubDate>
-<description><![CDATA[My new blog system... bloGit
-</p><p>
-Nowadays, you got to have your blog.  Or better: your blogs.  Even Junio
-blogs about Git.
-</p><p>
-So I felt a little left behind, having no blog to show off.  But then
-I read about this fantastic new website on the mailing list, called
-<i>git planet</i> which was supposed to be a place where you could have your
-Git located blog.
-</p><p>
-Except that you could not have your blog <u>there</u>.  Instead, it is just an
-aggregator site.
-</p><p>
-I was disappointed.
-</p><p>
-But then, I had this (in my humble opinion very cute) idea that I already used to "publish"
-my slides from the talk "Contributing with Git (AKA All your rebase are
-belong to us)": back then, I just created a new branch, committed the
-file, and uploaded the result to <a href=http://repo.or.cz>repo.or.cz</a>, to be downloaded via Gitweb.
-</p><p>
-So I asked Pasky via IRC, if he would have any objections if I abused
-<a href=http://repo.or.cz>repo.or.cz</a> as a blog server.  He understood at once, and found it "sounds
-like a pretty cool idea".
-</p><p>
-Of course, just writing plain HTML and committing that is <i>too easy</i>,
-therefore I decided to write a shell script that would turn some sort
-of simple text file into proper HTML, commit it, and upload the result.
-</p><p>
-Well, about two hours later, I finished the first version of the script
-turning plain text with minimal markup into an HTML page, and it obviously
-worked -- otherwise nobody would be able to read this &#x263a;]]></description>
 </item>
 </channel>
 </rss>
