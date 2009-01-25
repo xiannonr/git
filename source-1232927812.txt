@@ -1,0 +1,37 @@
+A day full of rebase... and a little valgrind
+
+I think that I am progressing nicely with my rebase -p work, so much so
+that I will soon be able to use it myself to work on topic branches _and_
+rebase all the time without much hassle.
+
+In other words, I would like to be able to rebase all my topic branches
+to Junio's ''next'' branch whenever that has new commits.  With a single
+rebase.
+
+And finally, I got the idea of the thing Stephen implemented for dropped
+commits; however, I am quite sure I do not like it.
+
+So what are "dropped" commits?
+
+When you rebase, chances are that the upstream already has applied at
+least some of your patches.  So we filter those out with ''--cherry-pick''.
+Stephen calls those "dropped" commits.
+
+Then he goes on to reinvent the "$REWRITTEN" system: a directory containing
+the mappings of old commit names to new commit names.  That is easily fixed.
+
+But worse, he substitutes the dropped commits with their _parents_, instead
+of substituting them with the corresponding commits in upstream.
+
+I guess this will be a medium-sized fight on the mailing list, depending
+how much energy Stephen wants to put in to defend his strategy.
+
+Anyway, I finally got to a point where only three of the tests are failing,
+t3404, t3410 and t3412.  Somewhat disappointing is t3404, as its name pretends
+not to exercize -p at all.  Oh well, I guess I'll see what is broken tomorrow.
+
+Another part of the day was dedicated to the Valgrind patch series, which
+should give us yet another level of code quality.
+
+After having confused myself with several diverging/obsolete branches, I did
+indeed finally manage to send that patch series off.  Woohoo.
