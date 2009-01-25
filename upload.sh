@@ -363,6 +363,8 @@ generate_rss () {
 	get_blog_entries |
 	while read timestamp filename title
 	do
+		# remove all tags
+		title=$(echo "$title" | sed 's/<[^>]*>//g')
 		echo '<item>'
 		echo "<title>$title</title>"
 		echo "<link>$URLPREFIX${URL}index.html#$timestamp</link>"
