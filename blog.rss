@@ -5,7 +5,7 @@
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Sun, 25 Jan 2009 14:29:08 +0100</lastBuildDate>
+<lastBuildDate>Sun, 25 Jan 2009 14:34:02 +0100</lastBuildDate>
 <language>en-us</language>
 <item>
 <title>Regular diff with word coloring (as opposed to word diff)</title>
@@ -70,7 +70,7 @@ Of course, the hardest part is to find a nice user interface for that.  Maybe
 <i>--colored-words</i>? &#x263a;]]></description>
 </item>
 <item>
-<title>Ideas for a major revamp of the <i>--preserve-merges</i> handling in <i>git rebase</i></title>
+<title>Ideas for a major revamp of the --preserve-merges handling in git rebase</title>
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232828715</link>
 <guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232828715</guid>
 <pubDate>Sat, 24 Jan 2009 21:25:15 +0100</pubDate>
@@ -126,7 +126,7 @@ GIT_EDITOR with a script), but I am very certain that this cleanup is
 absolutely necessary to make <i>rebase -i -p</i> useful.]]></description>
 </item>
 <item>
-<title>Thoughts about <i>interactive rebase</i></title>
+<title>Thoughts about interactive rebase</title>
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232778113</link>
 <guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232778113</guid>
 <pubDate>Sat, 24 Jan 2009 07:21:53 +0100</pubDate>
