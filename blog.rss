@@ -5,7 +5,7 @@
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Mon, 26 Jan 2009 20:16:50 +0100</lastBuildDate>
+<lastBuildDate>Tue, 27 Jan 2009 00:33:49 +0100</lastBuildDate>
 <language>en-us</language>
 <item>
 <title>Valgrind takes a loooong time</title>
@@ -26,14 +26,15 @@ It seems as if that is not easily done.  I tried
 <center><table
 				border=1 bgcolor=white>
 			<tr><td bgcolor=lightblue colspan=3>
-				&nbsp;
+				<pre>                                                                </pre>
 			</td></tr>
 			<tr><td>
 				<table cellspacing=5 border=0
 					 style="color:black;">
 				<tr><td>
 					<pre>
-exec >(tee out) 2>&1                           		</pre>
+exec >(tee out) 2>&1
+</pre>
 				</td></tr>
 				</table>
 			</td></tr>
@@ -46,16 +47,17 @@ The only solution I found was:
 <center><table
 				border=1 bgcolor=white>
 			<tr><td bgcolor=lightblue colspan=3>
-				&nbsp;
+				<pre>                                                                </pre>
 			</td></tr>
 			<tr><td>
 				<table cellspacing=5 border=0
 					 style="color:black;">
 				<tr><td>
 					<pre>
-mkpipe pipe                                    
+mkpipe pipe
 tee out < pipe &
-exec > pipe 2>&1 		</pre>
+exec > pipe 2>&1
+</pre>
 				</td></tr>
 				</table>
 			</td></tr>
@@ -460,7 +462,7 @@ So, how does such an abuse look like?
 <table
 				border=1 bgcolor=white>
 			<tr><td bgcolor=lightblue colspan=3>
-				&nbsp;
+				<pre>                                                                </pre>
 			</td></tr>
 			<tr><td>
 				<table cellspacing=5 border=0
@@ -470,7 +472,7 @@ So, how does such an abuse look like?
 $ git init
 $ git add .
 $ git ls-files --stage | sort -k2 | uniq -d -s7 -w40
-		</pre>
+</pre>
 				</td></tr>
 				</table>
 			</td></tr>
