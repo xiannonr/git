@@ -444,7 +444,7 @@ get_image_url () {
 	test ! -z "$DRYRUN" && echo "$1" && return
 	rev=$(git rev-list -1 HEAD -- $1)
 	test -z "$rev" && die "No revision found for $1"
-	echo "$$BLOBPLAIN;hb=$rev;f=$1"
+	echo "$BLOBPLAIN;hb=$rev;f=$1"
 }
 
 handle_svg_file () {
