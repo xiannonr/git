@@ -5,8 +5,70 @@
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Mon, 26 Jan 2009 00:56:53 +0100</lastBuildDate>
+<lastBuildDate>Mon, 26 Jan 2009 20:14:50 +0100</lastBuildDate>
 <language>en-us</language>
+<item>
+<title>Valgrind takes a loooong time</title>
+<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232997290</link>
+<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232997290</guid>
+<pubDate>Mon, 26 Jan 2009 20:14:50 +0100</pubDate>
+<description><![CDATA[Valgrind takes a loooong time
+</p><p>
+Yesterday, I started a run on a fast machine, and it took roughly 5.5
+hours by the machine's clock.
+</p><p>
+And of course, I redirected stdout only... *sigh*
+</p><p>
+Which triggered a Google search how to force redirection of all the output
+in the test scripts to a file and the terminal at the same time.
+</p><p>
+It seems as if that is not easily done.  I tried
+<center><table
+				border=1 bgcolor=white>
+			<tr><td bgcolor=lightblue colspan=3>
+				&nbsp;
+			</td></tr>
+			<tr><td>
+				<table cellspacing=5 border=0
+					 style="color:black;">
+				<tr><td>
+					<pre>
+exec >(tee out) 2>&1                           		</pre>
+				</td></tr>
+				</table>
+			</td></tr>
+			</table></center>
+</p><p>
+but that did not work: it mumbled something about invalid file handles or some
+such.
+</p><p>
+The only solution I found was:
+<center><table
+				border=1 bgcolor=white>
+			<tr><td bgcolor=lightblue colspan=3>
+				&nbsp;
+			</td></tr>
+			<tr><td>
+				<table cellspacing=5 border=0
+					 style="color:black;">
+				<tr><td>
+					<pre>
+mkpipe pipe                                    
+tee out < pipe &
+exec > pipe 2>&1 		</pre>
+				</td></tr>
+				</table>
+			</td></tr>
+			</table></center>
+</p><p>
+That is a problem for parallel execution, though, so I am still looking for a
+better way to do it.
+</p><p>
+Once I have the output, it is relatively easy to analyze it, as I already
+made a script which disects the output into valgrind output and the test
+case it came from, then groups by common valgrind output and shows the
+result to the user.]]></description>
+</item>
 <item>
 <title>A day full of rebase... and a little valgrind</title>
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232927812</link>
@@ -225,12 +287,12 @@ exactly the same as unrotated):
 		<tr>
 			<td align=center>
 				<embed type="image/svg+xml"
-					src="dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-ambigram.svg" width=317 />
+					src="2630BLOBPLAIN;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-ambigram.svg" width=317 />
 			</td>
 		</tr>
 		<tr>
 			<td align=center>
-				<a href=dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-ambigram.svg>git-ambigram.svg</a>
+				<a href=2630BLOBPLAIN;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-ambigram.svg>git-ambigram.svg</a>
 			</td>
 		</tr>
 	</table>
@@ -243,12 +305,12 @@ A play on gitk:
 		<tr>
 			<td align=center>
 				<embed type="image/svg+xml"
-					src="dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-gitk-logo.svg" width=325 />
+					src="2670BLOBPLAIN;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-gitk-logo.svg" width=325 />
 			</td>
 		</tr>
 		<tr>
 			<td align=center>
-				<a href=dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-gitk-logo.svg>git-gitk-logo.svg</a>
+				<a href=2670BLOBPLAIN;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-gitk-logo.svg>git-gitk-logo.svg</a>
 			</td>
 		</tr>
 	</table>
@@ -261,12 +323,12 @@ A play on the test you have to go through before getting new glasses:
 		<tr>
 			<td align=center>
 				<embed type="image/svg+xml"
-					src="dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-visual-test.svg" width=325 />
+					src="2689BLOBPLAIN;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-visual-test.svg" width=325 />
 			</td>
 		</tr>
 		<tr>
 			<td align=center>
-				<a href=dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-visual-test.svg>git-visual-test.svg</a>
+				<a href=2689BLOBPLAIN;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-visual-test.svg>git-visual-test.svg</a>
 			</td>
 		</tr>
 	</table>
@@ -279,12 +341,12 @@ This is Henrik Nyh's logo (converted to .svg by yours truly):
 		<tr>
 			<td align=center>
 				<embed type="image/svg+xml"
-					src="dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=gitlogo.svg" width=165 />
+					src="2708BLOBPLAIN;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=gitlogo.svg" width=165 />
 			</td>
 		</tr>
 		<tr>
 			<td align=center>
-				<a href=dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=gitlogo.svg>gitlogo.svg</a>
+				<a href=2708BLOBPLAIN;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=gitlogo.svg>gitlogo.svg</a>
 			</td>
 		</tr>
 	</table>
@@ -297,12 +359,12 @@ And of course, the original logo...
 		<tr>
 			<td align=center>
 				<embed type="image/svg+xml"
-					src="dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=original-git-logo.svg" width=165 />
+					src="2727BLOBPLAIN;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=original-git-logo.svg" width=165 />
 			</td>
 		</tr>
 		<tr>
 			<td align=center>
-				<a href=dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=original-git-logo.svg>original-git-logo.svg</a>
+				<a href=2727BLOBPLAIN;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=original-git-logo.svg>original-git-logo.svg</a>
 			</td>
 		</tr>
 	</table>
@@ -488,7 +550,7 @@ wear a hat?" on the agenda.
 </p><p>
 Sure enough, the subject got voted up, and eventually, we got Sverre a hat:
 </p><p>
-<center><img src=dscho.git?a=blob_plain;hb=30319f7436828cd15db8a531a0057351d8e361c0;f=sverre-hat.jpg sverre-hat.jpg></center>
+<center><img src=2786BLOBPLAIN;hb=30319f7436828cd15db8a531a0057351d8e361c0;f=sverre-hat.jpg sverre-hat.jpg></center>
 </p><p>
 By the way, another thing I like about this blog engine is that there are no
 comments...  Nothing is more annoying than leaving a comment on a blog,
@@ -496,24 +558,6 @@ forgetting about it for a few months, and then finding somebody answered
 ages ago.
 </p><p>
 Update: Sverre says it was dsymonds idea.]]></description>
-</item>
-<item>
-<title>Let there be images!</title>
-<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232604722</link>
-<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232604722</guid>
-<pubDate>Thu, 22 Jan 2009 07:12:02 +0100</pubDate>
-<description><![CDATA[Let there be images!
-</p><p>
-One of the most important features of blogs is the ability to insert images.
-So what would this blog be, if it could not present something that says
-more than a thousand words?
-</p><p>
-So here it goes, my first picture in this blog, taken from my Google Tech
-Talk in Mountain View:
-</p><p>
-<center><img src=dscho.git?a=blob_plain;hb=85b89d1cd73acd65ca4381be901d50287dde8170;f=all-your-rebase.png width=500px></center>
-</p><p>
-Now this blog starts to look like a real blog...]]></description>
 </item>
 </channel>
 </rss>
