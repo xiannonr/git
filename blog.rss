@@ -5,7 +5,7 @@
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Mon, 26 Jan 2009 20:14:50 +0100</lastBuildDate>
+<lastBuildDate>Mon, 26 Jan 2009 20:16:50 +0100</lastBuildDate>
 <language>en-us</language>
 <item>
 <title>Valgrind takes a loooong time</title>
@@ -287,12 +287,12 @@ exactly the same as unrotated):
 		<tr>
 			<td align=center>
 				<embed type="image/svg+xml"
-					src="2630BLOBPLAIN;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-ambigram.svg" width=317 />
+					src="dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-ambigram.svg" width=317 />
 			</td>
 		</tr>
 		<tr>
 			<td align=center>
-				<a href=2630BLOBPLAIN;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-ambigram.svg>git-ambigram.svg</a>
+				<a href=dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-ambigram.svg>git-ambigram.svg</a>
 			</td>
 		</tr>
 	</table>
@@ -305,12 +305,12 @@ A play on gitk:
 		<tr>
 			<td align=center>
 				<embed type="image/svg+xml"
-					src="2670BLOBPLAIN;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-gitk-logo.svg" width=325 />
+					src="dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-gitk-logo.svg" width=325 />
 			</td>
 		</tr>
 		<tr>
 			<td align=center>
-				<a href=2670BLOBPLAIN;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-gitk-logo.svg>git-gitk-logo.svg</a>
+				<a href=dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-gitk-logo.svg>git-gitk-logo.svg</a>
 			</td>
 		</tr>
 	</table>
@@ -323,12 +323,12 @@ A play on the test you have to go through before getting new glasses:
 		<tr>
 			<td align=center>
 				<embed type="image/svg+xml"
-					src="2689BLOBPLAIN;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-visual-test.svg" width=325 />
+					src="dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-visual-test.svg" width=325 />
 			</td>
 		</tr>
 		<tr>
 			<td align=center>
-				<a href=2689BLOBPLAIN;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-visual-test.svg>git-visual-test.svg</a>
+				<a href=dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-visual-test.svg>git-visual-test.svg</a>
 			</td>
 		</tr>
 	</table>
@@ -341,12 +341,12 @@ This is Henrik Nyh's logo (converted to .svg by yours truly):
 		<tr>
 			<td align=center>
 				<embed type="image/svg+xml"
-					src="2708BLOBPLAIN;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=gitlogo.svg" width=165 />
+					src="dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=gitlogo.svg" width=165 />
 			</td>
 		</tr>
 		<tr>
 			<td align=center>
-				<a href=2708BLOBPLAIN;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=gitlogo.svg>gitlogo.svg</a>
+				<a href=dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=gitlogo.svg>gitlogo.svg</a>
 			</td>
 		</tr>
 	</table>
@@ -359,12 +359,12 @@ And of course, the original logo...
 		<tr>
 			<td align=center>
 				<embed type="image/svg+xml"
-					src="2727BLOBPLAIN;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=original-git-logo.svg" width=165 />
+					src="dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=original-git-logo.svg" width=165 />
 			</td>
 		</tr>
 		<tr>
 			<td align=center>
-				<a href=2727BLOBPLAIN;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=original-git-logo.svg>original-git-logo.svg</a>
+				<a href=dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=original-git-logo.svg>original-git-logo.svg</a>
 			</td>
 		</tr>
 	</table>
@@ -550,7 +550,7 @@ wear a hat?" on the agenda.
 </p><p>
 Sure enough, the subject got voted up, and eventually, we got Sverre a hat:
 </p><p>
-<center><img src=2786BLOBPLAIN;hb=30319f7436828cd15db8a531a0057351d8e361c0;f=sverre-hat.jpg sverre-hat.jpg></center>
+<center><img src=dscho.git?a=blob_plain;hb=30319f7436828cd15db8a531a0057351d8e361c0;f=sverre-hat.jpg sverre-hat.jpg></center>
 </p><p>
 By the way, another thing I like about this blog engine is that there are no
 comments...  Nothing is more annoying than leaving a comment on a blog,
