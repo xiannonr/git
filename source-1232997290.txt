@@ -10,16 +10,18 @@ in the test scripts to a file and the terminal at the same time.
 
 It seems as if that is not easily done.  I tried
 <center><bash>
-exec >(tee out) 2>&1                           </bash></center>
+exec >(tee out) 2>&1
+</bash></center>
 
 but that did not work: it mumbled something about invalid file handles or some
 such.
 
 The only solution I found was:
 <center><bash>
-mkpipe pipe                                    
+mkpipe pipe
 tee out < pipe &
-exec > pipe 2>&1 </bash></center>
+exec > pipe 2>&1
+</bash></center>
 
 That is a problem for parallel execution, though, so I am still looking for a
 better way to do it.
