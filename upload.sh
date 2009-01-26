@@ -66,7 +66,11 @@ BRANCH=$(get_config branch blog)
 
 URLPREFIX="$(dirname "$GITWEBURL")"/
 REMOTEREPOSITORY="$(basename "$GITWEBURL")"
-URL="$REMOTEREPOSITORY?a=blob_plain;hb=$BRANCH;f="
+case "$REMOTEREPOSITORY" in
+*'?'*) BLOBPLAIN="$REMOTEREPOSITORY;a=blob_plain";;
+*) BLOBPLAIN="$REMOTEREPOSITORY?a=blob_plain";;
+esac
+URL="$BLOBPLAIN;hb=$BRANCH;f="
 ORIGURL=$URL
 NEW=new
 OUTPUT=index.html
@@ -284,7 +288,7 @@ EOF
 			commit=$(git log --pretty=format:%H --diff-filter=AM \
 					-- $last_removed_entry |
 				head -n 1)
-			previous="$REMOTEREPOSITORY?a=blob_plain;hb=$commit"
+			previous="$BLOBPLAIN;hb=$commit"
 			echo "<a href=$previous;f=index.html>Older posts</a>"
 		}
 		end_box
@@ -439,7 +443,7 @@ get_image_url () {
 	test ! -z "$DRYRUN" && echo "$1" && return
 	rev=$(git rev-list -1 HEAD -- $1)
 	test -z "$rev" && die "No revision found for $1"
-	echo "$REMOTEREPOSITORY?a=blob_plain;hb=$rev;f=$1"
+	echo "$$BLOBPLAIN;hb=$rev;f=$1"
 }
 
 handle_svg_file () {
@@ -519,7 +523,7 @@ die "Could not commit new images"
 IMAGEFILES="$(get_image_files)"
 REV=$(git rev-list -1 HEAD -- $IMAGEFILES)
 test -z "$REV" && REV=$BRANCH
-URL="$REMOTEREPOSITORY?a=blob_plain;hb=$REV;f="
+URL="$BLOBPLAIN;hb=$REV;f="
 
 if test ! -z "$DRYRUN"
 then
