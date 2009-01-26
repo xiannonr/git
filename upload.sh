@@ -175,6 +175,8 @@ markup_substitution () {
 	esac
 }
 
+space80='        '
+space80="$space80$space80$space80$space80$space80$space80$space80$space80"
 # transform markup in stdin to HTML
 markup () {
 	case "$*" in
@@ -192,14 +194,14 @@ markup () {
 		-e 's!<bash>!<table\
 				border=1 bgcolor='$bash_bg'>\
 			<tr><td bgcolor=lightblue colspan=3>\
-				\&nbsp;\
+				<pre>'"$space80"'</pre>\
 			</td></tr>\
 			<tr><td>\
 				<table cellspacing=5 border=0\
 					 style="color:'$bash_fg';">\
 				<tr><td>\
 					<pre>!' \
-		-e 's!</bash>!		</pre>\
+		-e 's!</bash>!</pre>\
 				</td></tr>\
 				</table>\
 			</td></tr>\
