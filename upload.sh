@@ -66,8 +66,9 @@ BRANCH=$(get_config branch blog)
 
 URLPREFIX="$(dirname "$GITWEBURL")"/
 REMOTEREPOSITORY="$(basename "$GITWEBURL")"
-case "$REMOTEREPOSITORY" in
+case "$GITWEBURL" in
 *'?'*) BLOBPLAIN="$REMOTEREPOSITORY;a=blob_plain";;
+*/) URLPREFIX=$GITWEBURL; BLOBPLAIN="a=blob_plain";;
 *) BLOBPLAIN="$REMOTEREPOSITORY?a=blob_plain";;
 esac
 URL="$BLOBPLAIN;hb=$BRANCH;f="
