@@ -291,11 +291,11 @@ exec > pipe 2>&1
 			</p><p>
 			And it should not be hard to do at all!
 			</p><p>
-			In <i>diff&#95;words&#95;show()</i>, we basically get the minus lines as
-			<i>diff&#95;words->minus</i> and the plus lines as <i>diff&#95;words->plus</i>.  The
+			In <i>diff_words_show()</i>, we basically get the minus lines as
+			<i>diff_words->minus</i> and the plus lines as <i>diff_words->plus</i>.  The
 			function then prepares the word lists and calls the xdiff engine to do all the
 			hard work, analyzing the result from xdiff and printing the lines in
-			<i>fn&#95;out&#95;diff&#95;words&#95;aux()</i>.
+			<i>fn_out_diff_words_aux()</i>.
 			</p><p>
 			So all that would have to be changed would be to <u>record</u> the positions
 			of the removed/added words instead of outputting them, and at the end printing
@@ -304,17 +304,17 @@ exec > pipe 2>&1
 			This would involve
 			</p><p>
 			<ul>
-			<li>adding two new members holding the offsets in the <i>diff&#95;words</i>
+			<li>adding two new members holding the offsets in the <i>diff_words</i>
 			struct,
 			<li>having a special handling for that mode in
-			<i>fn&#95;out&#95;diff&#95;words&#95;aux()</i> that appends the offsets and
+			<i>fn_out_diff_words_aux()</i> that appends the offsets and
 			returns,
-			<li>adding a function <i>show&#95;lines&#95;with&#95;colored&#95;words()</i> that
+			<li>adding a function <i>show_lines_with_colored_words()</i> that
 			outputs a buffer with a given prefix ('-' or '+') and coloring the words at
 			given offsets with a given color,
-			<li>modify <i>diff&#95;words&#95;show()</i> to call that function for the "special
+			<li>modify <i>diff_words_show()</i> to call that function for the "special
 			case: only removal" and at the end of the function, and
-			<li> disabling the <i>fwrite()</i> at the end of <i>diff<u>words</u>show()</i> for that
+			<li> disabling the <i>fwrite()</i> at the end of <i>diff_words_show()</i> for that
 			mode.
 			</ul>
 			</p><p>

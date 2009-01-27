@@ -25,11 +25,11 @@ This sentence has a <font color=red>tyop</font><font color=green>typo</font> in 
 
 And it should not be hard to do at all!
 
-In ''diff&#95;words&#95;show()'', we basically get the minus lines as
-''diff&#95;words->minus'' and the plus lines as ''diff&#95;words->plus''.  The
+In ''diff_words_show()'', we basically get the minus lines as
+''diff_words->minus'' and the plus lines as ''diff_words->plus''.  The
 function then prepares the word lists and calls the xdiff engine to do all the
 hard work, analyzing the result from xdiff and printing the lines in
-''fn&#95;out&#95;diff&#95;words&#95;aux()''.
+''fn_out_diff_words_aux()''.
 
 So all that would have to be changed would be to _record_ the positions
 of the removed/added words instead of outputting them, and at the end printing
@@ -38,15 +38,15 @@ the minus/plus buffers using the recorded information to color the words.
 This would involve
 
 <ul>
-<li>adding two new members holding the offsets in the ''diff&#95;words''
+<li>adding two new members holding the offsets in the ''diff_words''
 struct,
 <li>having a special handling for that mode in
-''fn&#95;out&#95;diff&#95;words&#95;aux()'' that appends the offsets and
+''fn_out_diff_words_aux()'' that appends the offsets and
 returns,
-<li>adding a function ''show&#95;lines&#95;with&#95;colored&#95;words()'' that
+<li>adding a function ''show_lines_with_colored_words()'' that
 outputs a buffer with a given prefix ('-' or '+') and coloring the words at
 given offsets with a given color,
-<li>modify ''diff&#95;words&#95;show()'' to call that function for the "special
+<li>modify ''diff_words_show()'' to call that function for the "special
 case: only removal" and at the end of the function, and
 <li> disabling the ''fwrite()'' at the end of ''diff_words_show()'' for that
 mode.
