@@ -189,8 +189,8 @@ markup_substitution () {
 	echo "s/$left$right/\\\\1<$2>\\\\2<\/$2>\\\\$right_no/g"
 }
 
-space80='        '
-space80="$space80$space80$space80$space80$space80$space80$space80$space80"
+space80='                          '
+space80="$space80$space80$space80  '
 # transform markup in stdin to HTML
 markup () {
 	case "$*" in
