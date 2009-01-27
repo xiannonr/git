@@ -164,15 +164,29 @@ make_date () {
 
 # make an argument for sed, to replace $1..$1 by <$2>..</$2>
 markup_substitution () {
-	case "$1" in
-	?) echo "s/$1\\([^$1]*\\)$1/<$2>\\\\1<\/$2>/g";;
-	??)
-		tmp="[^${1%?}]*"
-		tmp2="\\|${1%?}[^${1#?}]$tmp"
-		tmp3="\\($tmp\\($tmp2\\($tmp2\\($tmp2\\)\\)\\)\\)"
-		echo "s/$1$tmp3$1/<$2>\\\\1<\/$2>/g"
-	;;
-	esac
+	# sed does not know minimal match with .*, only greedy one
+	middle=
+	middleend=
+	delim=$1
+	right_no=3
+	while test ! -z "$delim"
+	do
+		right_no=$(($right_no+1))
+		test $right_no -gt 9 &&
+		die "Invalid markup pattern: $1"
+		first=$(expr "$delim" : '\(.\)')
+		delim=${delim#$first}
+		test -z "$delim" && {
+			middle="$middle\\([^$first]\\|$first[A-Za-z0-9]\\)"
+			break
+		}
+		middle="$middle\\([^$first]\\|$first"
+		middleend="$middleend\\)"
+	done
+
+	left="\\(^\\|[^A-Za-z0-9]\\)$1\\($middle$middleend*\\)"
+	right="$1\\($\\|[^A-Za-z0-9]\\)"
+	echo "s/$left$right/\\\\1<$2>\\\\2<\/$2>\\\\$right_no/g"
 }
 
 space80='        '
