@@ -190,7 +190,7 @@ markup_substitution () {
 }
 
 space80='                          '
-space80="$space80$space80$space80  '
+space80="$space80$space80$space80  "
 # transform markup in stdin to HTML
 markup () {
 	case "$*" in
