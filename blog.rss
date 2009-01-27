@@ -5,8 +5,78 @@
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Tue, 27 Jan 2009 00:33:49 +0100</lastBuildDate>
+<lastBuildDate>Tue, 27 Jan 2009 03:20:09 +0100</lastBuildDate>
 <language>en-us</language>
+<item>
+<title>Fun with calculus after midnight</title>
+<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1233022809</link>
+<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1233022809</guid>
+<pubDate>Tue, 27 Jan 2009 03:20:09 +0100</pubDate>
+<description><![CDATA[Fun with calculus after midnight
+</p><p>
+Problem: what is the shortest way of defining a variable consisting of <i>N</i>
+spaces?  I.e. for <i>N=80</i> the result will look something like
+</p><p>
+<table
+				border=1 bgcolor=white>
+			<tr><td bgcolor=lightblue colspan=3>
+				<pre>                                                                </pre>
+			</td></tr>
+			<tr><td>
+				<table cellspacing=5 border=0
+					 style="color:black;">
+				<tr><td>
+					<pre>
+s='    '
+s="$s$s$s$s$s$s$s$s$s$s$s$s$s$s$s$s$s$s$s$s"
+</pre>
+				</td></tr>
+				</table>
+			</td></tr>
+			</table>
+</p><p>
+Let's see.  Let the minimal number of characters needed be <i>A(N)</i>.  For
+simplicity, let's say that we only use one variable.  Then, certainly, <i>A(N)</i>
+cannot be larger than <i>5+N</i>, as we could define a variable using 1 character
+for the name, 1 for the equal sign, 2 for the quotes, and one for the semicolon
+or newline character (whichever).
+</p><p>
+Now, let's assume <i>N</i> is a product <i>K*L</i>.  Then certainly, <i>A(N)</i> cannot
+be larger than <i>A(K)+5+2*L</i>, as we could first define a variable that has
+exactly <i>K</i> spaces and then use that to define the end result (in the example
+above, <i>K=5</i> and <i>L=20</i>).
+</p><p>
+So, for which <i>N=K*L</i> is it better to use two definitions instead of one?
+</p><p>
+Simple calculus says that <i>5+K*L>5+K+5+2*L</i> must hold true, or (after some
+scribbling): <i>L>1+7/(K-2)</i>. Which means that it makes no sense to define
+a variable with 1 or 2 spaces first, which is kinda obvious (writing '$s'
+alone would use two characters, so we could write the spaces right away).
+</p><p>
+But what for the other values?  For <i>K=3</i>, <i>L</i> must be at least 9 to make
+sense (in other words, <i>N</i> must be at least 27).  For <i>K=4</i>, <i>L</i> needs
+to be greater or equal to 5 (<i>N>=20</i>), the next pairs are <i>(5,4)</i>,
+<i>(6,3)</i>, <i>(7,3)</i>, <i>(8,3)</i>, <i>(9,3)</i> and starting with <i>K=10</i>, any
+<i>L>1</i> makes sense.
+</p><p>
+The second definition can also contain spaces at the end, however, so for any
+<i>N=K*L+M</i>, <i>A(N)</i> cannot be larger than <i>A(K)+5+2*L+M</i>.
+</p><p>
+Not surprisingly, this leads to exactly the same <i>L>1+7/(K-2)</i> (as we can
+append the <i>M</i> spaces in the last definition, no matter if we use 1 or
+2 definitions).
+</p><p>
+However, that means that as soon as <i>N>=18</i>, we should use two definitions,
+prior to that, it makes no sense.
+</p><p>
+So for <i>N<18</i>, <i>A(N)=5+N</i>.
+</p><p>
+But what <i>K</i> should one choose, i.e. how many spaces in the first definition?
+In other words, what is <i>A(N)</i> given that we use two definitions?
+</p><p>
+That will have to wait for another midnight.  Just a teaser: <i>A(80)=36</i>.  Oh,
+and with 80 characters, you can define a string of 9900 spaces...]]></description>
+</item>
 <item>
 <title>Valgrind takes a loooong time</title>
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232997290</link>
@@ -519,47 +589,6 @@ Most funny are the ridiculous attempts by those persons at explaining why
 top-posting is <i>so</i> much superior to anything else.
 </p><p>
 Which is good, because if they were not that funny, they would be pretty sad.]]></description>
-</item>
-<item>
-<title>Sverre's hat</title>
-<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232607201</link>
-<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232607201</guid>
-<pubDate>Thu, 22 Jan 2009 07:53:21 +0100</pubDate>
-<description><![CDATA[Sverre's hat
-</p><p>
-The fun part about a blog is that you can talk about less technical stuff.
-For example, Sverre's hat.
-</p><p>
-Let me start a bit earlier, so that you get the context.
-</p><p>
-Last year, at the <a href=http://git.or.cz/gitwiki/GitTogether>GitTogether</a>,
-we had an <a href=http://en.wikipedia.org/wiki/Unconference>unconference style
-conference</a>, which basically meant that it was our job to decide what
-we want to talk about.
-</p><p>
-It turned out to be pretty hard, because there was so much we wanted to
-discuss, and because we wanted to get to know each other, and we wanted to
-do some hacking.
-</p><p>
-So to help us decide what subjects, and in which order we wanted to have
-scheduled, Shawn opened a series on <a href=http://moderator.appspot.com/>
-Google Moderator</a>, a nifty, yet simple application which allows a group
-to agree quickly on an agenda.
-</p><p>
-It worked quite well; However, that little saboteur displayed his sense of
-humor so overtly that some entertaining Gitter put the question "Should Sverre
-wear a hat?" on the agenda.
-</p><p>
-Sure enough, the subject got voted up, and eventually, we got Sverre a hat:
-</p><p>
-<center><img src=dscho.git?a=blob_plain;hb=30319f7436828cd15db8a531a0057351d8e361c0;f=sverre-hat.jpg sverre-hat.jpg></center>
-</p><p>
-By the way, another thing I like about this blog engine is that there are no
-comments...  Nothing is more annoying than leaving a comment on a blog,
-forgetting about it for a few months, and then finding somebody answered
-ages ago.
-</p><p>
-Update: Sverre says it was dsymonds idea.]]></description>
 </item>
 </channel>
 </rss>
