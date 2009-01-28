@@ -12,7 +12,7 @@
 			<tr><th>Table of contents:</th></tr>
 			<tr><td>
 			<p><ul>
-			<li><a href=#1233107175>28 Jan 2009 </a>
+			<li><a href=#1233154567>28 Jan 2009 Splitting topic branches</a>
 			<li><a href=#1233102919>28 Jan 2009 Showing off that you're an Alpine user ... priceless!</a>
 			<li><a href=#1233101919>28 Jan 2009 Progress with the interactive rebase preserving merges</a>
 			<li><a href=#1233099894>28 Jan 2009 Another midnight riddle?</a>
@@ -86,11 +86,34 @@
 			</script>
 			</td></tr></table>
 			</div>
-			<h6>Wednesday, 28th of January, Anno Domini MMIX, at the hour of the Buffalo</h6>
-			<a name=1233107175>
-			<h2></h2>
+			<h6>Wednesday, 28th of January, Anno Domini MMIX, at the hour of the Monkey</h6>
+			<a name=1233154567>
+			<h2>Splitting topic branches</h2>
 
 			<p>
+			</p><p>
+			One might be put off easily by the overarching use of buzzwords in the
+			description of how <i>Darcs</i> works.  I, for one, do not expect an intelligent
+			author when I read <i>Theory of patches</i> and <i>based on quantum physics</i>.
+			</p><p>
+			The true story, however, is much simpler, and is actually not that dumb:
+			Let's call two commits "conflicting" when they contain at least one
+			overlapping change.
+			</p><p>
+			The idea is now: Given a list of commits (not a set, as the order is important),
+			to sort them into smaller lists such that conflicting commits are in the
+			sublists ("topic branches") and the sublists are minimal, i.e. no two
+			non-conflicting commits are in the same sublist.
+			</p><p>
+			The idea has flaws, of course, as you can have a patch changing the code,
+			and another changing the documentation, but splitting a list of commits
+			in that way is a first step to sort out my <i>my-next</i> mess, where I have
+			a linear perl of not-necessarily-dependent commits.
+			</p><p>
+			And actually, my whole rebase revamp aimed at the clean-up for my own
+			<i>my-next</i> branch, so I am currently writing a script that can be used
+			as a GIT_EDITOR for git-rebase which implements the Darcs algorithm.  Kind of:
+			the result is not implicit, but explicit and can be fixed up later.
 			</p>
 			<h6>Wednesday, 28th of January, Anno Domini MMIX, at the hour of the Buffalo</h6>
 			<a name=1233102919>
