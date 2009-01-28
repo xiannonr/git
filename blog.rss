@@ -5,8 +5,41 @@
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Wed, 28 Jan 2009 01:18:39 +0100</lastBuildDate>
+<lastBuildDate>Wed, 28 Jan 2009 01:35:19 +0100</lastBuildDate>
 <language>en-us</language>
+<item>
+<title>Showing off that you're an Alpine user ... priceless!</title>
+<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1233102919</link>
+<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1233102919</guid>
+<pubDate>Wed, 28 Jan 2009 01:35:19 +0100</pubDate>
+<description><![CDATA[Showing off that you're an Alpine user ... priceless!
+</p><p>
+So I was in a hurry to send the patches, and sent all the patches as replies
+to the cover-letter, and therefore typed in <i>rnyn</i> all the time, which is the
+mantra I need to say to Alpine for <i>Reply</i>, ... include quoted message?
+<i>No</i>, ... reply to all recipients? <i>Yes</i>, ... use first role?
+<i>No, use default role</i>.
+</p><p>
+That was pretty embarassing, as it shows everybody that I still do not trust
+<i>send-email</i>, and rather paste every single patch by hand.  Which is rather
+annoying.
+</p><p>
+So I started using format-patch today, to output directly to Alpine's
+<i>postponed-msgs</i> folder, so that I can do some touchups in the mailer
+before sending the patch series on its way.
+</p><p>
+However, when running format-patch with <i>--thread</i>, it generates Message-ID
+strings that Alpine does not like, and therefore replaces.
+</p><p>
+Oh, well, I'll probably just investigate how the Message-IDs are supposed to
+look, and then use sed to rewrite the generated ones by Alpine-friendly ones
+during the redirection to <i>postponed-msgs</i>.
+</p><p>
+But I alread realized that doing it that way is dramatically faster than the
+workflow I had before.
+</p><p>
+And safer: no more <i>rnyn</i>.]]></description>
+</item>
 <item>
 <title>Progress with the interactive rebase preserving merges</title>
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1233101919</link>
@@ -506,51 +539,6 @@ And of course, the original logo...
 </center>
 </p><p>
 Maybe some of you have fun with them...]]></description>
-</item>
-<item>
-<title>How to deal with files that are not source code when merging</title>
-<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232742582</link>
-<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232742582</guid>
-<pubDate>Fri, 23 Jan 2009 21:29:42 +0100</pubDate>
-<description><![CDATA[How to deal with files that are not source code when merging
-</p><p>
-Last week, one of the mentors of last year's <a href=http://code.google.com/soc>
-Summer of Code</a> mentioned the idea that merge strategies are in dear need
-for file types other than source code.
-</p><p>
-I think this idea is awesome, even if I cannot bring myself to believe that
-any of the file types would make a good Summer of Code project: either they
-are too complicated (think raster images such as .png or even .jpg), or they
-are too straight-forward (think LaTeX, where all that is needed is a good
-graphical user interface to inspect the three versions: <i>ours</i>, <i>baseline</i>
-and <i>theirs</i>).
-</p><p>
-The LaTeX idea would be a good project for me to mentor, though: I have a
-pretty clear idea how it should be done; I just lack the time (and motivation)
-to do it myself.
-</p><p>
-As for OpenOffice text documents, vector graphics (such as .svg), or more
-specific data such as spreadsheets, I think that all of these are really
-difficult: the problem is not so much the implementation (i.e. the programming
-part of it), but the design.
-</p><p>
-This design should involve much more than a Summer of Code project is about:
-you would need to survey users' expectations, and at least the mentor -- if
-not the student -- would need to be an expert in usability questions, which
-is rather unlikely in the realm of Open Source.
-</p><p>
-Maybe this is the missing part in Open Source: we have many brilliant
-programmers, but next to nobody with a good idea how to design intuitive
-user interfaces.
-</p><p>
-That might be related to the fact that brilliant software engineers, as they
-can be found in Open Source, are not exactly known for their social skills,
-a human trait that seems to be a very important prerequisite for designing
-intuitive user interfaces.
-</p><p>
-Well, I have <a href=http://git.or.cz/gitwiki/SoC2009Ideas#head-6188833471f79f277e162ef9fbe1592aa10b5f6c>
-added</a> the proposal to Git's Summer of Code idea page on the Git Wiki; We will
-see what comes out of it.]]></description>
 </item>
 </channel>
 </rss>
