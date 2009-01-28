@@ -1,0 +1,36 @@
+Progress with the interactive rebase preserving merges
+
+I thought about the "dropped" commits a bit more, after all, and it is
+probably a good thing to substitute them by their parent, as Stephen did it.
+
+Imagine that you have merged a branch with two commits.  One is in upstream,
+and you want to rebase (preserving merges) onto upstream.  Then you still
+want to merge the single commit.
+
+Even better, if there is no commit left, the ''$REWRITTEN'' mechanism will
+substitute the commit onto which we are rebasing, so a merge will just
+result in a fast-forward!
+
+Oh, another thing: merge commits can never be dropped (as that would mean
+that the patch id of that commit is identical to a patch id of a commit in
+the upstream branch; but merge commits do not have a single patch, let alone
+a patch id).  So we can be certain that a dropped commit always has at most
+one parent.
+
+So what about a root commit?  If that was dropped, we will just substitute
+it with the commit onto which we rebase.
+
+The thing that upset me a bit when I found out about it, is what t3410 is
+all about.  It speaks about dropping local merges together with their
+_whole_ branches when an upstream has the same "merge resolution".
+
+To my surprise, Stephen had no objections to remove that stuff, so I think
+I'll be able to submit something usable tomorrow.
+
+Or maybe I will start to use it first...
+
+Another thought that occurred to me is that I could include the output of
+''git log --graph''.  This cannot be done in the rebase script directly,
+as there are "goto" and "merge" statements disrupting the graph, and
+besides, it would look ugly if you reordered commits without adjusting the
+graph, so I may include the graph (for ''-p'' only) in the comment section.

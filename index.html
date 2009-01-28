@@ -12,6 +12,7 @@
 			<tr><th>Table of contents:</th></tr>
 			<tr><td>
 			<p><ul>
+			<li><a href=#1233101919>28 Jan 2009 Progress with the interactive rebase preserving merges</a>
 			<li><a href=#1233099894>28 Jan 2009 Another midnight riddle?</a>
 			<li><a href=#1233022809>27 Jan 2009 Fun with calculus after midnight</a>
 			<li><a href=#1232997290>26 Jan 2009 Valgrind takes a loooong time</a>
@@ -21,9 +22,8 @@
 			<li><a href=#1232778113>24 Jan 2009 Thoughts about <i>interactive rebase</i></a>
 			<li><a href=#1232745071>23 Jan 2009 Git Logos</a>
 			<li><a href=#1232742582>23 Jan 2009 How to deal with files that are not source code when merging</a>
-			<li><a href=#1232626236>22 Jan 2009 The UGFWIINI contest</a>
 			</ul></p>
-			<a href=dscho.git?a=blob_plain;hb=43f0b5e717b8eb67a4b4eef37f600acd4dfba6c9;f=index.html>Older posts</a>
+			<a href=dscho.git?a=blob_plain;hb=2d0d8b3bf30f6803b679342cb91225746af5376a;f=index.html>Older posts</a>
 			</td></tr></table>
 			<br>
 			<div style="text-align:right;">
@@ -86,6 +86,47 @@
 			</script>
 			</td></tr></table>
 			</div>
+			<h6>Wednesday, 28th of January, Anno Domini MMIX, at the hour of the Buffalo</h6>
+			<a name=1233101919>
+			<h2>Progress with the interactive rebase preserving merges</h2>
+
+			<p>
+			</p><p>
+			I thought about the "dropped" commits a bit more, after all, and it is
+			probably a good thing to substitute them by their parent, as Stephen did it.
+			</p><p>
+			Imagine that you have merged a branch with two commits.  One is in upstream,
+			and you want to rebase (preserving merges) onto upstream.  Then you still
+			want to merge the single commit.
+			</p><p>
+			Even better, if there is no commit left, the <i>$REWRITTEN</i> mechanism will
+			substitute the commit onto which we are rebasing, so a merge will just
+			result in a fast-forward!
+			</p><p>
+			Oh, another thing: merge commits can never be dropped (as that would mean
+			that the patch id of that commit is identical to a patch id of a commit in
+			the upstream branch; but merge commits do not have a single patch, let alone
+			a patch id).  So we can be certain that a dropped commit always has at most
+			one parent.
+			</p><p>
+			So what about a root commit?  If that was dropped, we will just substitute
+			it with the commit onto which we rebase.
+			</p><p>
+			The thing that upset me a bit when I found out about it, is what t3410 is
+			all about.  It speaks about dropping local merges together with their
+			<u>whole</u> branches when an upstream has the same "merge resolution".
+			</p><p>
+			To my surprise, Stephen had no objections to remove that stuff, so I think
+			I'll be able to submit something usable tomorrow.
+			</p><p>
+			Or maybe I will start to use it first...
+			</p><p>
+			Another thought that occurred to me is that I could include the output of
+			<i>git log --graph</i>.  This cannot be done in the rebase script directly,
+			as there are "goto" and "merge" statements disrupting the graph, and
+			besides, it would look ugly if you reordered commits without adjusting the
+			graph, so I may include the graph (for <i>-p</i> only) in the comment section.
+			</p>
 			<h6>Wednesday, 28th of January, Anno Domini MMIX, at the hour of the Rat</h6>
 			<a name=1233099894>
 			<h2>Another midnight riddle?</h2>
@@ -579,70 +620,6 @@ A - B - - - E
 			Well, I have <a href=http://git.or.cz/gitwiki/SoC2009Ideas#head-6188833471f79f277e162ef9fbe1592aa10b5f6c>
 			added</a> the proposal to Git's Summer of Code idea page on the Git Wiki; We will
 			see what comes out of it.
-			</p>
-			<h6>Thursday, 22nd of January, Anno Domini MMIX, at the hour of the Goat</h6>
-			<a name=1232626236>
-			<h2>The UGFWIINI contest</h2>
-
-			<p>
-			</p><p>
-			Just in case somebody finds this blog, here is a challenge.  Inspired by my
-			own little hack (this blog), I announce the "Using Git For What It Is Not
-			Intended" contest.
-			</p><p>
-			And it is especially cool, since the acronym sounds cool!  You might miss
-			this fact if you do no know that I pronounce the "F" like an "A" so that
-			it sounds cool.
-			</p><p>
-			This will be a running contest; whenever I have 10 valid applications, I
-			will announce a winner on the Git mailing list.
-			</p><p>
-			So, what accounts for a valid application?
-			</p><p>
-			<ul>
-			<li> You must use a Git program (the term is used loosely here, GitWeb is
-			     considered a Git program, for example).
-			<li> The program must be intended for something completely different than
-			     what you are using it for.  E.g. GitWeb -- which was intended to let
-			     you browse through the history using your web browser -- is used
-			     to serve a blog to the wide world.
-			<li> You must be able to prove that you actually used the Git program to
-			     the purpose you claim, preferably in a live demonstration like this
-			     one.
-			<li> Nobody and nothing must be harmed in the process (except your
-			     laughing muscle, that's okay).
-			</ul>
-			</p><p>
-			So, how does such an abuse look like?
-			</p><p>
-			<ul>
-			<li> ... like this blog.
-			<li> Managing your mail (in maildir format) in a Git repository.
-			<li> Finding duplicate files by
-			<table
-							border=1 bgcolor=black>
-						<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
-			</td></tr>
-			<tr><td>
-				<table cellspacing=5 border=0
-					 style="color:white;">
-				<tr><td>
-					<pre>
-$ git init
-$ git add .
-$ git ls-files --stage | sort -k2 | uniq -d -s7 -w40
-</pre>
-							</td></tr>
-							</table>
-						</td></tr>
-						</table>
-			<li> Abusing the Git alias mechanism to call scripts defined directly in
-			     the config.
-			</ul>
-			</p><p>
-			I am really looking forward to all of your submissions... *chuckles*
-			</p><p>
 			</p>
 		</div>
 	</body>
