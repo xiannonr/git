@@ -5,8 +5,15 @@
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Wed, 28 Jan 2009 01:35:19 +0100</lastBuildDate>
+<lastBuildDate>Wed, 28 Jan 2009 02:46:16 +0100</lastBuildDate>
 <language>en-us</language>
+<item>
+<title></title>
+<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1233107175</link>
+<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1233107175</guid>
+<pubDate>Wed, 28 Jan 2009 02:46:15 +0100</pubDate>
+<description><![CDATA[]]></description>
+</item>
 <item>
 <title>Showing off that you're an Alpine user ... priceless!</title>
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1233102919</link>
@@ -58,29 +65,17 @@ Even better, if there is no commit left, the <i>$REWRITTEN</i> mechanism will
 substitute the commit onto which we are rebasing, so a merge will just
 result in a fast-forward!
 </p><p>
-Oh, another thing: merge commits can never be dropped (as that would mean
-that the patch id of that commit is identical to a patch id of a commit in
-the upstream branch; but merge commits do not have a single patch, let alone
-a patch id).  So we can be certain that a dropped commit always has at most
-one parent.
+Oh, another thing: merge commits should not have a patch id, as they have
+<u>multiple</u> patches.  However, I borked the code long time ago (9c6efa36)
+and merges get the patch-id of their diff to the first parent.  Which is
+probably wrong.  So I guess I'll have to fix that with my rebase revamp.
 </p><p>
 So what about a root commit?  If that was dropped, we will just substitute
-it with the commit onto which we rebase.
+it with the commit onto which we rebase (as a root commit did not really
+have a parent, but will get the onto-commit as new parent)..
 </p><p>
-The thing that upset me a bit when I found out about it, is what t3410 is
-all about.  It speaks about dropping local merges together with their
-<u>whole</u> branches when an upstream has the same "merge resolution".
-</p><p>
-To my surprise, Stephen had no objections to remove that stuff, so I think
-I'll be able to submit something usable tomorrow.
-</p><p>
-Or maybe I will start to use it first...
-</p><p>
-Another thought that occurred to me is that I could include the output of
-<i>git log --graph</i>.  This cannot be done in the rebase script directly,
-as there are "goto" and "merge" statements disrupting the graph, and
-besides, it would look ugly if you reordered commits without adjusting the
-graph, so I may include the graph (for <i>-p</i> only) in the comment section.]]></description>
+Now that I finally realized that t3410 is so strange because of a bug <u>I</u>
+introduced, I can finally go about fixing it.]]></description>
 </item>
 <item>
 <title>Another midnight riddle?</title>
@@ -436,109 +431,6 @@ The more I think about it, the more I actually like this idea &#x263a;
 </p><p>
 Of course, working on this little project means that I will have to cope with
 that ugly code again.  *urgh*]]></description>
-</item>
-<item>
-<title>Git Logos</title>
-<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232745071</link>
-<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232745071</guid>
-<pubDate>Fri, 23 Jan 2009 22:11:11 +0100</pubDate>
-<description><![CDATA[Git Logos
-</p><p>
-The other day, when I did not exactly have too much time on my hands, but
-definitely too much motivation, I played around creating several logos.
-</p><p>
-An ambigram (if you turn it 180 degrees around the appropriate axis, it looks
-exactly the same as unrotated):
-</p><p>
-<center>
-	<table border=0>
-		<tr>
-			<td align=center>
-				<embed type="image/svg+xml"
-					src="dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-ambigram.svg" width=317 />
-			</td>
-		</tr>
-		<tr>
-			<td align=center>
-				<a href=dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-ambigram.svg>git-ambigram.svg</a>
-			</td>
-		</tr>
-	</table>
-</center>
-</p><p>
-A play on gitk:
-</p><p>
-<center>
-	<table border=0>
-		<tr>
-			<td align=center>
-				<embed type="image/svg+xml"
-					src="dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-gitk-logo.svg" width=325 />
-			</td>
-		</tr>
-		<tr>
-			<td align=center>
-				<a href=dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-gitk-logo.svg>git-gitk-logo.svg</a>
-			</td>
-		</tr>
-	</table>
-</center>
-</p><p>
-A play on the test you have to go through before getting new glasses:
-</p><p>
-<center>
-	<table border=0>
-		<tr>
-			<td align=center>
-				<embed type="image/svg+xml"
-					src="dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-visual-test.svg" width=325 />
-			</td>
-		</tr>
-		<tr>
-			<td align=center>
-				<a href=dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=git-visual-test.svg>git-visual-test.svg</a>
-			</td>
-		</tr>
-	</table>
-</center>
-</p><p>
-This is Henrik Nyh's logo (converted to .svg by yours truly):
-</p><p>
-<center>
-	<table border=0>
-		<tr>
-			<td align=center>
-				<embed type="image/svg+xml"
-					src="dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=gitlogo.svg" width=165 />
-			</td>
-		</tr>
-		<tr>
-			<td align=center>
-				<a href=dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=gitlogo.svg>gitlogo.svg</a>
-			</td>
-		</tr>
-	</table>
-</center>
-</p><p>
-And of course, the original logo...
-</p><p>
-<center>
-	<table border=0>
-		<tr>
-			<td align=center>
-				<embed type="image/svg+xml"
-					src="dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=original-git-logo.svg" width=165 />
-			</td>
-		</tr>
-		<tr>
-			<td align=center>
-				<a href=dscho.git?a=blob_plain;hb=aaa9edafbe6ca5349ad7b36848fb294e5f4fc529;f=original-git-logo.svg>original-git-logo.svg</a>
-			</td>
-		</tr>
-	</table>
-</center>
-</p><p>
-Maybe some of you have fun with them...]]></description>
 </item>
 </channel>
 </rss>
