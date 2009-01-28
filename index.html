@@ -12,6 +12,7 @@
 			<tr><th>Table of contents:</th></tr>
 			<tr><td>
 			<p><ul>
+			<li><a href=#1233102919>28 Jan 2009 Showing off that you're an Alpine user ... priceless!</a>
 			<li><a href=#1233101919>28 Jan 2009 Progress with the interactive rebase preserving merges</a>
 			<li><a href=#1233099894>28 Jan 2009 Another midnight riddle?</a>
 			<li><a href=#1233022809>27 Jan 2009 Fun with calculus after midnight</a>
@@ -21,9 +22,8 @@
 			<li><a href=#1232828715>24 Jan 2009 Ideas for a major revamp of the <i>--preserve-merges</i> handling in <i>git rebase</i></a>
 			<li><a href=#1232778113>24 Jan 2009 Thoughts about <i>interactive rebase</i></a>
 			<li><a href=#1232745071>23 Jan 2009 Git Logos</a>
-			<li><a href=#1232742582>23 Jan 2009 How to deal with files that are not source code when merging</a>
 			</ul></p>
-			<a href=dscho.git?a=blob_plain;hb=2d0d8b3bf30f6803b679342cb91225746af5376a;f=index.html>Older posts</a>
+			<a href=dscho.git?a=blob_plain;hb=701d385443e5287b0aca524d7d6619dd3b434a32;f=index.html>Older posts</a>
 			</td></tr></table>
 			<br>
 			<div style="text-align:right;">
@@ -86,6 +86,38 @@
 			</script>
 			</td></tr></table>
 			</div>
+			<h6>Wednesday, 28th of January, Anno Domini MMIX, at the hour of the Buffalo</h6>
+			<a name=1233102919>
+			<h2>Showing off that you're an Alpine user ... priceless!</h2>
+
+			<p>
+			</p><p>
+			So I was in a hurry to send the patches, and sent all the patches as replies
+			to the cover-letter, and therefore typed in <i>rnyn</i> all the time, which is the
+			mantra I need to say to Alpine for <i>Reply</i>, ... include quoted message?
+			<i>No</i>, ... reply to all recipients? <i>Yes</i>, ... use first role?
+			<i>No, use default role</i>.
+			</p><p>
+			That was pretty embarassing, as it shows everybody that I still do not trust
+			<i>send-email</i>, and rather paste every single patch by hand.  Which is rather
+			annoying.
+			</p><p>
+			So I started using format-patch today, to output directly to Alpine's
+			<i>postponed-msgs</i> folder, so that I can do some touchups in the mailer
+			before sending the patch series on its way.
+			</p><p>
+			However, when running format-patch with <i>--thread</i>, it generates Message-ID
+			strings that Alpine does not like, and therefore replaces.
+			</p><p>
+			Oh, well, I'll probably just investigate how the Message-IDs are supposed to
+			look, and then use sed to rewrite the generated ones by Alpine-friendly ones
+			during the redirection to <i>postponed-msgs</i>.
+			</p><p>
+			But I alread realized that doing it that way is dramatically faster than the
+			workflow I had before.
+			</p><p>
+			And safer: no more <i>rnyn</i>.
+			</p>
 			<h6>Wednesday, 28th of January, Anno Domini MMIX, at the hour of the Buffalo</h6>
 			<a name=1233101919>
 			<h2>Progress with the interactive rebase preserving merges</h2>
@@ -576,50 +608,6 @@ A - B - - - E
 			</center>
 			</p><p>
 			Maybe some of you have fun with them...
-			</p>
-			<h6>Friday, 23rd of January, Anno Domini MMIX, at the hour of the Pig</h6>
-			<a name=1232742582>
-			<h2>How to deal with files that are not source code when merging</h2>
-
-			<p>
-			</p><p>
-			Last week, one of the mentors of last year's <a href=http://code.google.com/soc>
-			Summer of Code</a> mentioned the idea that merge strategies are in dear need
-			for file types other than source code.
-			</p><p>
-			I think this idea is awesome, even if I cannot bring myself to believe that
-			any of the file types would make a good Summer of Code project: either they
-			are too complicated (think raster images such as .png or even .jpg), or they
-			are too straight-forward (think LaTeX, where all that is needed is a good
-			graphical user interface to inspect the three versions: <i>ours</i>, <i>baseline</i>
-			and <i>theirs</i>).
-			</p><p>
-			The LaTeX idea would be a good project for me to mentor, though: I have a
-			pretty clear idea how it should be done; I just lack the time (and motivation)
-			to do it myself.
-			</p><p>
-			As for OpenOffice text documents, vector graphics (such as .svg), or more
-			specific data such as spreadsheets, I think that all of these are really
-			difficult: the problem is not so much the implementation (i.e. the programming
-			part of it), but the design.
-			</p><p>
-			This design should involve much more than a Summer of Code project is about:
-			you would need to survey users' expectations, and at least the mentor -- if
-			not the student -- would need to be an expert in usability questions, which
-			is rather unlikely in the realm of Open Source.
-			</p><p>
-			Maybe this is the missing part in Open Source: we have many brilliant
-			programmers, but next to nobody with a good idea how to design intuitive
-			user interfaces.
-			</p><p>
-			That might be related to the fact that brilliant software engineers, as they
-			can be found in Open Source, are not exactly known for their social skills,
-			a human trait that seems to be a very important prerequisite for designing
-			intuitive user interfaces.
-			</p><p>
-			Well, I have <a href=http://git.or.cz/gitwiki/SoC2009Ideas#head-6188833471f79f277e162ef9fbe1592aa10b5f6c>
-			added</a> the proposal to Git's Summer of Code idea page on the Git Wiki; We will
-			see what comes out of it.
 			</p>
 		</div>
 	</body>

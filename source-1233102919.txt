@@ -1,0 +1,27 @@
+Showing off that you're an Alpine user ... priceless!
+
+So I was in a hurry to send the patches, and sent all the patches as replies
+to the cover-letter, and therefore typed in ''rnyn'' all the time, which is the
+mantra I need to say to Alpine for ''Reply'', ... include quoted message?
+''No'', ... reply to all recipients? ''Yes'', ... use first role?
+''No, use default role''.
+
+That was pretty embarassing, as it shows everybody that I still do not trust
+''send-email'', and rather paste every single patch by hand.  Which is rather
+annoying.
+
+So I started using format-patch today, to output directly to Alpine's
+''postponed-msgs'' folder, so that I can do some touchups in the mailer
+before sending the patch series on its way.
+
+However, when running format-patch with ''--thread'', it generates Message-ID
+strings that Alpine does not like, and therefore replaces.
+
+Oh, well, I'll probably just investigate how the Message-IDs are supposed to
+look, and then use sed to rewrite the generated ones by Alpine-friendly ones
+during the redirection to ''postponed-msgs''.
+
+But I alread realized that doing it that way is dramatically faster than the
+workflow I had before.
+
+And safer: no more ''rnyn''.
