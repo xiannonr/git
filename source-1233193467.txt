@@ -1,0 +1,46 @@
+Interactive stash
+
+There is an easy way to split a patch:
+
+<bash>
+$ git reset HEAD^
+$ git add -i
+$ git commit
+$ git diff -R HEAD@{1} | git apply --index
+$ git commit
+</bash>
+
+but it misses out on the fact that the first of both commits does not
+reflect the state of the working directory at any time.
+
+So I think something like an interactive ''stash'' is needed.  A method
+to specify what you want to keep in the working directory, the rest should
+be stashed.  The idea would be something like this:
+
+<ol>
+<li>Add the desired changes into a temporary index.
+<li>Put the rest of the changes in another temporary index.
+<li>Stash the latter index.
+<li>Synchronize the working directory with the first index.
+<li>Clean up temporary indices.
+</ol>
+
+Or in code:
+
+<bash>
+$ cp .git/index .git/interactive-stash-1
+$ GIT_INDEX_FILE=.git/interactive-stash-1 git add -i
+$ cp .git/index .git/interactive-stash-2
+$ GIT_INDEX_FILE=.git/interactive-stash-1 git diff -R |
+        (GIT_INDEX_FILE=.git/interactive-stash-2 git apply--index)
+$ tree=$(GIT_INDEX_FILE=.git/index git write-tree)
+$ commit=$(echo Current index | git commit-tree $tree -p HEAD)
+$ tree=$(GIT_INDEX_FILE=.git/interactive-stash-2 git write-tree)
+$ commit=$(echo Edited out | git commit-tree $tree -p HEAD -p $commit)
+$ git update-ref refs/stash $commit
+$ GIT_INDEX_FILE=.git/interactive-stash-1 git checkout-index -a -f
+$ rm .git/interactive-stash-1 .git/interactive-stash-2
+</bash>
+
+This should probably go into ''git-stash.sh'', maybe even with a switch
+to start git-gui to do the interactive adding instead of git-add.

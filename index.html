@@ -12,6 +12,7 @@
 			<tr><th>Table of contents:</th></tr>
 			<tr><td>
 			<p><ul>
+			<li><a href=#1233193467>29 Jan 2009 Interactive stash</a>
 			<li><a href=#1233154567>28 Jan 2009 Splitting topic branches</a>
 			<li><a href=#1233102919>28 Jan 2009 Showing off that you're an Alpine user ... priceless!</a>
 			<li><a href=#1233101919>28 Jan 2009 Progress with the interactive rebase preserving merges</a>
@@ -21,7 +22,6 @@
 			<li><a href=#1232927812>26 Jan 2009 A day full of rebase... and a little valgrind</a>
 			<li><a href=#1232888842>25 Jan 2009 Regular diff with word coloring (as opposed to word diff)</a>
 			<li><a href=#1232828715>24 Jan 2009 Ideas for a major revamp of the <i>--preserve-merges</i> handling in <i>git rebase</i></a>
-			<li><a href=#1232778113>24 Jan 2009 Thoughts about <i>interactive rebase</i></a>
 			</ul></p>
 			<a href=dscho.git?a=blob_plain;hb=a910b3bb049f5fa34908772ab008a90223a598ac;f=index.html>Older posts</a>
 			</td></tr></table>
@@ -86,6 +86,83 @@
 			</script>
 			</td></tr></table>
 			</div>
+			<h6>Thursday, 29th of January, Anno Domini MMIX, at the hour of the Buffalo</h6>
+			<a name=1233193467>
+			<h2>Interactive stash</h2>
+
+			<p>
+			</p><p>
+			There is an easy way to split a patch:
+			</p><p>
+			<table
+							border=1 bgcolor=black>
+						<tr><td bgcolor=lightblue colspan=3>
+				<pre>                                                                                </pre>
+			</td></tr>
+			<tr><td>
+				<table cellspacing=5 border=0
+					 style="color:white;">
+				<tr><td>
+					<pre>
+$ git reset HEAD^
+$ git add -i
+$ git commit
+$ git diff -R HEAD@{1} | git apply --index
+$ git commit
+</pre>
+							</td></tr>
+							</table>
+						</td></tr>
+						</table>
+			</p><p>
+			but it misses out on the fact that the first of both commits does not
+			reflect the state of the working directory at any time.
+			</p><p>
+			So I think something like an interactive <i>stash</i> is needed.  A method
+			to specify what you want to keep in the working directory, the rest should
+			be stashed.  The idea would be something like this:
+			</p><p>
+			<ol>
+			<li>Add the desired changes into a temporary index.
+			<li>Put the rest of the changes in another temporary index.
+			<li>Stash the latter index.
+			<li>Synchronize the working directory with the first index.
+			<li>Clean up temporary indices.
+			</ol>
+			</p><p>
+			Or in code:
+			</p><p>
+			<table
+							border=1 bgcolor=black>
+						<tr><td bgcolor=lightblue colspan=3>
+				<pre>                                                                                </pre>
+			</td></tr>
+			<tr><td>
+				<table cellspacing=5 border=0
+					 style="color:white;">
+				<tr><td>
+					<pre>
+$ cp .git/index .git/interactive-stash-1
+$ GIT_INDEX_FILE=.git/interactive-stash-1 git add -i
+$ cp .git/index .git/interactive-stash-2
+$ GIT_INDEX_FILE=.git/interactive-stash-1 git diff -R |
+        (GIT_INDEX_FILE=.git/interactive-stash-2 git apply--index)
+$ tree=$(GIT_INDEX_FILE=.git/index git write-tree)
+$ commit=$(echo Current index | git commit-tree $tree -p HEAD)
+$ tree=$(GIT_INDEX_FILE=.git/interactive-stash-2 git write-tree)
+$ commit=$(echo Edited out | git commit-tree $tree -p HEAD -p $commit)
+$ git update-ref refs/stash $commit
+$ GIT_INDEX_FILE=.git/interactive-stash-1 git checkout-index -a -f
+$ rm .git/interactive-stash-1 .git/interactive-stash-2
+</pre>
+							</td></tr>
+							</table>
+						</td></tr>
+						</table>
+			</p><p>
+			This should probably go into <i>git-stash.sh</i>, maybe even with a switch
+			to start git-gui to do the interactive adding instead of git-add.
+			</p>
 			<h6>Wednesday, 28th of January, Anno Domini MMIX, at the hour of the Monkey</h6>
 			<a name=1233154567>
 			<h2>Splitting topic branches</h2>
@@ -485,44 +562,6 @@ A - B - - - E
 			I am very sorry if somebody actually scripted <i>rebase -i -p</i> (by setting 
 			GIT_EDITOR with a script), but I am very certain that this cleanup is 
 			absolutely necessary to make <i>rebase -i -p</i> useful.
-			</p>
-			<h6>Saturday, 24th of January, Anno Domini MMIX, at the hour of the Dragon</h6>
-			<a name=1232778113>
-			<h2>Thoughts about <i>interactive rebase</i></h2>
-
-			<p>
-			</p><p>
-			Somebody mentioned that my <i>my-next</i> branch is a mess, as it mixes all
-			kinds of topics.
-			</p><p>
-			That is undeniably true, however, there is a good reason that I do not
-			have a lot of topic branches: I work on more than just one computer.
-			</p><p>
-			To make sure that I do not lose a commit by mistake, I always <i>rebase -i</i>
-			the <i>my-next</i> branch of the computer I happen to work on on top of the
-			<i>my-next</i> branch I fetch from <a href=http://repo.or.cz>repo.or.cz</a>.
-			</p><p>
-			To rebase a lot of topic branches at the same time seems a bit complicated.
-			But that is actually what the <i>-p</i> option (preserve merges) is all about.
-			</p><p>
-			The only problem is that the code for <i>rebase -i -p</i> has been messed up
-			recently, quite successfully, I might add.
-			</p><p>
-			Worse, some people are pushing for a completely and total unintuitive syntax.
-			</p><p>
-			So maybe I will start to work on <i>-p</i> again, for my own use (I should learn
-			to heed the principle more: work on things I can use myself).
-			</p><p>
-			My current idea is to implement a "goto" statement that will jump to another
-			commit.  To make it easily usable, I will add the semantics that "goto" will
-			always try to go to the <u>rewritten</u> version of the given commit; if the user
-			wanted to have the original commit, she has to paste the unabbreviated commit
-			name.
-			</p><p>
-			The more I think about it, the more I actually like this idea &#x263a;
-			</p><p>
-			Of course, working on this little project means that I will have to cope with
-			that ugly code again.  *urgh*
 			</p>
 		</div>
 	</body>
