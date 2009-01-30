@@ -1,0 +1,41 @@
+More valgrind fun
+
+So I spent quite a number of hours on that funny zlib/valgrind issue.  The
+thing is, zlib people claim that even if their code accesses uninitialized
+memory, it does not produce erroneous data (by cutting out the results of the
+uninitialized data, which is cheaper than checking for the end of the buffer
+in an unaligned manner), so zlib will always be special for valgrind.
+
+However, the bug I was chasing is funny, and different from said issue.  zlib
+deflates an input buffer to an output buffer that is exactly 58 bytes long.
+But valgrind claims that the 52nd of those bytes is uninitialized, and _only_
+that one.
+
+But it is not.  It must be 0x2c, otherwise zlib refuses to inflate the
+buffer.
+
+Now, I went into a debugging frenzy, and finally found out that zlib just
+passes fine (with the default suppressions because of the "cute" way it
+uses uninitialized memory), _except_ when it is compiled with UNALIGNED_OK
+defined.
+
+Which Ubuntu does, of course.  Ubuntu, the biggest forker of all.
+
+The bad part is that it sounds like a bug in valgrind, and I _could_ imagine
+that it is an issue of an optimized memcpy() that copies int by int, and
+that valgrind misses out on the fact that a part of that int is actually
+_not_ uninitialized.
+
+But my debugging session's results disagree with that.
+
+With the help of Julian Seward, the original author of valgrind, I instrumented
+zlib's source code so that valgrind checks earlier if the byte is initialized
+or not, to find out where the reason of the issue lies.
+
+The sad part is that when I added the instrumentation to both the _end_ of
+the while() loop in compress_block() in zlib's trees.c, and just _after_ the
+while() loop (whose condition is a plain ''variable < variable'' comparison,
+nothing fancy, certainly not changing any memory), only the _latter_ catches
+a valgrind error.
+
+And that is truly strange.
