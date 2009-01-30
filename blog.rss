@@ -5,8 +5,55 @@
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Thu, 29 Jan 2009 02:44:27 +0100</lastBuildDate>
+<lastBuildDate>Fri, 30 Jan 2009 02:01:26 +0100</lastBuildDate>
 <language>en-us</language>
+<item>
+<title>More valgrind fun</title>
+<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1233277286</link>
+<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1233277286</guid>
+<pubDate>Fri, 30 Jan 2009 02:01:26 +0100</pubDate>
+<description><![CDATA[More valgrind fun
+</p><p>
+So I spent quite a number of hours on that funny zlib/valgrind issue.  The
+thing is, zlib people claim that even if their code accesses uninitialized
+memory, it does not produce erroneous data (by cutting out the results of the
+uninitialized data, which is cheaper than checking for the end of the buffer
+in an unaligned manner), so zlib will always be special for valgrind.
+</p><p>
+However, the bug I was chasing is funny, and different from said issue.  zlib
+deflates an input buffer to an output buffer that is exactly 58 bytes long.
+But valgrind claims that the 52nd of those bytes is uninitialized, and <u>only</u>
+that one.
+</p><p>
+But it is not.  It must be 0x2c, otherwise zlib refuses to inflate the
+buffer.
+</p><p>
+Now, I went into a debugging frenzy, and finally found out that zlib just
+passes fine (with the default suppressions because of the "cute" way it
+uses uninitialized memory), <u>except</u> when it is compiled with UNALIGNED_OK
+defined.
+</p><p>
+Which Ubuntu does, of course.  Ubuntu, the biggest forker of all.
+</p><p>
+The bad part is that it sounds like a bug in valgrind, and I <u>could</u> imagine
+that it is an issue of an optimized memcpy() that copies int by int, and
+that valgrind misses out on the fact that a part of that int is actually
+<u>not</u> uninitialized.
+</p><p>
+But my debugging session's results disagree with that.
+</p><p>
+With the help of Julian Seward, the original author of valgrind, I instrumented
+zlib's source code so that valgrind checks earlier if the byte is initialized
+or not, to find out where the reason of the issue lies.
+</p><p>
+The sad part is that when I added the instrumentation to both the <u>end</u> of
+the while() loop in compress_block() in zlib's trees.c, and just <u>after</u> the
+while() loop (whose condition is a plain <i>variable < variable</i> comparison,
+nothing fancy, certainly not changing any memory), only the <u>latter</u> catches
+a valgrind error.
+</p><p>
+And that is truly strange.]]></description>
+</item>
 <item>
 <title>Interactive stash</title>
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1233193467</link>
@@ -437,62 +484,6 @@ mode.
 </p><p>
 Of course, the hardest part is to find a nice user interface for that.  Maybe
 <i>--colored-words</i>? &#x263a;]]></description>
-</item>
-<item>
-<title>Ideas for a major revamp of the --preserve-merges handling in git rebase</title>
-<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232828715</link>
-<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232828715</guid>
-<pubDate>Sat, 24 Jan 2009 21:25:15 +0100</pubDate>
-<description><![CDATA[Ideas for a major revamp of the <i>--preserve-merges</i> handling in <i>git rebase</i>
-</p><p>
-As probably everybody agrees, the code to preserve merges is a big mess 
-right now.
-</p><p>
-Worse, the whole concept of "pick <merge-sha1>" just does not fly well.
-</p><p>
-So I started a <u>major</u> cleanup, which happens to reduce the code very 
-nicely so far.
-</p><p>
-It will take a few days to flesh out, I guess, but these are the major 
-ideas of my work:
-</p><p>
-<b>pick $sha1</b><br>
-<blockquote>will only work on non-merges in the future.</blockquote>
-<b>merge $sha1 [$sha1...] was $sha1 Merge ...</b><br>
-<blockquote>will merge the given list of commits into the current HEAD, for 
-	the user's reference and to keep up-to-date what was rewritten, 
-	the original merge is shown after the keyword "was" (which is not 
-	a valid SHA-1, luckily).</blockquote>
-<b>goto $sha1</b><br>
-<blockquote>will reset the HEAD to the given commit.</blockquote>
-<b>$sha1'</b><br>
-<blockquote>for merge and goto, if a $sha1 ends in a single quote, the 
-	rewritten commit is substituted (if there is one).</blockquote>
-</p><p>
-Example:
-</p><p>
-<pre>
-A - B - - - E 
-  \       /
-    C - D
-</pre>
-</p><p>
-could yield this TODO script:
-</p><p>
-<pre>
-	pick A
-	pick C
-	pick D
-	goto A'
-	pick B
-	merge D' was E
-</pre>
-</p><p>
-This should lead to a much more intuitive user experience.
-</p><p>
-I am very sorry if somebody actually scripted <i>rebase -i -p</i> (by setting 
-GIT_EDITOR with a script), but I am very certain that this cleanup is 
-absolutely necessary to make <i>rebase -i -p</i> useful.]]></description>
 </item>
 </channel>
 </rss>
