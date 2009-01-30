@@ -60,7 +60,7 @@ get_config () {
 }
 
 BACKGROUNDIMG=$(get_config background paper.jpg)
-TITLE=$(get_config title "Dscho's blog")
+TITLE=$(get_config title "Dscho's Git log")
 MAXENTRIES=$(get_config maxPostsPerPage 10)
 BRANCH=$(get_config branch blog)
 
