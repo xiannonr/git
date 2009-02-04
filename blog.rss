@@ -5,8 +5,38 @@
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Fri, 30 Jan 2009 02:01:26 +0100</lastBuildDate>
+<lastBuildDate>Wed, 04 Feb 2009 01:11:34 +0100</lastBuildDate>
 <language>en-us</language>
+<item>
+<title>Problems with split-topic-branches.sh</title>
+<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1233706294</link>
+<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1233706294</guid>
+<pubDate>Wed, 04 Feb 2009 01:11:34 +0100</pubDate>
+<description><![CDATA[Problems with split-topic-branches.sh
+</p><p>
+So my little script that should help me to split my topic branches does
+not work properly.
+</p><p>
+First some background: the idea was to let <i>git blame</i> do the hard work
+to find overlapping changes, i.e. changes that would conflict when
+changing the order (or skipping the first change, on which the next builds).
+</p><p>
+The first problem with that approach: when lines are <u>removed</u> by one
+commit, and the next commit touches the same location, <i>git blame</i> does
+not find that the first commit is required by the second.
+</p><p>
+Therefore I introduced a really slow reverse thing which tries to find
+those commits whose removals survived until the parent of a particular
+commit, but not further.
+</p><p>
+However, it does not work properly.  Basically, only context sizes that
+span the whole files lead to conflict-free topic branches so far.
+</p><p>
+As a consequence, I think I'll add an option --sprout to the revision
+walker which will fake octopus merges (or a series of two-parent merges)
+whenever it finds a perl of non-merge commits that are theoretically
+independent, i.e. whose patches apply cleanly.]]></description>
+</item>
 <item>
 <title>More valgrind fun</title>
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1233277286</link>
@@ -422,68 +452,6 @@ should give us yet another level of code quality.
 </p><p>
 After having confused myself with several diverging/obsolete branches, I did
 indeed finally manage to send that patch series off.  Woohoo.]]></description>
-</item>
-<item>
-<title>Regular diff with word coloring (as opposed to word diff)</title>
-<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232888842</link>
-<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232888842</guid>
-<pubDate>Sun, 25 Jan 2009 14:07:22 +0100</pubDate>
-<description><![CDATA[Regular diff with word coloring (as opposed to word diff)
-</p><p>
-You know, if I were a bit faster with everything I do, I could do so much more!
-</p><p>
-For example, Junio's idea that you could keep showing a regular diff, only
-coloring the words that have been removed/deleted.
-</p><p>
-Just imagine looking at the diff of a long line in LaTeX source code.  It
-should be much nicer to the eye to see the complete removed/added sentences
-instead of one sentence with colored words in between, disrupting your read
-flow.
-</p><p>
-Compare these two versions:
-</p><p>
-Regular diff with colored words:
-<blockquote><tt>
--This sentence has a <font color=red>tyop</font> in it.<br>
-+This sentence has a <font color=green>typo</font> in it.<br>
-</tt></blockquote>
-</p><p>
-Word diff:
-<blockquote><tt>
-This sentence has a <font color=red>tyop</font><font color=green>typo</font> in it.<br>
-</tt></blockquote>
-</p><p>
-And it should not be hard to do at all!
-</p><p>
-In <i>diff_words_show()</i>, we basically get the minus lines as
-<i>diff_words->minus</i> and the plus lines as <i>diff_words->plus</i>.  The
-function then prepares the word lists and calls the xdiff engine to do all the
-hard work, analyzing the result from xdiff and printing the lines in
-<i>fn_out_diff_words_aux()</i>.
-</p><p>
-So all that would have to be changed would be to <u>record</u> the positions
-of the removed/added words instead of outputting them, and at the end printing
-the minus/plus buffers using the recorded information to color the words.
-</p><p>
-This would involve
-</p><p>
-<ul>
-<li>adding two new members holding the offsets in the <i>diff_words</i>
-struct,
-<li>having a special handling for that mode in
-<i>fn_out_diff_words_aux()</i> that appends the offsets and
-returns,
-<li>adding a function <i>show_lines_with_colored_words()</i> that
-outputs a buffer with a given prefix ('-' or '+') and coloring the words at
-given offsets with a given color,
-<li>modify <i>diff_words_show()</i> to call that function for the "special
-case: only removal" and at the end of the function, and
-<li> disabling the <i>fwrite()</i> at the end of <i>diff_words_show()</i> for that
-mode.
-</ul>
-</p><p>
-Of course, the hardest part is to find a nice user interface for that.  Maybe
-<i>--colored-words</i>? &#x263a;]]></description>
 </item>
 </channel>
 </rss>
