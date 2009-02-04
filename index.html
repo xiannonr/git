@@ -1,17 +1,18 @@
 <html>
 	<head>
-		<title>Dscho's blog</title>
+		<title>Dscho's Git log</title>
 		<meta http-equiv="Content-Type"
 			content="text/html; charset=UTF-8"/>
 	</head>
 	<body style="width:800px;background-image:url(dscho.git?a=blob_plain;hb=832be85c785c80202f17b87db7f063ae57ec2cac;f=paper.jpg);background-repeat:repeat-y;background-attachment:scroll;padding:0px;">
 		<div style="width:610px;margin-left:120px;margin-top:50px;align:left;vertical-align:top;">
-			<h1>Dscho's blog</h1>
+			<h1>Dscho's Git log</h1>
 			<div style="position:absolute;top:50px;left:810px;width=400px">
 			<table width=400px bgcolor=#e0e0e0 border=1>
 			<tr><th>Table of contents:</th></tr>
 			<tr><td>
 			<p><ul>
+			<li><a href=#1233706294>04 Feb 2009 Problems with split-topic-branches.sh</a>
 			<li><a href=#1233277286>30 Jan 2009 More valgrind fun</a>
 			<li><a href=#1233193467>29 Jan 2009 Interactive stash</a>
 			<li><a href=#1233154567>28 Jan 2009 Splitting topic branches</a>
@@ -21,9 +22,8 @@
 			<li><a href=#1233022809>27 Jan 2009 Fun with calculus after midnight</a>
 			<li><a href=#1232997290>26 Jan 2009 Valgrind takes a loooong time</a>
 			<li><a href=#1232927812>26 Jan 2009 A day full of rebase... and a little valgrind</a>
-			<li><a href=#1232888842>25 Jan 2009 Regular diff with word coloring (as opposed to word diff)</a>
 			</ul></p>
-			<a href=dscho.git?a=blob_plain;hb=9206ba5d401f83ed00b74a943b5499be5e7dcd8c;f=index.html>Older posts</a>
+			<a href=dscho.git?a=blob_plain;hb=efe941ee8e076b27d4df8414bc9060ca33bf789f;f=index.html>Older posts</a>
 			</td></tr></table>
 			<br>
 			<div style="text-align:right;">
@@ -86,6 +86,35 @@
 			</script>
 			</td></tr></table>
 			</div>
+			<h6>Wednesday, 4th of February, Anno Domini MMIX, at the hour of the Buffalo</h6>
+			<a name=1233706294>
+			<h2>Problems with split-topic-branches.sh</h2>
+
+			<p>
+			</p><p>
+			So my little script that should help me to split my topic branches does
+			not work properly.
+			</p><p>
+			First some background: the idea was to let <i>git blame</i> do the hard work
+			to find overlapping changes, i.e. changes that would conflict when
+			changing the order (or skipping the first change, on which the next builds).
+			</p><p>
+			The first problem with that approach: when lines are <u>removed</u> by one
+			commit, and the next commit touches the same location, <i>git blame</i> does
+			not find that the first commit is required by the second.
+			</p><p>
+			Therefore I introduced a really slow reverse thing which tries to find
+			those commits whose removals survived until the parent of a particular
+			commit, but not further.
+			</p><p>
+			However, it does not work properly.  Basically, only context sizes that
+			span the whole files lead to conflict-free topic branches so far.
+			</p><p>
+			As a consequence, I think I'll add an option --sprout to the revision
+			walker which will fake octopus merges (or a series of two-parent merges)
+			whenever it finds a perl of non-merge commits that are theoretically
+			independent, i.e. whose patches apply cleanly.
+			</p>
 			<h6>Friday, 30th of January, Anno Domini MMIX, at the hour of the Buffalo</h6>
 			<a name=1233277286>
 			<h2>More valgrind fun</h2>
@@ -492,67 +521,6 @@ exec > pipe 2>&1
 			</p><p>
 			After having confused myself with several diverging/obsolete branches, I did
 			indeed finally manage to send that patch series off.  Woohoo.
-			</p>
-			<h6>Sunday, 25th of January, Anno Domini MMIX, at the hour of the Goat</h6>
-			<a name=1232888842>
-			<h2>Regular diff with word coloring (as opposed to word diff)</h2>
-
-			<p>
-			</p><p>
-			You know, if I were a bit faster with everything I do, I could do so much more!
-			</p><p>
-			For example, Junio's idea that you could keep showing a regular diff, only
-			coloring the words that have been removed/deleted.
-			</p><p>
-			Just imagine looking at the diff of a long line in LaTeX source code.  It
-			should be much nicer to the eye to see the complete removed/added sentences
-			instead of one sentence with colored words in between, disrupting your read
-			flow.
-			</p><p>
-			Compare these two versions:
-			</p><p>
-			Regular diff with colored words:
-			<blockquote><tt>
-			-This sentence has a <font color=red>tyop</font> in it.<br>
-			+This sentence has a <font color=green>typo</font> in it.<br>
-			</tt></blockquote>
-			</p><p>
-			Word diff:
-			<blockquote><tt>
-			This sentence has a <font color=red>tyop</font><font color=green>typo</font> in it.<br>
-			</tt></blockquote>
-			</p><p>
-			And it should not be hard to do at all!
-			</p><p>
-			In <i>diff_words_show()</i>, we basically get the minus lines as
-			<i>diff_words->minus</i> and the plus lines as <i>diff_words->plus</i>.  The
-			function then prepares the word lists and calls the xdiff engine to do all the
-			hard work, analyzing the result from xdiff and printing the lines in
-			<i>fn_out_diff_words_aux()</i>.
-			</p><p>
-			So all that would have to be changed would be to <u>record</u> the positions
-			of the removed/added words instead of outputting them, and at the end printing
-			the minus/plus buffers using the recorded information to color the words.
-			</p><p>
-			This would involve
-			</p><p>
-			<ul>
-			<li>adding two new members holding the offsets in the <i>diff_words</i>
-			struct,
-			<li>having a special handling for that mode in
-			<i>fn_out_diff_words_aux()</i> that appends the offsets and
-			returns,
-			<li>adding a function <i>show_lines_with_colored_words()</i> that
-			outputs a buffer with a given prefix ('-' or '+') and coloring the words at
-			given offsets with a given color,
-			<li>modify <i>diff_words_show()</i> to call that function for the "special
-			case: only removal" and at the end of the function, and
-			<li> disabling the <i>fwrite()</i> at the end of <i>diff_words_show()</i> for that
-			mode.
-			</ul>
-			</p><p>
-			Of course, the hardest part is to find a nice user interface for that.  Maybe
-			<i>--colored-words</i>? &#x263a;
 			</p>
 		</div>
 	</body>

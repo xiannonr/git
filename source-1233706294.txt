@@ -1,0 +1,24 @@
+Problems with split-topic-branches.sh
+
+So my little script that should help me to split my topic branches does
+not work properly.
+
+First some background: the idea was to let ''git blame'' do the hard work
+to find overlapping changes, i.e. changes that would conflict when
+changing the order (or skipping the first change, on which the next builds).
+
+The first problem with that approach: when lines are _removed_ by one
+commit, and the next commit touches the same location, ''git blame'' does
+not find that the first commit is required by the second.
+
+Therefore I introduced a really slow reverse thing which tries to find
+those commits whose removals survived until the parent of a particular
+commit, but not further.
+
+However, it does not work properly.  Basically, only context sizes that
+span the whole files lead to conflict-free topic branches so far.
+
+As a consequence, I think I'll add an option --sprout to the revision
+walker which will fake octopus merges (or a series of two-parent merges)
+whenever it finds a perl of non-merge commits that are theoretically
+independent, i.e. whose patches apply cleanly.
