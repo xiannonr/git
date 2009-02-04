@@ -5,8 +5,40 @@
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Wed, 04 Feb 2009 01:11:34 +0100</lastBuildDate>
+<lastBuildDate>Wed, 04 Feb 2009 01:33:49 +0100</lastBuildDate>
 <language>en-us</language>
+<item>
+<title>New valgrind series</title>
+<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1233707628</link>
+<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1233707628</guid>
+<pubDate>Wed, 04 Feb 2009 01:33:48 +0100</pubDate>
+<description><![CDATA[New valgrind series
+</p><p>
+I spent quite some time cleaning up that patch series, and feel pretty
+exhausted.
+</p><p>
+Granted, the new <i>git rebase -i -p</i> does its job without complaint so far
+(so much so that I think I'll release a version of my <i>rebase</i> series
+soonish), but it <u>is</u> a hassle when you have patches that you have a hard
+time to decide upon the order/commit boundaries.
+</p><p>
+For example, I could imagine that the patch making the location of the
+templates independent of the location of the Git binaries should come
+<u>before</u> my patch series, and the valgrind specific part should then
+be squashed into the first valgrind commit.
+</p><p>
+Also, it uses two features of valgrind 3.4.0:
+</p><p>
+<ul>
+<li><i>...</i> in the suppression file, and
+<li><i>--track-origins=yes</i>
+</ul>
+</p><p>
+The latter is actually the reason I am pretty willing to keep the
+requirement of that valgrind version, as it is really, really useful.
+</p><p>
+I guess we will see what happens to it.]]></description>
+</item>
 <item>
 <title>Problems with split-topic-branches.sh</title>
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1233706294</link>
@@ -409,49 +441,6 @@ Once I have the output, it is relatively easy to analyze it, as I already
 made a script which disects the output into valgrind output and the test
 case it came from, then groups by common valgrind output and shows the
 result to the user.]]></description>
-</item>
-<item>
-<title>A day full of rebase... and a little valgrind</title>
-<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232927812</link>
-<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232927812</guid>
-<pubDate>Mon, 26 Jan 2009 00:56:52 +0100</pubDate>
-<description><![CDATA[A day full of rebase... and a little valgrind
-</p><p>
-I think that I am progressing nicely with my rebase -p work, so much so
-that I will soon be able to use it myself to work on topic branches <u>and</u>
-rebase all the time without much hassle.
-</p><p>
-In other words, I would like to be able to rebase all my topic branches
-to Junio's <i>next</i> branch whenever that has new commits.  With a single
-rebase.
-</p><p>
-And finally, I got the idea of the thing Stephen implemented for dropped
-commits; however, I am quite sure I do not like it.
-</p><p>
-So what are "dropped" commits?
-</p><p>
-When you rebase, chances are that the upstream already has applied at
-least some of your patches.  So we filter those out with <i>--cherry-pick</i>.
-Stephen calls those "dropped" commits.
-</p><p>
-Then he goes on to reinvent the "$REWRITTEN" system: a directory containing
-the mappings of old commit names to new commit names.  That is easily fixed.
-</p><p>
-But worse, he substitutes the dropped commits with their <u>parents</u>, instead
-of substituting them with the corresponding commits in upstream.
-</p><p>
-I guess this will be a medium-sized fight on the mailing list, depending
-how much energy Stephen wants to put in to defend his strategy.
-</p><p>
-Anyway, I finally got to a point where only three of the tests are failing,
-t3404, t3410 and t3412.  Somewhat disappointing is t3404, as its name pretends
-not to exercize -p at all.  Oh well, I guess I'll see what is broken tomorrow.
-</p><p>
-Another part of the day was dedicated to the Valgrind patch series, which
-should give us yet another level of code quality.
-</p><p>
-After having confused myself with several diverging/obsolete branches, I did
-indeed finally manage to send that patch series off.  Woohoo.]]></description>
 </item>
 </channel>
 </rss>
