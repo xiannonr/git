@@ -12,6 +12,7 @@
 			<tr><th>Table of contents:</th></tr>
 			<tr><td>
 			<p><ul>
+			<li><a href=#1233707628>04 Feb 2009 New valgrind series</a>
 			<li><a href=#1233706294>04 Feb 2009 Problems with split-topic-branches.sh</a>
 			<li><a href=#1233277286>30 Jan 2009 More valgrind fun</a>
 			<li><a href=#1233193467>29 Jan 2009 Interactive stash</a>
@@ -21,9 +22,8 @@
 			<li><a href=#1233099894>28 Jan 2009 Another midnight riddle?</a>
 			<li><a href=#1233022809>27 Jan 2009 Fun with calculus after midnight</a>
 			<li><a href=#1232997290>26 Jan 2009 Valgrind takes a loooong time</a>
-			<li><a href=#1232927812>26 Jan 2009 A day full of rebase... and a little valgrind</a>
 			</ul></p>
-			<a href=dscho.git?a=blob_plain;hb=efe941ee8e076b27d4df8414bc9060ca33bf789f;f=index.html>Older posts</a>
+			<a href=dscho.git?a=blob_plain;hb=8e403b2b24aab139684bdb61736f4a5e8500b496;f=index.html>Older posts</a>
 			</td></tr></table>
 			<br>
 			<div style="text-align:right;">
@@ -86,6 +86,37 @@
 			</script>
 			</td></tr></table>
 			</div>
+			<h6>Wednesday, 4th of February, Anno Domini MMIX, at the hour of the Buffalo</h6>
+			<a name=1233707628>
+			<h2>New valgrind series</h2>
+
+			<p>
+			</p><p>
+			I spent quite some time cleaning up that patch series, and feel pretty
+			exhausted.
+			</p><p>
+			Granted, the new <i>git rebase -i -p</i> does its job without complaint so far
+			(so much so that I think I'll release a version of my <i>rebase</i> series
+			soonish), but it <u>is</u> a hassle when you have patches that you have a hard
+			time to decide upon the order/commit boundaries.
+			</p><p>
+			For example, I could imagine that the patch making the location of the
+			templates independent of the location of the Git binaries should come
+			<u>before</u> my patch series, and the valgrind specific part should then
+			be squashed into the first valgrind commit.
+			</p><p>
+			Also, it uses two features of valgrind 3.4.0:
+			</p><p>
+			<ul>
+			<li><i>...</i> in the suppression file, and
+			<li><i>--track-origins=yes</i>
+			</ul>
+			</p><p>
+			The latter is actually the reason I am pretty willing to keep the
+			requirement of that valgrind version, as it is really, really useful.
+			</p><p>
+			I guess we will see what happens to it.
+			</p>
 			<h6>Wednesday, 4th of February, Anno Domini MMIX, at the hour of the Buffalo</h6>
 			<a name=1233706294>
 			<h2>Problems with split-topic-branches.sh</h2>
@@ -479,48 +510,6 @@ exec > pipe 2>&1
 			made a script which disects the output into valgrind output and the test
 			case it came from, then groups by common valgrind output and shows the
 			result to the user.
-			</p>
-			<h6>Monday, 26th of January, Anno Domini MMIX, at the hour of the Rat</h6>
-			<a name=1232927812>
-			<h2>A day full of rebase... and a little valgrind</h2>
-
-			<p>
-			</p><p>
-			I think that I am progressing nicely with my rebase -p work, so much so
-			that I will soon be able to use it myself to work on topic branches <u>and</u>
-			rebase all the time without much hassle.
-			</p><p>
-			In other words, I would like to be able to rebase all my topic branches
-			to Junio's <i>next</i> branch whenever that has new commits.  With a single
-			rebase.
-			</p><p>
-			And finally, I got the idea of the thing Stephen implemented for dropped
-			commits; however, I am quite sure I do not like it.
-			</p><p>
-			So what are "dropped" commits?
-			</p><p>
-			When you rebase, chances are that the upstream already has applied at
-			least some of your patches.  So we filter those out with <i>--cherry-pick</i>.
-			Stephen calls those "dropped" commits.
-			</p><p>
-			Then he goes on to reinvent the "$REWRITTEN" system: a directory containing
-			the mappings of old commit names to new commit names.  That is easily fixed.
-			</p><p>
-			But worse, he substitutes the dropped commits with their <u>parents</u>, instead
-			of substituting them with the corresponding commits in upstream.
-			</p><p>
-			I guess this will be a medium-sized fight on the mailing list, depending
-			how much energy Stephen wants to put in to defend his strategy.
-			</p><p>
-			Anyway, I finally got to a point where only three of the tests are failing,
-			t3404, t3410 and t3412.  Somewhat disappointing is t3404, as its name pretends
-			not to exercize -p at all.  Oh well, I guess I'll see what is broken tomorrow.
-			</p><p>
-			Another part of the day was dedicated to the Valgrind patch series, which
-			should give us yet another level of code quality.
-			</p><p>
-			After having confused myself with several diverging/obsolete branches, I did
-			indeed finally manage to send that patch series off.  Woohoo.
 			</p>
 		</div>
 	</body>

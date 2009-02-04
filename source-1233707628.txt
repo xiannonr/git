@@ -1,0 +1,26 @@
+New valgrind series
+
+I spent quite some time cleaning up that patch series, and feel pretty
+exhausted.
+
+Granted, the new ''git rebase -i -p'' does its job without complaint so far
+(so much so that I think I'll release a version of my ''rebase'' series
+soonish), but it _is_ a hassle when you have patches that you have a hard
+time to decide upon the order/commit boundaries.
+
+For example, I could imagine that the patch making the location of the
+templates independent of the location of the Git binaries should come
+_before_ my patch series, and the valgrind specific part should then
+be squashed into the first valgrind commit.
+
+Also, it uses two features of valgrind 3.4.0:
+
+<ul>
+<li>''...'' in the suppression file, and
+<li>''--track-origins=yes''
+</ul>
+
+The latter is actually the reason I am pretty willing to keep the
+requirement of that valgrind version, as it is really, really useful.
+
+I guess we will see what happens to it.
