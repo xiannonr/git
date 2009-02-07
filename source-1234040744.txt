@@ -1,0 +1,30 @@
+The infamous ''mark'' command in the ''rebase'' command
+
+I realized today how easy it is to lose commits with the "merge preserving"
+mode of the interactive rebase.  In my case, it was when I tried to move a
+bunch of commits from the tip of my branch into a topic branch.
+
+But after moving the commits, I forgot to update the parent of the merge
+commit.  Possibly a mark command could have helped.  The very same command
+I called a nightmare for usability.
+
+So I was wrong.  Big news.  :-)
+
+However, I think that the syntax "mark :1" is something best left for
+machine consumption, not for human beings.
+
+But I have an idea: we could use some garbled commit subject, or in case of
+merge parents, the merge subject as some human readable title of the mark.
+
+The rebase script would then look something like this:
+
+<bash>
+pick abcdefg Some ultra cool commit
+bookmark ultra-cool
+goto upstream
+pick hijklmn Some other cool commit
+merge parent ultra-cool Merge 'ultra-cool' into master
+</bash>
+
+The good news is: I added code that refuses to finish a rebase when there
+are commits that were rewritten, but not part of the new HEAD's ancestry.
