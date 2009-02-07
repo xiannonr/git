@@ -5,8 +5,57 @@
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Wed, 04 Feb 2009 10:53:51 +0100</lastBuildDate>
+<lastBuildDate>Sat, 07 Feb 2009 22:05:44 +0100</lastBuildDate>
 <language>en-us</language>
+<item>
+<title>The infamous mark command in the rebase command</title>
+<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1234040744</link>
+<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1234040744</guid>
+<pubDate>Sat, 07 Feb 2009 22:05:44 +0100</pubDate>
+<description><![CDATA[The infamous <i>mark</i> command in the <i>rebase</i> command
+</p><p>
+I realized today how easy it is to lose commits with the "merge preserving"
+mode of the interactive rebase.  In my case, it was when I tried to move a
+bunch of commits from the tip of my branch into a topic branch.
+</p><p>
+But after moving the commits, I forgot to update the parent of the merge
+commit.  Possibly a mark command could have helped.  The very same command
+I called a nightmare for usability.
+</p><p>
+So I was wrong.  Big news.  &#x263a;
+</p><p>
+However, I think that the syntax "mark :1" is something best left for
+machine consumption, not for human beings.
+</p><p>
+But I have an idea: we could use some garbled commit subject, or in case of
+merge parents, the merge subject as some human readable title of the mark.
+</p><p>
+The rebase script would then look something like this:
+</p><p>
+<table
+				border=1 bgcolor=white>
+			<tr><td bgcolor=lightblue colspan=3>
+				<pre>                                                                                </pre>
+			</td></tr>
+			<tr><td>
+				<table cellspacing=5 border=0
+					 style="color:black;">
+				<tr><td>
+					<pre>
+pick abcdefg Some ultra cool commit
+bookmark ultra-cool
+goto upstream
+pick hijklmn Some other cool commit
+merge parent ultra-cool Merge 'ultra-cool' into master
+</pre>
+				</td></tr>
+				</table>
+			</td></tr>
+			</table>
+</p><p>
+The good news is: I added code that refuses to finish a rebase when there
+are commits that were rewritten, but not part of the new HEAD's ancestry.]]></description>
+</item>
 <item>
 <title>New valgrind series</title>
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1233707628</link>
@@ -377,70 +426,6 @@ In other words, what is <i>A(N)</i> given that we use two definitions?
 </p><p>
 That will have to wait for another midnight.  Just a teaser: <i>A(80)=36</i>.  Oh,
 and with 80 characters, you can define a string of 9900 spaces...]]></description>
-</item>
-<item>
-<title>Valgrind takes a loooong time</title>
-<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232997290</link>
-<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1232997290</guid>
-<pubDate>Mon, 26 Jan 2009 20:14:50 +0100</pubDate>
-<description><![CDATA[Valgrind takes a loooong time
-</p><p>
-Yesterday, I started a run on a fast machine, and it took roughly 5.5
-hours by the machine's clock.
-</p><p>
-And of course, I redirected stdout only... *sigh*
-</p><p>
-Which triggered a Google search how to force redirection of all the output
-in the test scripts to a file and the terminal at the same time.
-</p><p>
-It seems as if that is not easily done.  I tried
-<center><table
-				border=1 bgcolor=white>
-			<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
-			</td></tr>
-			<tr><td>
-				<table cellspacing=5 border=0
-					 style="color:black;">
-				<tr><td>
-					<pre>
-exec >(tee out) 2>&1
-</pre>
-				</td></tr>
-				</table>
-			</td></tr>
-			</table></center>
-</p><p>
-but that did not work: it mumbled something about invalid file handles or some
-such.
-</p><p>
-The only solution I found was:
-<center><table
-				border=1 bgcolor=white>
-			<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
-			</td></tr>
-			<tr><td>
-				<table cellspacing=5 border=0
-					 style="color:black;">
-				<tr><td>
-					<pre>
-mkpipe pipe
-tee out < pipe &
-exec > pipe 2>&1
-</pre>
-				</td></tr>
-				</table>
-			</td></tr>
-			</table></center>
-</p><p>
-That is a problem for parallel execution, though, so I am still looking for a
-better way to do it.
-</p><p>
-Once I have the output, it is relatively easy to analyze it, as I already
-made a script which disects the output into valgrind output and the test
-case it came from, then groups by common valgrind output and shows the
-result to the user.]]></description>
 </item>
 </channel>
 </rss>
