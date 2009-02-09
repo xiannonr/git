@@ -12,6 +12,7 @@
 			<tr><th>Table of contents:</th></tr>
 			<tr><td>
 			<p><ul>
+			<li><a href=#1234141489>09 Feb 2009 <i>format-patch --thread</i> and Alpine</a>
 			<li><a href=#1234140696>09 Feb 2009 <i>rebase</i> updates</a>
 			<li><a href=#1234040744>07 Feb 2009 The infamous <i>mark</i> command in the <i>rebase</i> command</a>
 			<li><a href=#1233707628>04 Feb 2009 New valgrind series</a>
@@ -21,9 +22,8 @@
 			<li><a href=#1233154567>28 Jan 2009 Splitting topic branches</a>
 			<li><a href=#1233102919>28 Jan 2009 Showing off that you're an Alpine user ... priceless!</a>
 			<li><a href=#1233101919>28 Jan 2009 Progress with the interactive rebase preserving merges</a>
-			<li><a href=#1233099894>28 Jan 2009 Another midnight riddle?</a>
 			</ul></p>
-			<a href=dscho.git?a=blob_plain;hb=f040c492d180218c48700a4b35c3a6186c5373f1;f=index.html>Older posts</a>
+			<a href=dscho.git?a=blob_plain;hb=3a8acf6d038f47c5cd637d70e94c8b23a0fe8914;f=index.html>Older posts</a>
 			</td></tr></table>
 			<br>
 			<div style="text-align:right;">
@@ -86,6 +86,36 @@
 			</script>
 			</td></tr></table>
 			</div>
+			<h6>Monday, 9th of February, Anno Domini MMIX, at the hour of the Buffalo</h6>
+			<a name=1234141489>
+			<h2><i>format-patch --thread</i> and Alpine</h2>
+
+			<p>
+			</p><p>
+			I started recently to pipe the output of
+			<i>git format-patch --cover-letter --stdout ...</i> directly into the
+			<i>postponed-msgs</i> folder Alpine uses, instead of pasting files into the
+			mailer.
+			</p><p>
+			The idea is to pretend that I continue a postponed mail, but in reality I
+			never wrote it, <i>format-patch</i> did.
+			</p><p>
+			However, I had problems with the <i>--thread</i> option that is implied by
+			<i>--cover-letter</i>.  Alpine always generated new message IDs without adjusting
+			the <i>In-reply-to:</i> and <i>References:</i> headers of the other mails.
+			</p><p>
+			Now I found out that the reason is that the <i>Fcc:</i> headers were missing in
+			the mails, and Alpine generated them, making up new message IDs in the process.
+			</p><p>
+			Therefore I have an alias now which sets not only the <i>Fcc:</i> header, but also
+			the <i>To:</i> headers by rewriting the stream using <i>sed</i>.  This is slightly
+			ugly, but so is the handling of headers in <i>format-patch</i>: if you thought
+			you could specify arbitrary headers using the command line, you are mistaken:
+			you can do that only by editing the config.
+			</p><p>
+			While at it, I also noticed a bug whereby <i>--thread --in-reply-to=...</i> simply
+			forgets the <i>--thread</i>.  Maybe this week I will find time to address this bug.
+			</p>
 			<h6>Monday, 9th of February, Anno Domini MMIX, at the hour of the Buffalo</h6>
 			<a name=1234140696>
 			<h2><i>rebase</i> updates</h2>
@@ -434,26 +464,6 @@ $ rm .git/interactive-stash-1 .git/interactive-stash-2
 			</p><p>
 			Now that I finally realized that t3410 is so strange because of a bug <u>I</u>
 			introduced, I can finally go about fixing it.
-			</p>
-			<h6>Wednesday, 28th of January, Anno Domini MMIX, at the hour of the Rat</h6>
-			<a name=1233099894>
-			<h2>Another midnight riddle?</h2>
-
-			<p>
-			</p><p>
-			Okay, here's another riddle: what is the next line?
-			</p><p>
-<pre>
-       1
-      1 1
-      2 1
-    1 1 1 2
-    3 1 1 2
-  2 1 1 2 1 3
-...
-</pre>
-			</p><p>
-			And when does the line get wider than 10 digits?
 			</p>
 		</div>
 	</body>

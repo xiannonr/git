@@ -1,0 +1,25 @@
+''format-patch --thread'' and Alpine
+
+I started recently to pipe the output of
+''git format-patch --cover-letter --stdout ...'' directly into the
+''postponed-msgs'' folder Alpine uses, instead of pasting files into the
+mailer.
+
+The idea is to pretend that I continue a postponed mail, but in reality I
+never wrote it, ''format-patch'' did.
+
+However, I had problems with the ''--thread'' option that is implied by
+''--cover-letter''.  Alpine always generated new message IDs without adjusting
+the ''In-reply-to:'' and ''References:'' headers of the other mails.
+
+Now I found out that the reason is that the ''Fcc:'' headers were missing in
+the mails, and Alpine generated them, making up new message IDs in the process.
+
+Therefore I have an alias now which sets not only the ''Fcc:'' header, but also
+the ''To:'' headers by rewriting the stream using ''sed''.  This is slightly
+ugly, but so is the handling of headers in ''format-patch'': if you thought
+you could specify arbitrary headers using the command line, you are mistaken:
+you can do that only by editing the config.
+
+While at it, I also noticed a bug whereby ''--thread --in-reply-to=...'' simply
+forgets the ''--thread''.  Maybe this week I will find time to address this bug.
