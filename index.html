@@ -12,6 +12,7 @@
 			<tr><th>Table of contents:</th></tr>
 			<tr><td>
 			<p><ul>
+			<li><a href=#1234140696>09 Feb 2009 <i>rebase</i> updates</a>
 			<li><a href=#1234040744>07 Feb 2009 The infamous <i>mark</i> command in the <i>rebase</i> command</a>
 			<li><a href=#1233707628>04 Feb 2009 New valgrind series</a>
 			<li><a href=#1233706294>04 Feb 2009 Problems with split-topic-branches.sh</a>
@@ -21,9 +22,8 @@
 			<li><a href=#1233102919>28 Jan 2009 Showing off that you're an Alpine user ... priceless!</a>
 			<li><a href=#1233101919>28 Jan 2009 Progress with the interactive rebase preserving merges</a>
 			<li><a href=#1233099894>28 Jan 2009 Another midnight riddle?</a>
-			<li><a href=#1233022809>27 Jan 2009 Fun with calculus after midnight</a>
 			</ul></p>
-			<a href=dscho.git?a=blob_plain;hb=312f1afd7263e214f649db481b001ad072adb559;f=index.html>Older posts</a>
+			<a href=dscho.git?a=blob_plain;hb=f040c492d180218c48700a4b35c3a6186c5373f1;f=index.html>Older posts</a>
 			</td></tr></table>
 			<br>
 			<div style="text-align:right;">
@@ -86,6 +86,34 @@
 			</script>
 			</td></tr></table>
 			</div>
+			<h6>Monday, 9th of February, Anno Domini MMIX, at the hour of the Buffalo</h6>
+			<a name=1234140696>
+			<h2><i>rebase</i> updates</h2>
+
+			<p>
+			</p><p>
+			Phew.  The last few days, I was mainly chasing bugs I introduced due to being
+			too tired to work on the merge-preserving, interactive <i>rebase</i>.
+			</p><p>
+			But finally I have something I can start working with.  After my failed
+			experiment to use git-blame to split topic branches, I will sort the commits
+			in my <i>my-next</i> branch into topic branches manually.
+			</p><p>
+			Then I will add an option to <i>rebase -i -p</i> to rewrite refs which point to
+			rewritten commits, so that I can have branches <i>rebase-i-p</i>, <i>add-e</i>, etc
+			and all of them are automatically updated when I <i>rebase -i -p</i> the <i>my-next</i>
+			branch.
+			</p><p>
+			In the process, not only have I learnt the value of the <i>bookmark</i> command,
+			but made quite a few-much needed cleanups (which make
+			<i>git-rebase--interactive.sh</i> longer, but much more understandable).
+			</p><p>
+			Hopefully Stephan will pick the changes in the "rebase protocol" up, and then
+			we can have a sequencer with which I can start to make a graphical interactive
+			rebase using git-gui.  Or gitk.
+			</p><p>
+			Maybe.
+			</p>
 			<h6>Saturday, 7th of February, Anno Domini MMIX, at the hour of the Pig</h6>
 			<a name=1234040744>
 			<h2>The infamous <i>mark</i> command in the <i>rebase</i> command</h2>
@@ -426,75 +454,6 @@ $ rm .git/interactive-stash-1 .git/interactive-stash-2
 </pre>
 			</p><p>
 			And when does the line get wider than 10 digits?
-			</p>
-			<h6>Tuesday, 27th of January, Anno Domini MMIX, at the hour of the Tiger</h6>
-			<a name=1233022809>
-			<h2>Fun with calculus after midnight</h2>
-
-			<p>
-			</p><p>
-			Problem: what is the shortest way of defining a variable consisting of <i>N</i>
-			spaces?  I.e. for <i>N=80</i> the result will look something like
-			</p><p>
-			<table
-							border=1 bgcolor=black>
-						<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
-			</td></tr>
-			<tr><td>
-				<table cellspacing=5 border=0
-					 style="color:white;">
-				<tr><td>
-					<pre>
-s='    '
-s="$s$s$s$s$s$s$s$s$s$s$s$s$s$s$s$s$s$s$s$s"
-</pre>
-							</td></tr>
-							</table>
-						</td></tr>
-						</table>
-			</p><p>
-			Let's see.  Let the minimal number of characters needed be <i>A(N)</i>.  For
-			simplicity, let's say that we only use one variable.  Then, certainly, <i>A(N)</i>
-			cannot be larger than <i>5+N</i>, as we could define a variable using 1 character
-			for the name, 1 for the equal sign, 2 for the quotes, and one for the semicolon
-			or newline character (whichever).
-			</p><p>
-			Now, let's assume <i>N</i> is a product <i>K*L</i>.  Then certainly, <i>A(N)</i> cannot
-			be larger than <i>A(K)+5+2*L</i>, as we could first define a variable that has
-			exactly <i>K</i> spaces and then use that to define the end result (in the example
-			above, <i>K=5</i> and <i>L=20</i>).
-			</p><p>
-			So, for which <i>N=K*L</i> is it better to use two definitions instead of one?
-			</p><p>
-			Simple calculus says that <i>5+K*L>5+K+5+2*L</i> must hold true, or (after some
-			scribbling): <i>L>1+7/(K-2)</i>. Which means that it makes no sense to define
-			a variable with 1 or 2 spaces first, which is kinda obvious (writing '$s'
-			alone would use two characters, so we could write the spaces right away).
-			</p><p>
-			But what for the other values?  For <i>K=3</i>, <i>L</i> must be at least 9 to make
-			sense (in other words, <i>N</i> must be at least 27).  For <i>K=4</i>, <i>L</i> needs
-			to be greater or equal to 5 (<i>N>=20</i>), the next pairs are <i>(5,4)</i>,
-			<i>(6,3)</i>, <i>(7,3)</i>, <i>(8,3)</i>, <i>(9,3)</i> and starting with <i>K=10</i>, any
-			<i>L>1</i> makes sense.
-			</p><p>
-			The second definition can also contain spaces at the end, however, so for any
-			<i>N=K*L+M</i>, <i>A(N)</i> cannot be larger than <i>A(K)+5+2*L+M</i>.
-			</p><p>
-			Not surprisingly, this leads to exactly the same <i>L>1+7/(K-2)</i> (as we can
-			append the <i>M</i> spaces in the last definition, no matter if we use 1 or
-			2 definitions).
-			</p><p>
-			However, that means that as soon as <i>N>=18</i>, we should use two definitions,
-			prior to that, it makes no sense.
-			</p><p>
-			So for <i>N<18</i>, <i>A(N)=5+N</i>.
-			</p><p>
-			But what <i>K</i> should one choose, i.e. how many spaces in the first definition?
-			In other words, what is <i>A(N)</i> given that we use two definitions?
-			</p><p>
-			That will have to wait for another midnight.  Just a teaser: <i>A(80)=36</i>.  Oh,
-			and with 80 characters, you can define a string of 9900 spaces...
 			</p>
 		</div>
 	</body>

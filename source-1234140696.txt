@@ -1,0 +1,23 @@
+''rebase'' updates
+
+Phew.  The last few days, I was mainly chasing bugs I introduced due to being
+too tired to work on the merge-preserving, interactive ''rebase''.
+
+But finally I have something I can start working with.  After my failed
+experiment to use git-blame to split topic branches, I will sort the commits
+in my ''my-next'' branch into topic branches manually.
+
+Then I will add an option to ''rebase -i -p'' to rewrite refs which point to
+rewritten commits, so that I can have branches ''rebase-i-p'', ''add-e'', etc
+and all of them are automatically updated when I ''rebase -i -p'' the ''my-next''
+branch.
+
+In the process, not only have I learnt the value of the ''bookmark'' command,
+but made quite a few-much needed cleanups (which make
+''git-rebase--interactive.sh'' longer, but much more understandable).
+
+Hopefully Stephan will pick the changes in the "rebase protocol" up, and then
+we can have a sequencer with which I can start to make a graphical interactive
+rebase using git-gui.  Or gitk.
+
+Maybe.
