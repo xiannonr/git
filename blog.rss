@@ -5,8 +5,39 @@
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Mon, 09 Feb 2009 01:51:36 +0100</lastBuildDate>
+<lastBuildDate>Mon, 09 Feb 2009 02:04:49 +0100</lastBuildDate>
 <language>en-us</language>
+<item>
+<title>format-patch --thread and Alpine</title>
+<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1234141489</link>
+<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1234141489</guid>
+<pubDate>Mon, 09 Feb 2009 02:04:49 +0100</pubDate>
+<description><![CDATA[<i>format-patch --thread</i> and Alpine
+</p><p>
+I started recently to pipe the output of
+<i>git format-patch --cover-letter --stdout ...</i> directly into the
+<i>postponed-msgs</i> folder Alpine uses, instead of pasting files into the
+mailer.
+</p><p>
+The idea is to pretend that I continue a postponed mail, but in reality I
+never wrote it, <i>format-patch</i> did.
+</p><p>
+However, I had problems with the <i>--thread</i> option that is implied by
+<i>--cover-letter</i>.  Alpine always generated new message IDs without adjusting
+the <i>In-reply-to:</i> and <i>References:</i> headers of the other mails.
+</p><p>
+Now I found out that the reason is that the <i>Fcc:</i> headers were missing in
+the mails, and Alpine generated them, making up new message IDs in the process.
+</p><p>
+Therefore I have an alias now which sets not only the <i>Fcc:</i> header, but also
+the <i>To:</i> headers by rewriting the stream using <i>sed</i>.  This is slightly
+ugly, but so is the handling of headers in <i>format-patch</i>: if you thought
+you could specify arbitrary headers using the command line, you are mistaken:
+you can do that only by editing the config.
+</p><p>
+While at it, I also noticed a bug whereby <i>--thread --in-reply-to=...</i> simply
+forgets the <i>--thread</i>.  Maybe this week I will find time to address this bug.]]></description>
+</item>
 <item>
 <title>rebase updates</title>
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1234140696</link>
@@ -364,27 +395,6 @@ have a parent, but will get the onto-commit as new parent)..
 </p><p>
 Now that I finally realized that t3410 is so strange because of a bug <u>I</u>
 introduced, I can finally go about fixing it.]]></description>
-</item>
-<item>
-<title>Another midnight riddle?</title>
-<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1233099894</link>
-<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1233099894</guid>
-<pubDate>Wed, 28 Jan 2009 00:44:54 +0100</pubDate>
-<description><![CDATA[Another midnight riddle?
-</p><p>
-Okay, here's another riddle: what is the next line?
-</p><p>
-<pre>
-       1
-      1 1
-      2 1
-    1 1 1 2
-    3 1 1 2
-  2 1 1 2 1 3
-...
-</pre>
-</p><p>
-And when does the line get wider than 10 digits?]]></description>
 </item>
 </channel>
 </rss>
