@@ -5,8 +5,37 @@
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Sat, 07 Feb 2009 22:05:44 +0100</lastBuildDate>
+<lastBuildDate>Mon, 09 Feb 2009 01:51:36 +0100</lastBuildDate>
 <language>en-us</language>
+<item>
+<title>rebase updates</title>
+<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1234140696</link>
+<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1234140696</guid>
+<pubDate>Mon, 09 Feb 2009 01:51:36 +0100</pubDate>
+<description><![CDATA[<i>rebase</i> updates
+</p><p>
+Phew.  The last few days, I was mainly chasing bugs I introduced due to being
+too tired to work on the merge-preserving, interactive <i>rebase</i>.
+</p><p>
+But finally I have something I can start working with.  After my failed
+experiment to use git-blame to split topic branches, I will sort the commits
+in my <i>my-next</i> branch into topic branches manually.
+</p><p>
+Then I will add an option to <i>rebase -i -p</i> to rewrite refs which point to
+rewritten commits, so that I can have branches <i>rebase-i-p</i>, <i>add-e</i>, etc
+and all of them are automatically updated when I <i>rebase -i -p</i> the <i>my-next</i>
+branch.
+</p><p>
+In the process, not only have I learnt the value of the <i>bookmark</i> command,
+but made quite a few-much needed cleanups (which make
+<i>git-rebase--interactive.sh</i> longer, but much more understandable).
+</p><p>
+Hopefully Stephan will pick the changes in the "rebase protocol" up, and then
+we can have a sequencer with which I can start to make a graphical interactive
+rebase using git-gui.  Or gitk.
+</p><p>
+Maybe.]]></description>
+</item>
 <item>
 <title>The infamous mark command in the rebase command</title>
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1234040744</link>
@@ -356,76 +385,6 @@ Okay, here's another riddle: what is the next line?
 </pre>
 </p><p>
 And when does the line get wider than 10 digits?]]></description>
-</item>
-<item>
-<title>Fun with calculus after midnight</title>
-<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1233022809</link>
-<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1233022809</guid>
-<pubDate>Tue, 27 Jan 2009 03:20:09 +0100</pubDate>
-<description><![CDATA[Fun with calculus after midnight
-</p><p>
-Problem: what is the shortest way of defining a variable consisting of <i>N</i>
-spaces?  I.e. for <i>N=80</i> the result will look something like
-</p><p>
-<table
-				border=1 bgcolor=white>
-			<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
-			</td></tr>
-			<tr><td>
-				<table cellspacing=5 border=0
-					 style="color:black;">
-				<tr><td>
-					<pre>
-s='    '
-s="$s$s$s$s$s$s$s$s$s$s$s$s$s$s$s$s$s$s$s$s"
-</pre>
-				</td></tr>
-				</table>
-			</td></tr>
-			</table>
-</p><p>
-Let's see.  Let the minimal number of characters needed be <i>A(N)</i>.  For
-simplicity, let's say that we only use one variable.  Then, certainly, <i>A(N)</i>
-cannot be larger than <i>5+N</i>, as we could define a variable using 1 character
-for the name, 1 for the equal sign, 2 for the quotes, and one for the semicolon
-or newline character (whichever).
-</p><p>
-Now, let's assume <i>N</i> is a product <i>K*L</i>.  Then certainly, <i>A(N)</i> cannot
-be larger than <i>A(K)+5+2*L</i>, as we could first define a variable that has
-exactly <i>K</i> spaces and then use that to define the end result (in the example
-above, <i>K=5</i> and <i>L=20</i>).
-</p><p>
-So, for which <i>N=K*L</i> is it better to use two definitions instead of one?
-</p><p>
-Simple calculus says that <i>5+K*L>5+K+5+2*L</i> must hold true, or (after some
-scribbling): <i>L>1+7/(K-2)</i>. Which means that it makes no sense to define
-a variable with 1 or 2 spaces first, which is kinda obvious (writing '$s'
-alone would use two characters, so we could write the spaces right away).
-</p><p>
-But what for the other values?  For <i>K=3</i>, <i>L</i> must be at least 9 to make
-sense (in other words, <i>N</i> must be at least 27).  For <i>K=4</i>, <i>L</i> needs
-to be greater or equal to 5 (<i>N>=20</i>), the next pairs are <i>(5,4)</i>,
-<i>(6,3)</i>, <i>(7,3)</i>, <i>(8,3)</i>, <i>(9,3)</i> and starting with <i>K=10</i>, any
-<i>L>1</i> makes sense.
-</p><p>
-The second definition can also contain spaces at the end, however, so for any
-<i>N=K*L+M</i>, <i>A(N)</i> cannot be larger than <i>A(K)+5+2*L+M</i>.
-</p><p>
-Not surprisingly, this leads to exactly the same <i>L>1+7/(K-2)</i> (as we can
-append the <i>M</i> spaces in the last definition, no matter if we use 1 or
-2 definitions).
-</p><p>
-However, that means that as soon as <i>N>=18</i>, we should use two definitions,
-prior to that, it makes no sense.
-</p><p>
-So for <i>N<18</i>, <i>A(N)=5+N</i>.
-</p><p>
-But what <i>K</i> should one choose, i.e. how many spaces in the first definition?
-In other words, what is <i>A(N)</i> given that we use two definitions?
-</p><p>
-That will have to wait for another midnight.  Just a teaser: <i>A(80)=36</i>.  Oh,
-and with 80 characters, you can define a string of 9900 spaces...]]></description>
 </item>
 </channel>
 </rss>
