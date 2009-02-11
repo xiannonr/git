@@ -5,8 +5,38 @@
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Mon, 09 Feb 2009 02:04:49 +0100</lastBuildDate>
+<lastBuildDate>Wed, 11 Feb 2009 03:53:26 +0100</lastBuildDate>
 <language>en-us</language>
+<item>
+<title>Thunderbird, oh Thunderbird, you always make my small brain hurt</title>
+<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1234320806</link>
+<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1234320806</guid>
+<pubDate>Wed, 11 Feb 2009 03:53:26 +0100</pubDate>
+<description><![CDATA[Thunderbird, oh Thunderbird, you always make my small brain hurt
+</p><p>
+There was a lengthy discussion on the Git mailing list about using Thunderbird,
+a not quite unpopular mailing program, to send inline patches.
+</p><p>
+It is really kind of sad that the Thunderbird developers do not see how
+stubbornly they offend quite a number of people and scare them away from their
+program.  After all, you should try to be liberal in what you accept and strict
+in what you emit.  No, that does not mean that you should force others to
+switch their mailers because you strictly adher to your philosophy in what you
+emit, ignoring the rest of the world.
+</p><p>
+In any case, I am not affected (as long as I do not get mails from a poor soul
+stuck with Thunderbird).
+</p><p>
+But I was a bit mean to that Thunderbird guy I dragged into the discussion, and
+he seems really offended.
+</p><p>
+So I thought I'd give him a real reason to feel offended: I'll just do his work: 
+</p><p>
+http://<a href=http://repo.or.cz>repo.or.cz</a>/w/UnFlowedThunderbird.git
+</p><p>
+It took my free time of two days, being not a Thunderbird developer myself.
+Hopefully it works, and hopefully some people will feel really ashamed now.]]></description>
+</item>
 <item>
 <title>format-patch --thread and Alpine</title>
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1234141489</link>
@@ -365,36 +395,6 @@ But I alread realized that doing it that way is dramatically faster than the
 workflow I had before.
 </p><p>
 And safer: no more <i>rnyn</i>.]]></description>
-</item>
-<item>
-<title>Progress with the interactive rebase preserving merges</title>
-<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1233101919</link>
-<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1233101919</guid>
-<pubDate>Wed, 28 Jan 2009 01:18:39 +0100</pubDate>
-<description><![CDATA[Progress with the interactive rebase preserving merges
-</p><p>
-I thought about the "dropped" commits a bit more, after all, and it is
-probably a good thing to substitute them by their parent, as Stephen did it.
-</p><p>
-Imagine that you have merged a branch with two commits.  One is in upstream,
-and you want to rebase (preserving merges) onto upstream.  Then you still
-want to merge the single commit.
-</p><p>
-Even better, if there is no commit left, the <i>$REWRITTEN</i> mechanism will
-substitute the commit onto which we are rebasing, so a merge will just
-result in a fast-forward!
-</p><p>
-Oh, another thing: merge commits should not have a patch id, as they have
-<u>multiple</u> patches.  However, I borked the code long time ago (9c6efa36)
-and merges get the patch-id of their diff to the first parent.  Which is
-probably wrong.  So I guess I'll have to fix that with my rebase revamp.
-</p><p>
-So what about a root commit?  If that was dropped, we will just substitute
-it with the commit onto which we rebase (as a root commit did not really
-have a parent, but will get the onto-commit as new parent)..
-</p><p>
-Now that I finally realized that t3410 is so strange because of a bug <u>I</u>
-introduced, I can finally go about fixing it.]]></description>
 </item>
 </channel>
 </rss>
