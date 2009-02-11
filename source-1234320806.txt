@@ -1,0 +1,24 @@
+Thunderbird, oh Thunderbird, you always make my small brain hurt
+
+There was a lengthy discussion on the Git mailing list about using Thunderbird,
+a not quite unpopular mailing program, to send inline patches.
+
+It is really kind of sad that the Thunderbird developers do not see how
+stubbornly they offend quite a number of people and scare them away from their
+program.  After all, you should try to be liberal in what you accept and strict
+in what you emit.  No, that does not mean that you should force others to
+switch their mailers because you strictly adher to your philosophy in what you
+emit, ignoring the rest of the world.
+
+In any case, I am not affected (as long as I do not get mails from a poor soul
+stuck with Thunderbird).
+
+But I was a bit mean to that Thunderbird guy I dragged into the discussion, and
+he seems really offended.
+
+So I thought I'd give him a real reason to feel offended: I'll just do his work: 
+
+http://repo.or.cz/w/UnFlowedThunderbird.git
+
+It took my free time of two days, being not a Thunderbird developer myself.
+Hopefully it works, and hopefully some people will feel really ashamed now.
