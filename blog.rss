@@ -5,8 +5,34 @@
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Thu, 12 Feb 2009 04:29:56 +0100</lastBuildDate>
+<lastBuildDate>Fri, 20 Feb 2009 02:16:55 +0100</lastBuildDate>
 <language>en-us</language>
+<item>
+<title>Code reviews</title>
+<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1235092615</link>
+<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1235092615</guid>
+<pubDate>Fri, 20 Feb 2009 02:16:55 +0100</pubDate>
+<description><![CDATA[Code reviews
+</p><p>
+It has been said that reviewing patches is a most thankless job.  As I really
+like the elegance of Git's source code, and care a lot about it, I did not
+think that it was thankless, just a little bit tedious (especially when the
+patch authors mistake criticism for personal attacks).
+</p><p>
+Usually, I am pretty good at ignoring insults as responses to my comments;
+after all, I have a lot more enjoyable things to do than to spend time talking
+to a guy who shows how wise he is when he thinks that I criticize him
+<u>personally</u> when I just try to enhance his work, by offering a little bit of
+my knowledge.
+</p><p>
+However, in the last days, three people really seemed to want to insult me,
+to make me go away, to stop the fun I have with Git.
+</p><p>
+And they almost succeeded.
+</p><p>
+So I guess it is time to reassess my priorities, and maybe stop reviewing
+Git patches altogether.]]></description>
+</item>
 <item>
 <title>Interactive rebase just learnt a new command: topic</title>
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1234409395</link>
@@ -382,36 +408,6 @@ $ rm .git/interactive-stash-1 .git/interactive-stash-2
 </p><p>
 This should probably go into <i>git-stash.sh</i>, maybe even with a switch
 to start git-gui to do the interactive adding instead of git-add.]]></description>
-</item>
-<item>
-<title>Splitting topic branches</title>
-<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1233154567</link>
-<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1233154567</guid>
-<pubDate>Wed, 28 Jan 2009 15:56:07 +0100</pubDate>
-<description><![CDATA[Splitting topic branches
-</p><p>
-One might be put off easily by the overarching use of buzzwords in the
-description of how <i>Darcs</i> works.  I, for one, do not expect an intelligent
-author when I read <i>Theory of patches</i> and <i>based on quantum physics</i>.
-</p><p>
-The true story, however, is much simpler, and is actually not that dumb:
-Let's call two commits "conflicting" when they contain at least one
-overlapping change.
-</p><p>
-The idea is now: Given a list of commits (not a set, as the order is important),
-to sort them into smaller lists such that conflicting commits are in the
-sublists ("topic branches") and the sublists are minimal, i.e. no two
-non-conflicting commits are in the same sublist.
-</p><p>
-The idea has flaws, of course, as you can have a patch changing the code,
-and another changing the documentation, but splitting a list of commits
-in that way is a first step to sort out my <i>my-next</i> mess, where I have
-a linear perl of not-necessarily-dependent commits.
-</p><p>
-And actually, my whole rebase revamp aimed at the clean-up for my own
-<i>my-next</i> branch, so I am currently writing a script that can be used
-as a GIT_EDITOR for git-rebase which implements the Darcs algorithm.  Kind of:
-the result is not implicit, but explicit and can be fixed up later.]]></description>
 </item>
 </channel>
 </rss>
