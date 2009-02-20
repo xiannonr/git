@@ -12,6 +12,7 @@
 			<tr><th>Table of contents:</th></tr>
 			<tr><td>
 			<p><ul>
+			<li><a href=#1235092615>20 Feb 2009 Code reviews</a>
 			<li><a href=#1234409395>12 Feb 2009 Interactive <i>rebase</i> just learnt a new command: <i>topic</i></a>
 			<li><a href=#1234320806>11 Feb 2009 Thunderbird, oh Thunderbird, you always make my small brain hurt</a>
 			<li><a href=#1234141489>09 Feb 2009 <i>format-patch --thread</i> and Alpine</a>
@@ -21,9 +22,8 @@
 			<li><a href=#1233706294>04 Feb 2009 Problems with split-topic-branches.sh</a>
 			<li><a href=#1233277286>30 Jan 2009 More valgrind fun</a>
 			<li><a href=#1233193467>29 Jan 2009 Interactive stash</a>
-			<li><a href=#1233154567>28 Jan 2009 Splitting topic branches</a>
 			</ul></p>
-			<a href=dscho.git?a=blob_plain;hb=d764b17bff9cda76d2a6102552a2c49fc5cf953d;f=index.html>Older posts</a>
+			<a href=dscho.git?a=blob_plain;hb=5204f7b2812bc27ee97fe72131e35f198fc0b4c6;f=index.html>Older posts</a>
 			</td></tr></table>
 			<br>
 			<div style="text-align:right;">
@@ -86,6 +86,31 @@
 			</script>
 			</td></tr></table>
 			</div>
+			<h6>Friday, 20th of February, Anno Domini MMIX, at the hour of the Buffalo</h6>
+			<a name=1235092615>
+			<h2>Code reviews</h2>
+
+			<p>
+			</p><p>
+			It has been said that reviewing patches is a most thankless job.  As I really
+			like the elegance of Git's source code, and care a lot about it, I did not
+			think that it was thankless, just a little bit tedious (especially when the
+			patch authors mistake criticism for personal attacks).
+			</p><p>
+			Usually, I am pretty good at ignoring insults as responses to my comments;
+			after all, I have a lot more enjoyable things to do than to spend time talking
+			to a guy who shows how wise he is when he thinks that I criticize him
+			<u>personally</u> when I just try to enhance his work, by offering a little bit of
+			my knowledge.
+			</p><p>
+			However, in the last days, three people really seemed to want to insult me,
+			to make me go away, to stop the fun I have with Git.
+			</p><p>
+			And they almost succeeded.
+			</p><p>
+			So I guess it is time to reassess my priorities, and maybe stop reviewing
+			Git patches altogether.
+			</p>
 			<h6>Thursday, 12th of February, Anno Domini MMIX, at the hour of the Tiger</h6>
 			<a name=1234409395>
 			<h2>Interactive <i>rebase</i> just learnt a new command: <i>topic</i></h2>
@@ -452,35 +477,6 @@ $ rm .git/interactive-stash-1 .git/interactive-stash-2
 			</p><p>
 			This should probably go into <i>git-stash.sh</i>, maybe even with a switch
 			to start git-gui to do the interactive adding instead of git-add.
-			</p>
-			<h6>Wednesday, 28th of January, Anno Domini MMIX, at the hour of the Monkey</h6>
-			<a name=1233154567>
-			<h2>Splitting topic branches</h2>
-
-			<p>
-			</p><p>
-			One might be put off easily by the overarching use of buzzwords in the
-			description of how <i>Darcs</i> works.  I, for one, do not expect an intelligent
-			author when I read <i>Theory of patches</i> and <i>based on quantum physics</i>.
-			</p><p>
-			The true story, however, is much simpler, and is actually not that dumb:
-			Let's call two commits "conflicting" when they contain at least one
-			overlapping change.
-			</p><p>
-			The idea is now: Given a list of commits (not a set, as the order is important),
-			to sort them into smaller lists such that conflicting commits are in the
-			sublists ("topic branches") and the sublists are minimal, i.e. no two
-			non-conflicting commits are in the same sublist.
-			</p><p>
-			The idea has flaws, of course, as you can have a patch changing the code,
-			and another changing the documentation, but splitting a list of commits
-			in that way is a first step to sort out my <i>my-next</i> mess, where I have
-			a linear perl of not-necessarily-dependent commits.
-			</p><p>
-			And actually, my whole rebase revamp aimed at the clean-up for my own
-			<i>my-next</i> branch, so I am currently writing a script that can be used
-			as a GIT_EDITOR for git-rebase which implements the Darcs algorithm.  Kind of:
-			the result is not implicit, but explicit and can be fixed up later.
 			</p>
 		</div>
 	</body>

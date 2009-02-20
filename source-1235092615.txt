@@ -1,0 +1,20 @@
+Code reviews
+
+It has been said that reviewing patches is a most thankless job.  As I really
+like the elegance of Git's source code, and care a lot about it, I did not
+think that it was thankless, just a little bit tedious (especially when the
+patch authors mistake criticism for personal attacks).
+
+Usually, I am pretty good at ignoring insults as responses to my comments;
+after all, I have a lot more enjoyable things to do than to spend time talking
+to a guy who shows how wise he is when he thinks that I criticize him
+_personally_ when I just try to enhance his work, by offering a little bit of
+my knowledge.
+
+However, in the last days, three people really seemed to want to insult me,
+to make me go away, to stop the fun I have with Git.
+
+And they almost succeeded.
+
+So I guess it is time to reassess my priorities, and maybe stop reviewing
+Git patches altogether.
