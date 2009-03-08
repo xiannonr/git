@@ -1,17 +1,18 @@
 <html>
 	<head>
-		<title>Dscho's Git log</title>
+		<title>Dscho's git log</title>
 		<meta http-equiv="Content-Type"
 			content="text/html; charset=UTF-8"/>
 	</head>
 	<body style="width:800px;background-image:url(dscho.git?a=blob_plain;hb=832be85c785c80202f17b87db7f063ae57ec2cac;f=paper.jpg);background-repeat:repeat-y;background-attachment:scroll;padding:0px;">
 		<div style="width:610px;margin-left:120px;margin-top:50px;align:left;vertical-align:top;">
-			<h1>Dscho's Git log</h1>
+			<h1>Dscho's git log</h1>
 			<div style="position:absolute;top:50px;left:810px;width=400px">
 			<table width=400px bgcolor=#e0e0e0 border=1>
 			<tr><th>Table of contents:</th></tr>
 			<tr><td>
 			<p><ul>
+			<li><a href=#1236554268>09 Mar 2009 So, what is missing from my <i>rebase-i-p</i> branch?</a>
 			<li><a href=#1236479389>08 Mar 2009 New Git for Windows version</a>
 			<li><a href=#1235092615>20 Feb 2009 Code reviews</a>
 			<li><a href=#1234409395>12 Feb 2009 Interactive <i>rebase</i> just learnt a new command: <i>topic</i></a>
@@ -21,9 +22,8 @@
 			<li><a href=#1234040744>07 Feb 2009 The infamous <i>mark</i> command in the <i>rebase</i> command</a>
 			<li><a href=#1233707628>04 Feb 2009 New valgrind series</a>
 			<li><a href=#1233706294>04 Feb 2009 Problems with split-topic-branches.sh</a>
-			<li><a href=#1233277286>30 Jan 2009 More valgrind fun</a>
 			</ul></p>
-			<a href=dscho.git?a=blob_plain;hb=e0559e8e91d1c01a337b56a3ff00234a33106924;f=index.html>Older posts</a>
+			<a href=dscho.git?a=blob_plain;hb=f62f49b4faeb477b348f51f3865dc9f4650d3029;f=index.html>Older posts</a>
 			</td></tr></table>
 			<br>
 			<div style="text-align:right;">
@@ -86,6 +86,45 @@
 			</script>
 			</td></tr></table>
 			</div>
+			<h6>Monday, 9th of March, Anno Domini MMIX, at the hour of the Rat</h6>
+			<a name=1236554268>
+			<h2>So, what is missing from my <i>rebase-i-p</i> branch?</h2>
+
+			<p>
+			</p><p>
+			I regularly use <i>rebase -i -p</i> these days, to update my personal Git
+			tree (which used to be <i>my-next</i>).
+			</p><p>
+			There are a few things missing before I can start assembling a patch
+			series for submission:
+			</p><p>
+			<ul>
+			<li>I need to handle the commit parents which are outside of the rebased
+			ones properly.  In other words, when a commit is picked whose parent is
+			not rebased, it needs to be rebased onto $ONTO.
+			<li>The patch which uses patch-id to generate DROPPED directly also tries to
+			consolidate the handling of DROPPED commits by putting them into REWRITTEN
+			instead of DROPPED, but that breaks the tests.  So, this patch needs to be
+			split.
+			<li>I want to introduce one more command, <i>rephrase</i>, which allows you to
+			modify the commit message, and nothing more, and <i>halt</i>, which does the
+			same as <i>edit</i> without <i>pick</i>.  Then there needs to be a new test script
+			for those commands, and this will be an early patch series.
+			<li>Time.  I need time, desperately.  If my day job was not as exciting as it
+			is, I would have more time for Git.  As it is, I have to budget my time so
+			that I get anything done at all.
+			</ul>
+			</p><p>
+			These issues have been postponed due to Steffen taking a well-deserved
+			vacation, which means that I have to act as msysGit maintainer again.
+			</p><p>
+			And this coming week, I will have other things to do in all likeliness, so
+			that I expect to be able to submit a <i>rebase -i -p</i> patch series only next
+			week.  If not then, due to a heavy workload, it will be postponed to early
+			April.
+			</p><p>
+			Oh well, the joys of being excited by several competing projects! &#x263a;
+			</p>
 			<h6>Sunday, 8th of March, Anno Domini MMIX, at the hour of the Tiger</h6>
 			<a name=1236479389>
 			<h2>New Git for Windows version</h2>
@@ -384,52 +423,6 @@ merge parent ultra-cool Merge 'ultra-cool' into master
 			walker which will fake octopus merges (or a series of two-parent merges)
 			whenever it finds a perl of non-merge commits that are theoretically
 			independent, i.e. whose patches apply cleanly.
-			</p>
-			<h6>Friday, 30th of January, Anno Domini MMIX, at the hour of the Buffalo</h6>
-			<a name=1233277286>
-			<h2>More valgrind fun</h2>
-
-			<p>
-			</p><p>
-			So I spent quite a number of hours on that funny zlib/valgrind issue.  The
-			thing is, zlib people claim that even if their code accesses uninitialized
-			memory, it does not produce erroneous data (by cutting out the results of the
-			uninitialized data, which is cheaper than checking for the end of the buffer
-			in an unaligned manner), so zlib will always be special for valgrind.
-			</p><p>
-			However, the bug I was chasing is funny, and different from said issue.  zlib
-			deflates an input buffer to an output buffer that is exactly 58 bytes long.
-			But valgrind claims that the 52nd of those bytes is uninitialized, and <u>only</u>
-			that one.
-			</p><p>
-			But it is not.  It must be 0x2c, otherwise zlib refuses to inflate the
-			buffer.
-			</p><p>
-			Now, I went into a debugging frenzy, and finally found out that zlib just
-			passes fine (with the default suppressions because of the "cute" way it
-			uses uninitialized memory), <u>except</u> when it is compiled with UNALIGNED_OK
-			defined.
-			</p><p>
-			Which Ubuntu does, of course.  Ubuntu, the biggest forker of all.
-			</p><p>
-			The bad part is that it sounds like a bug in valgrind, and I <u>could</u> imagine
-			that it is an issue of an optimized memcpy() that copies int by int, and
-			that valgrind misses out on the fact that a part of that int is actually
-			<u>not</u> uninitialized.
-			</p><p>
-			But my debugging session's results disagree with that.
-			</p><p>
-			With the help of Julian Seward, the original author of valgrind, I instrumented
-			zlib's source code so that valgrind checks earlier if the byte is initialized
-			or not, to find out where the reason of the issue lies.
-			</p><p>
-			The sad part is that when I added the instrumentation to both the <u>end</u> of
-			the while() loop in compress_block() in zlib's trees.c, and just <u>after</u> the
-			while() loop (whose condition is a plain <i>variable < variable</i> comparison,
-			nothing fancy, certainly not changing any memory), only the <u>latter</u> catches
-			a valgrind error.
-			</p><p>
-			And that is truly strange.
 			</p>
 		</div>
 	</body>

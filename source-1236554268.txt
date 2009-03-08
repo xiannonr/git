@@ -1,0 +1,34 @@
+So, what is missing from my ''rebase-i-p'' branch?
+
+I regularly use ''rebase -i -p'' these days, to update my personal Git
+tree (which used to be ''my-next'').
+
+There are a few things missing before I can start assembling a patch
+series for submission:
+
+<ul>
+<li>I need to handle the commit parents which are outside of the rebased
+ones properly.  In other words, when a commit is picked whose parent is
+not rebased, it needs to be rebased onto $ONTO.
+<li>The patch which uses patch-id to generate DROPPED directly also tries to
+consolidate the handling of DROPPED commits by putting them into REWRITTEN
+instead of DROPPED, but that breaks the tests.  So, this patch needs to be
+split.
+<li>I want to introduce one more command, ''rephrase'', which allows you to
+modify the commit message, and nothing more, and ''halt'', which does the
+same as ''edit'' without ''pick''.  Then there needs to be a new test script
+for those commands, and this will be an early patch series.
+<li>Time.  I need time, desperately.  If my day job was not as exciting as it
+is, I would have more time for Git.  As it is, I have to budget my time so
+that I get anything done at all.
+</ul>
+
+These issues have been postponed due to Steffen taking a well-deserved
+vacation, which means that I have to act as msysGit maintainer again.
+
+And this coming week, I will have other things to do in all likeliness, so
+that I expect to be able to submit a ''rebase -i -p'' patch series only next
+week.  If not then, due to a heavy workload, it will be postponed to early
+April.
+
+Oh well, the joys of being excited by several competing projects! :-)
