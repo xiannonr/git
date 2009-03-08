@@ -5,8 +5,39 @@
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Fri, 20 Feb 2009 02:16:55 +0100</lastBuildDate>
+<lastBuildDate>Sun, 08 Mar 2009 03:29:50 +0100</lastBuildDate>
 <language>en-us</language>
+<item>
+<title>New Git for Windows version</title>
+<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1236479389</link>
+<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1236479389</guid>
+<pubDate>Sun, 08 Mar 2009 03:29:49 +0100</pubDate>
+<description><![CDATA[New Git for Windows version
+</p><p>
+Phew.  That was quite a day, almost exclusively spent on finishing that
+installer.  The worst part: updating GCC seemed not to be such a good idea
+after all...
+</p><p>
+For Windows, we need to use the printf format <i>%I64u</i> (which is
+non-standard, in the common way of Microsoft) if you want to print 64-bit
+wide unsigned numbers.  The rest of the world accepts the standard <i>%llu</i>.
+</p><p>
+After upgrading to the new GCC, a lot of warnings appeared, complaining
+about <i>%I64u</i>.  The warnings went away when I replaced the format with
+<i>%llu</i>.
+</p><p>
+Being the naive I am, I mistook that for a sign that we could finally go
+more standards-compliant.
+</p><p>
+However, it only means that we have to live with the warnings for now, as
+the C runtime provided on Windows still strongly disagrees with standards
+(and it has to continue to do so, lest it break existing programs).
+</p><p>
+Sigh.
+</p><p>
+At least I have the feeling that I caught the most important bugs before
+releasing.]]></description>
+</item>
 <item>
 <title>Code reviews</title>
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1235092615</link>
@@ -330,84 +361,6 @@ nothing fancy, certainly not changing any memory), only the <u>latter</u> catche
 a valgrind error.
 </p><p>
 And that is truly strange.]]></description>
-</item>
-<item>
-<title>Interactive stash</title>
-<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1233193467</link>
-<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1233193467</guid>
-<pubDate>Thu, 29 Jan 2009 02:44:27 +0100</pubDate>
-<description><![CDATA[Interactive stash
-</p><p>
-There is an easy way to split a patch:
-</p><p>
-<table
-				border=1 bgcolor=white>
-			<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
-			</td></tr>
-			<tr><td>
-				<table cellspacing=5 border=0
-					 style="color:black;">
-				<tr><td>
-					<pre>
-$ git reset HEAD^
-$ git add -i
-$ git commit
-$ git diff -R HEAD@{1} | git apply --index
-$ git commit
-</pre>
-				</td></tr>
-				</table>
-			</td></tr>
-			</table>
-</p><p>
-but it misses out on the fact that the first of both commits does not
-reflect the state of the working directory at any time.
-</p><p>
-So I think something like an interactive <i>stash</i> is needed.  A method
-to specify what you want to keep in the working directory, the rest should
-be stashed.  The idea would be something like this:
-</p><p>
-<ol>
-<li>Add the desired changes into a temporary index.
-<li>Put the rest of the changes in another temporary index.
-<li>Stash the latter index.
-<li>Synchronize the working directory with the first index.
-<li>Clean up temporary indices.
-</ol>
-</p><p>
-Or in code:
-</p><p>
-<table
-				border=1 bgcolor=white>
-			<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
-			</td></tr>
-			<tr><td>
-				<table cellspacing=5 border=0
-					 style="color:black;">
-				<tr><td>
-					<pre>
-$ cp .git/index .git/interactive-stash-1
-$ GIT_INDEX_FILE=.git/interactive-stash-1 git add -i
-$ cp .git/index .git/interactive-stash-2
-$ GIT_INDEX_FILE=.git/interactive-stash-1 git diff -R |
-        (GIT_INDEX_FILE=.git/interactive-stash-2 git apply--index)
-$ tree=$(GIT_INDEX_FILE=.git/index git write-tree)
-$ commit=$(echo Current index | git commit-tree $tree -p HEAD)
-$ tree=$(GIT_INDEX_FILE=.git/interactive-stash-2 git write-tree)
-$ commit=$(echo Edited out | git commit-tree $tree -p HEAD -p $commit)
-$ git update-ref refs/stash $commit
-$ GIT_INDEX_FILE=.git/interactive-stash-1 git checkout-index -a -f
-$ rm .git/interactive-stash-1 .git/interactive-stash-2
-</pre>
-				</td></tr>
-				</table>
-			</td></tr>
-			</table>
-</p><p>
-This should probably go into <i>git-stash.sh</i>, maybe even with a switch
-to start git-gui to do the interactive adding instead of git-add.]]></description>
 </item>
 </channel>
 </rss>
