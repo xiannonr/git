@@ -12,6 +12,7 @@
 			<tr><th>Table of contents:</th></tr>
 			<tr><td>
 			<p><ul>
+			<li><a href=#1236479389>08 Mar 2009 New Git for Windows version</a>
 			<li><a href=#1235092615>20 Feb 2009 Code reviews</a>
 			<li><a href=#1234409395>12 Feb 2009 Interactive <i>rebase</i> just learnt a new command: <i>topic</i></a>
 			<li><a href=#1234320806>11 Feb 2009 Thunderbird, oh Thunderbird, you always make my small brain hurt</a>
@@ -21,9 +22,8 @@
 			<li><a href=#1233707628>04 Feb 2009 New valgrind series</a>
 			<li><a href=#1233706294>04 Feb 2009 Problems with split-topic-branches.sh</a>
 			<li><a href=#1233277286>30 Jan 2009 More valgrind fun</a>
-			<li><a href=#1233193467>29 Jan 2009 Interactive stash</a>
 			</ul></p>
-			<a href=dscho.git?a=blob_plain;hb=5204f7b2812bc27ee97fe72131e35f198fc0b4c6;f=index.html>Older posts</a>
+			<a href=dscho.git?a=blob_plain;hb=e0559e8e91d1c01a337b56a3ff00234a33106924;f=index.html>Older posts</a>
 			</td></tr></table>
 			<br>
 			<div style="text-align:right;">
@@ -86,6 +86,36 @@
 			</script>
 			</td></tr></table>
 			</div>
+			<h6>Sunday, 8th of March, Anno Domini MMIX, at the hour of the Tiger</h6>
+			<a name=1236479389>
+			<h2>New Git for Windows version</h2>
+
+			<p>
+			</p><p>
+			Phew.  That was quite a day, almost exclusively spent on finishing that
+			installer.  The worst part: updating GCC seemed not to be such a good idea
+			after all...
+			</p><p>
+			For Windows, we need to use the printf format <i>%I64u</i> (which is
+			non-standard, in the common way of Microsoft) if you want to print 64-bit
+			wide unsigned numbers.  The rest of the world accepts the standard <i>%llu</i>.
+			</p><p>
+			After upgrading to the new GCC, a lot of warnings appeared, complaining
+			about <i>%I64u</i>.  The warnings went away when I replaced the format with
+			<i>%llu</i>.
+			</p><p>
+			Being the naive I am, I mistook that for a sign that we could finally go
+			more standards-compliant.
+			</p><p>
+			However, it only means that we have to live with the warnings for now, as
+			the C runtime provided on Windows still strongly disagrees with standards
+			(and it has to continue to do so, lest it break existing programs).
+			</p><p>
+			Sigh.
+			</p><p>
+			At least I have the feeling that I caught the most important bugs before
+			releasing.
+			</p>
 			<h6>Friday, 20th of February, Anno Domini MMIX, at the hour of the Buffalo</h6>
 			<a name=1235092615>
 			<h2>Code reviews</h2>
@@ -400,83 +430,6 @@ merge parent ultra-cool Merge 'ultra-cool' into master
 			a valgrind error.
 			</p><p>
 			And that is truly strange.
-			</p>
-			<h6>Thursday, 29th of January, Anno Domini MMIX, at the hour of the Buffalo</h6>
-			<a name=1233193467>
-			<h2>Interactive stash</h2>
-
-			<p>
-			</p><p>
-			There is an easy way to split a patch:
-			</p><p>
-			<table
-							border=1 bgcolor=black>
-						<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
-			</td></tr>
-			<tr><td>
-				<table cellspacing=5 border=0
-					 style="color:white;">
-				<tr><td>
-					<pre>
-$ git reset HEAD^
-$ git add -i
-$ git commit
-$ git diff -R HEAD@{1} | git apply --index
-$ git commit
-</pre>
-							</td></tr>
-							</table>
-						</td></tr>
-						</table>
-			</p><p>
-			but it misses out on the fact that the first of both commits does not
-			reflect the state of the working directory at any time.
-			</p><p>
-			So I think something like an interactive <i>stash</i> is needed.  A method
-			to specify what you want to keep in the working directory, the rest should
-			be stashed.  The idea would be something like this:
-			</p><p>
-			<ol>
-			<li>Add the desired changes into a temporary index.
-			<li>Put the rest of the changes in another temporary index.
-			<li>Stash the latter index.
-			<li>Synchronize the working directory with the first index.
-			<li>Clean up temporary indices.
-			</ol>
-			</p><p>
-			Or in code:
-			</p><p>
-			<table
-							border=1 bgcolor=black>
-						<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
-			</td></tr>
-			<tr><td>
-				<table cellspacing=5 border=0
-					 style="color:white;">
-				<tr><td>
-					<pre>
-$ cp .git/index .git/interactive-stash-1
-$ GIT_INDEX_FILE=.git/interactive-stash-1 git add -i
-$ cp .git/index .git/interactive-stash-2
-$ GIT_INDEX_FILE=.git/interactive-stash-1 git diff -R |
-        (GIT_INDEX_FILE=.git/interactive-stash-2 git apply--index)
-$ tree=$(GIT_INDEX_FILE=.git/index git write-tree)
-$ commit=$(echo Current index | git commit-tree $tree -p HEAD)
-$ tree=$(GIT_INDEX_FILE=.git/interactive-stash-2 git write-tree)
-$ commit=$(echo Edited out | git commit-tree $tree -p HEAD -p $commit)
-$ git update-ref refs/stash $commit
-$ GIT_INDEX_FILE=.git/interactive-stash-1 git checkout-index -a -f
-$ rm .git/interactive-stash-1 .git/interactive-stash-2
-</pre>
-							</td></tr>
-							</table>
-						</td></tr>
-						</table>
-			</p><p>
-			This should probably go into <i>git-stash.sh</i>, maybe even with a switch
-			to start git-gui to do the interactive adding instead of git-add.
 			</p>
 		</div>
 	</body>

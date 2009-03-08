@@ -1,0 +1,25 @@
+New Git for Windows version
+
+Phew.  That was quite a day, almost exclusively spent on finishing that
+installer.  The worst part: updating GCC seemed not to be such a good idea
+after all...
+
+For Windows, we need to use the printf format ''%I64u'' (which is
+non-standard, in the common way of Microsoft) if you want to print 64-bit
+wide unsigned numbers.  The rest of the world accepts the standard ''%llu''.
+
+After upgrading to the new GCC, a lot of warnings appeared, complaining
+about ''%I64u''.  The warnings went away when I replaced the format with
+''%llu''.
+
+Being the naive I am, I mistook that for a sign that we could finally go
+more standards-compliant.
+
+However, it only means that we have to live with the warnings for now, as
+the C runtime provided on Windows still strongly disagrees with standards
+(and it has to continue to do so, lest it break existing programs).
+
+Sigh.
+
+At least I have the feeling that I caught the most important bugs before
+releasing.
