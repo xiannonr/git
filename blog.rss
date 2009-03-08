@@ -5,8 +5,48 @@
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Sun, 08 Mar 2009 03:29:50 +0100</lastBuildDate>
+<lastBuildDate>Mon, 09 Mar 2009 00:17:48 +0100</lastBuildDate>
 <language>en-us</language>
+<item>
+<title>So, what is missing from my rebase-i-p branch?</title>
+<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1236554268</link>
+<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1236554268</guid>
+<pubDate>Mon, 09 Mar 2009 00:17:48 +0100</pubDate>
+<description><![CDATA[So, what is missing from my <i>rebase-i-p</i> branch?
+</p><p>
+I regularly use <i>rebase -i -p</i> these days, to update my personal Git
+tree (which used to be <i>my-next</i>).
+</p><p>
+There are a few things missing before I can start assembling a patch
+series for submission:
+</p><p>
+<ul>
+<li>I need to handle the commit parents which are outside of the rebased
+ones properly.  In other words, when a commit is picked whose parent is
+not rebased, it needs to be rebased onto $ONTO.
+<li>The patch which uses patch-id to generate DROPPED directly also tries to
+consolidate the handling of DROPPED commits by putting them into REWRITTEN
+instead of DROPPED, but that breaks the tests.  So, this patch needs to be
+split.
+<li>I want to introduce one more command, <i>rephrase</i>, which allows you to
+modify the commit message, and nothing more, and <i>halt</i>, which does the
+same as <i>edit</i> without <i>pick</i>.  Then there needs to be a new test script
+for those commands, and this will be an early patch series.
+<li>Time.  I need time, desperately.  If my day job was not as exciting as it
+is, I would have more time for Git.  As it is, I have to budget my time so
+that I get anything done at all.
+</ul>
+</p><p>
+These issues have been postponed due to Steffen taking a well-deserved
+vacation, which means that I have to act as msysGit maintainer again.
+</p><p>
+And this coming week, I will have other things to do in all likeliness, so
+that I expect to be able to submit a <i>rebase -i -p</i> patch series only next
+week.  If not then, due to a heavy workload, it will be postponed to early
+April.
+</p><p>
+Oh well, the joys of being excited by several competing projects! &#x263a;]]></description>
+</item>
 <item>
 <title>New Git for Windows version</title>
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1236479389</link>
@@ -314,53 +354,6 @@ As a consequence, I think I'll add an option --sprout to the revision
 walker which will fake octopus merges (or a series of two-parent merges)
 whenever it finds a perl of non-merge commits that are theoretically
 independent, i.e. whose patches apply cleanly.]]></description>
-</item>
-<item>
-<title>More valgrind fun</title>
-<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1233277286</link>
-<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1233277286</guid>
-<pubDate>Fri, 30 Jan 2009 02:01:26 +0100</pubDate>
-<description><![CDATA[More valgrind fun
-</p><p>
-So I spent quite a number of hours on that funny zlib/valgrind issue.  The
-thing is, zlib people claim that even if their code accesses uninitialized
-memory, it does not produce erroneous data (by cutting out the results of the
-uninitialized data, which is cheaper than checking for the end of the buffer
-in an unaligned manner), so zlib will always be special for valgrind.
-</p><p>
-However, the bug I was chasing is funny, and different from said issue.  zlib
-deflates an input buffer to an output buffer that is exactly 58 bytes long.
-But valgrind claims that the 52nd of those bytes is uninitialized, and <u>only</u>
-that one.
-</p><p>
-But it is not.  It must be 0x2c, otherwise zlib refuses to inflate the
-buffer.
-</p><p>
-Now, I went into a debugging frenzy, and finally found out that zlib just
-passes fine (with the default suppressions because of the "cute" way it
-uses uninitialized memory), <u>except</u> when it is compiled with UNALIGNED_OK
-defined.
-</p><p>
-Which Ubuntu does, of course.  Ubuntu, the biggest forker of all.
-</p><p>
-The bad part is that it sounds like a bug in valgrind, and I <u>could</u> imagine
-that it is an issue of an optimized memcpy() that copies int by int, and
-that valgrind misses out on the fact that a part of that int is actually
-<u>not</u> uninitialized.
-</p><p>
-But my debugging session's results disagree with that.
-</p><p>
-With the help of Julian Seward, the original author of valgrind, I instrumented
-zlib's source code so that valgrind checks earlier if the byte is initialized
-or not, to find out where the reason of the issue lies.
-</p><p>
-The sad part is that when I added the instrumentation to both the <u>end</u> of
-the while() loop in compress_block() in zlib's trees.c, and just <u>after</u> the
-while() loop (whose condition is a plain <i>variable < variable</i> comparison,
-nothing fancy, certainly not changing any memory), only the <u>latter</u> catches
-a valgrind error.
-</p><p>
-And that is truly strange.]]></description>
 </item>
 </channel>
 </rss>
