@@ -186,7 +186,10 @@ markup_substitution () {
 
 	left="\\(^\\|[^A-Za-z0-9]\\)$1\\($middle$middleend*\\)"
 	right="$1\\($\\|[^A-Za-z0-9]\\)"
-	echo "s/$left$right/\\\\1<$2>\\\\2<\/$2>\\\\$right_no/g"
+	# work around stupid dash interpreting backslashes when expanding vars
+	bs="\\\\"
+	test "\\" = "$(echo "$bs")" || bs="\\"
+	echo "s/$left$right/${bs}1<$2>${bs}2<\/$2>$bs$right_no/g"
 }
 
 space80='                          '
