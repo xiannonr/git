@@ -32,6 +32,7 @@
 # $ cp ~/images/background.jpg ./
 # $ git config gitweb.url http://repo.or.cz/w/git/dscho.git
 # $ git config blog.title "Dscho's blog"
+# $ git config blog.description "A few stories told by Dscho"
 # $ git config blog.background background.jpg
 # $ git config blog.branch blog
 #
@@ -63,6 +64,7 @@ BACKGROUNDIMG=$(get_config background paper.jpg)
 TITLE=$(get_config title "Dscho's Git log")
 MAXENTRIES=$(get_config maxPostsPerPage 10)
 BRANCH=$(get_config branch blog)
+DESC=$(get_config description "A few stories told by Dscho")
 
 URLPREFIX="$(dirname "$GITWEBURL")"/
 REMOTEREPOSITORY="$(basename "$GITWEBURL")"
@@ -375,12 +377,12 @@ generate_rss () {
 	echo '<?xml version="1.0" encoding="utf-8"?>'
 	echo '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">'
 	echo '<channel>'
-	echo "<title>Dscho's blog</title>"
+	echo "<title>$TITLE</title>"
 	echo "<link>$URLPREFIX${URL}index.html</link>"
 	self="$URLPREFIX$ORIGURL$RSS"
 	selfattribs='rel="self" type="application/rss+xml"'
 	echo "<atom:link href=\"$self\" $selfattribs/>"
-	echo '<description>A few stories told by Dscho</description>'
+	echo "<description>$DESC</description>"
 	echo "<lastBuildDate>$(date --rfc-2822)</lastBuildDate>"
 	echo '<language>en-us</language>'
 
