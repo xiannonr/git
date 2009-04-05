@@ -5,8 +5,24 @@
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Sun, 05 Apr 2009 22:54:52 +0200</lastBuildDate>
+<lastBuildDate>Mon, 06 Apr 2009 00:29:32 +0200</lastBuildDate>
 <language>en-us</language>
+<item>
+<title>How to recover from a hackathon</title>
+<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1238970571</link>
+<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1238970571</guid>
+<pubDate>Mon, 06 Apr 2009 00:29:31 +0200</pubDate>
+<description><![CDATA[How to recover from a hackathon
+</p><p>
+Phew, 2 crazy and fantastic weeks are behind me.  But it takes its toll:
+a weekend I was more offline than online.
+</p><p>
+Things that are important now: relax. sleep. take a walk. learn to sleep
+more than 4 hours a night again. learn to watch a movie without thinking
+about code. go for a run.
+</p><p>
+And after recovering, back to the rebase-i-p branch!]]></description>
+</item>
 <item>
 <title>So, what is missing from my rebase-i-p branch?</title>
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1236554268</link>
@@ -324,36 +340,6 @@ The latter is actually the reason I am pretty willing to keep the
 requirement of that valgrind version, as it is really, really useful.
 </p><p>
 I guess we will see what happens to it.]]></description>
-</item>
-<item>
-<title>Problems with split-topic-branches.sh</title>
-<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1233706294</link>
-<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1233706294</guid>
-<pubDate>Wed, 04 Feb 2009 01:11:34 +0100</pubDate>
-<description><![CDATA[Problems with split-topic-branches.sh
-</p><p>
-So my little script that should help me to split my topic branches does
-not work properly.
-</p><p>
-First some background: the idea was to let <i>git blame</i> do the hard work
-to find overlapping changes, i.e. changes that would conflict when
-changing the order (or skipping the first change, on which the next builds).
-</p><p>
-The first problem with that approach: when lines are <u>removed</u> by one
-commit, and the next commit touches the same location, <i>git blame</i> does
-not find that the first commit is required by the second.
-</p><p>
-Therefore I introduced a really slow reverse thing which tries to find
-those commits whose removals survived until the parent of a particular
-commit, but not further.
-</p><p>
-However, it does not work properly.  Basically, only context sizes that
-span the whole files lead to conflict-free topic branches so far.
-</p><p>
-As a consequence, I think I'll add an option --sprout to the revision
-walker which will fake octopus merges (or a series of two-parent merges)
-whenever it finds a perl of non-merge commits that are theoretically
-independent, i.e. whose patches apply cleanly.]]></description>
 </item>
 </channel>
 </rss>
