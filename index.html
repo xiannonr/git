@@ -12,6 +12,7 @@
 			<tr><th>Table of contents:</th></tr>
 			<tr><td>
 			<p><ul>
+			<li><a href=#1238970571>06 Apr 2009 How to recover from a hackathon</a>
 			<li><a href=#1236554268>09 Mar 2009 So, what is missing from my <i>rebase-i-p</i> branch?</a>
 			<li><a href=#1236479389>08 Mar 2009 New Git for Windows version</a>
 			<li><a href=#1235092615>20 Feb 2009 Code reviews</a>
@@ -21,9 +22,8 @@
 			<li><a href=#1234140696>09 Feb 2009 <i>rebase</i> updates</a>
 			<li><a href=#1234040744>07 Feb 2009 The infamous <i>mark</i> command in the <i>rebase</i> command</a>
 			<li><a href=#1233707628>04 Feb 2009 New valgrind series</a>
-			<li><a href=#1233706294>04 Feb 2009 Problems with split-topic-branches.sh</a>
 			</ul></p>
-			<a href=dscho.git?a=blob_plain;hb=f62f49b4faeb477b348f51f3865dc9f4650d3029;f=index.html>Older posts</a>
+			<a href=dscho.git?a=blob_plain;hb=2b3b3c28ace47f7d23df486052e6a7aa26a05e14;f=index.html>Older posts</a>
 			</td></tr></table>
 			<br>
 			<div style="text-align:right;">
@@ -87,6 +87,21 @@
 			</script>
 			</td></tr></table>
 			</div>
+			<h6>Monday, 6th of April, Anno Domini MMIX, at the hour of the Rat</h6>
+			<a name=1238970571>
+			<h2>How to recover from a hackathon</h2>
+
+			<p>
+			</p><p>
+			Phew, 2 crazy and fantastic weeks are behind me.  But it takes its toll:
+			a weekend I was more offline than online.
+			</p><p>
+			Things that are important now: relax. sleep. take a walk. learn to sleep
+			more than 4 hours a night again. learn to watch a movie without thinking
+			about code. go for a run.
+			</p><p>
+			And after recovering, back to the rebase-i-p branch!
+			</p>
 			<h6>Monday, 9th of March, Anno Domini MMIX, at the hour of the Rat</h6>
 			<a name=1236554268>
 			<h2>So, what is missing from my <i>rebase-i-p</i> branch?</h2>
@@ -395,35 +410,6 @@ merge parent ultra-cool Merge 'ultra-cool' into master
 			requirement of that valgrind version, as it is really, really useful.
 			</p><p>
 			I guess we will see what happens to it.
-			</p>
-			<h6>Wednesday, 4th of February, Anno Domini MMIX, at the hour of the Buffalo</h6>
-			<a name=1233706294>
-			<h2>Problems with split-topic-branches.sh</h2>
-
-			<p>
-			</p><p>
-			So my little script that should help me to split my topic branches does
-			not work properly.
-			</p><p>
-			First some background: the idea was to let <i>git blame</i> do the hard work
-			to find overlapping changes, i.e. changes that would conflict when
-			changing the order (or skipping the first change, on which the next builds).
-			</p><p>
-			The first problem with that approach: when lines are <u>removed</u> by one
-			commit, and the next commit touches the same location, <i>git blame</i> does
-			not find that the first commit is required by the second.
-			</p><p>
-			Therefore I introduced a really slow reverse thing which tries to find
-			those commits whose removals survived until the parent of a particular
-			commit, but not further.
-			</p><p>
-			However, it does not work properly.  Basically, only context sizes that
-			span the whole files lead to conflict-free topic branches so far.
-			</p><p>
-			As a consequence, I think I'll add an option --sprout to the revision
-			walker which will fake octopus merges (or a series of two-parent merges)
-			whenever it finds a perl of non-merge commits that are theoretically
-			independent, i.e. whose patches apply cleanly.
 			</p>
 		</div>
 	</body>

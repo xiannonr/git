@@ -1,0 +1,10 @@
+How to recover from a hackathon
+
+Phew, 2 crazy and fantastic weeks are behind me.  But it takes its toll:
+a weekend I was more offline than online.
+
+Things that are important now: relax. sleep. take a walk. learn to sleep
+more than 4 hours a night again. learn to watch a movie without thinking
+about code. go for a run.
+
+And after recovering, back to the rebase-i-p branch!
