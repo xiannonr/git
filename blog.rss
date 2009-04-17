@@ -5,8 +5,21 @@
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Mon, 06 Apr 2009 00:29:32 +0200</lastBuildDate>
+<lastBuildDate>Fri, 17 Apr 2009 15:39:57 +0200</lastBuildDate>
 <language>en-us</language>
+<item>
+<title>No time for Git</title>
+<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1239975597</link>
+<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1239975597</guid>
+<pubDate>Fri, 17 Apr 2009 15:39:57 +0200</pubDate>
+<description><![CDATA[No time for Git
+</p><p>
+It is a shame, but most of my Git time budget is taken by msysGit these
+days.
+</p><p>
+But at least msysGit is moving again; I'll probably write a Herald about
+it.]]></description>
+</item>
 <item>
 <title>How to recover from a hackathon</title>
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1238970571</link>
@@ -308,38 +321,6 @@ merge parent ultra-cool Merge 'ultra-cool' into master
 </p><p>
 The good news is: I added code that refuses to finish a rebase when there
 are commits that were rewritten, but not part of the new HEAD's ancestry.]]></description>
-</item>
-<item>
-<title>New valgrind series</title>
-<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1233707628</link>
-<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1233707628</guid>
-<pubDate>Wed, 04 Feb 2009 01:33:48 +0100</pubDate>
-<description><![CDATA[New valgrind series
-</p><p>
-I spent quite some time cleaning up that patch series, and feel pretty
-exhausted.
-</p><p>
-Granted, the new <i>git rebase -i -p</i> does its job without complaint so far
-(so much so that I think I'll release a version of my <i>rebase</i> series
-soonish), but it <u>is</u> a hassle when you have patches that you have a hard
-time to decide upon the order/commit boundaries.
-</p><p>
-For example, I could imagine that the patch making the location of the
-templates independent of the location of the Git binaries should come
-<u>before</u> my patch series, and the valgrind specific part should then
-be squashed into the first valgrind commit.
-</p><p>
-Also, it uses two features of valgrind 3.4.0:
-</p><p>
-<ul>
-<li><i>...</i> in the suppression file, and
-<li><i>--track-origins=yes</i>
-</ul>
-</p><p>
-The latter is actually the reason I am pretty willing to keep the
-requirement of that valgrind version, as it is really, really useful.
-</p><p>
-I guess we will see what happens to it.]]></description>
 </item>
 </channel>
 </rss>
