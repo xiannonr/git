@@ -1,0 +1,7 @@
+No time for Git
+
+It is a shame, but most of my Git time budget is taken by msysGit these
+days.
+
+But at least msysGit is moving again; I'll probably write a Herald about
+it.

@@ -12,6 +12,7 @@
 			<tr><th>Table of contents:</th></tr>
 			<tr><td>
 			<p><ul>
+			<li><a href=#1239975597>17 Apr 2009 No time for Git</a>
 			<li><a href=#1238970571>06 Apr 2009 How to recover from a hackathon</a>
 			<li><a href=#1236554268>09 Mar 2009 So, what is missing from my <i>rebase-i-p</i> branch?</a>
 			<li><a href=#1236479389>08 Mar 2009 New Git for Windows version</a>
@@ -21,9 +22,8 @@
 			<li><a href=#1234141489>09 Feb 2009 <i>format-patch --thread</i> and Alpine</a>
 			<li><a href=#1234140696>09 Feb 2009 <i>rebase</i> updates</a>
 			<li><a href=#1234040744>07 Feb 2009 The infamous <i>mark</i> command in the <i>rebase</i> command</a>
-			<li><a href=#1233707628>04 Feb 2009 New valgrind series</a>
 			</ul></p>
-			<a href=dscho.git?a=blob_plain;hb=2b3b3c28ace47f7d23df486052e6a7aa26a05e14;f=index.html>Older posts</a>
+			<a href=dscho.git?a=blob_plain;hb=4efb9dfc1f5b0ebdb59ceb849e602b0d598ef61c;f=index.html>Older posts</a>
 			</td></tr></table>
 			<br>
 			<div style="text-align:right;">
@@ -87,6 +87,18 @@
 			</script>
 			</td></tr></table>
 			</div>
+			<h6>Friday, 17th of April, Anno Domini MMIX, at the hour of the Monkey</h6>
+			<a name=1239975597>
+			<h2>No time for Git</h2>
+
+			<p>
+			</p><p>
+			It is a shame, but most of my Git time budget is taken by msysGit these
+			days.
+			</p><p>
+			But at least msysGit is moving again; I'll probably write a Herald about
+			it.
+			</p>
 			<h6>Monday, 6th of April, Anno Domini MMIX, at the hour of the Rat</h6>
 			<a name=1238970571>
 			<h2>How to recover from a hackathon</h2>
@@ -379,37 +391,6 @@ merge parent ultra-cool Merge 'ultra-cool' into master
 			</p><p>
 			The good news is: I added code that refuses to finish a rebase when there
 			are commits that were rewritten, but not part of the new HEAD's ancestry.
-			</p>
-			<h6>Wednesday, 4th of February, Anno Domini MMIX, at the hour of the Buffalo</h6>
-			<a name=1233707628>
-			<h2>New valgrind series</h2>
-
-			<p>
-			</p><p>
-			I spent quite some time cleaning up that patch series, and feel pretty
-			exhausted.
-			</p><p>
-			Granted, the new <i>git rebase -i -p</i> does its job without complaint so far
-			(so much so that I think I'll release a version of my <i>rebase</i> series
-			soonish), but it <u>is</u> a hassle when you have patches that you have a hard
-			time to decide upon the order/commit boundaries.
-			</p><p>
-			For example, I could imagine that the patch making the location of the
-			templates independent of the location of the Git binaries should come
-			<u>before</u> my patch series, and the valgrind specific part should then
-			be squashed into the first valgrind commit.
-			</p><p>
-			Also, it uses two features of valgrind 3.4.0:
-			</p><p>
-			<ul>
-			<li><i>...</i> in the suppression file, and
-			<li><i>--track-origins=yes</i>
-			</ul>
-			</p><p>
-			The latter is actually the reason I am pretty willing to keep the
-			requirement of that valgrind version, as it is really, really useful.
-			</p><p>
-			I guess we will see what happens to it.
 			</p>
 		</div>
 	</body>
