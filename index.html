@@ -8,10 +8,11 @@
 		<div style="width:610px;margin-left:120px;margin-top:50px;align:left;vertical-align:top;">
 			<h1>Dscho's Git log</h1>
 			<div style="position:absolute;top:50px;left:810px;width=400px">
-			<table width=400px bgcolor=#e0e0e0 border=1>
+			<table width=400px bgcolor=#e0e0e0 border=0>
 			<tr><th>Table of contents:</th></tr>
 			<tr><td>
 			<p><ul>
+			<li><a href=#1241995759>11 May 2009 Working on jgit diff</a>
 			<li><a href=#1239975597>17 Apr 2009 No time for Git</a>
 			<li><a href=#1238970571>06 Apr 2009 How to recover from a hackathon</a>
 			<li><a href=#1236554268>09 Mar 2009 So, what is missing from my <i>rebase-i-p</i> branch?</a>
@@ -21,9 +22,8 @@
 			<li><a href=#1234320806>11 Feb 2009 Thunderbird, oh Thunderbird, you always make my small brain hurt</a>
 			<li><a href=#1234141489>09 Feb 2009 <i>format-patch --thread</i> and Alpine</a>
 			<li><a href=#1234140696>09 Feb 2009 <i>rebase</i> updates</a>
-			<li><a href=#1234040744>07 Feb 2009 The infamous <i>mark</i> command in the <i>rebase</i> command</a>
 			</ul></p>
-			<a href=dscho.git?a=blob_plain;hb=4efb9dfc1f5b0ebdb59ceb849e602b0d598ef61c;f=index.html>Older posts</a>
+			<a href=dscho.git?a=blob_plain;hb=21687cb55cafecdfc2f10cc5eede1723a28a10d5;f=index.html>Older posts</a>
 			</td></tr></table>
 			<br>
 			<div style="text-align:right;">
@@ -33,7 +33,7 @@
 			   style="background-color:orange;text-decoration:none;color:white;font-family:sans-serif;">RSS</a>
 			</div>
 			<br>
-			<table width=400px bgcolor=#e0e0e0 border=1>
+			<table width=400px bgcolor=#e0e0e0 border=0>
 			<tr><th>About this blog:</th></tr>
 			<tr><td>
 			<p>It is an active <a href=http://repo.or.cz/w/git/dscho.git?a=blob_plain;f=index.html;hb=5f002cab57a837125a8f901bcd1f3c1477bc3119>abuse</a> of <a href=http://repo.or.cz/>repo.or.cz</a>,
@@ -48,7 +48,7 @@
 			</p>
 			</td></tr></table>
 			<br>
-			<table width=400px bgcolor=#e0e0e0 border=1>
+			<table width=400px bgcolor=#e0e0e0 border=0>
 			<tr><th>Links:</th></tr>
 			<tr><td>
 			<ul>
@@ -71,7 +71,7 @@
 			</ul>
 			</td></tr></table>
 			<br>
-			<table width=400px bgcolor=#e0e0e0 border=1>
+			<table width=400px bgcolor=#e0e0e0 border=0>
 			<tr><th>Google Ads:</th></tr>
 			<tr><td>
 			<script type="text/javascript"><!--
@@ -87,6 +87,54 @@
 			</script>
 			</td></tr></table>
 			</div>
+			<h6>Monday, 11th of May, Anno Domini MMIX, at the hour of the Rat</h6>
+			<a name=1241995759>
+			<h2>Working on jgit diff</h2>
+
+			<p>
+			</p><p>
+			Shawn did so many useful things that I use on a daily basis that I felt really
+			awful when I realized just how <u>long</u> I had promised to clean up that diff
+			implementation I wrote for JGit.
+			</p><p>
+			Alas, it appears that the thing turned out to be almost a complete rewrite, as
+			the original implementation walked the edit graph in a rather inefficient way.
+			</p><p>
+			A little background: Myers' algorithm to generate "an edit script" works on
+			the <i>edit graph</i>: imagine you have all lines of file <i>A</i> as columns and
+			all lines of file <i>B</i> as rows, then the <i>edit graph</i> is a connection of
+			the upper left corner to the lower right corner, containing only horizontal,
+			vertical or diagonal elements, where diagonal elements are only allowed when
+			the lines of both files agree at that point:
+			</p><p>
+<pre>
+ H E L L O , W O R L D
+ ----
+L    \
+      ---
+O        \
+          ---
+W            \
+              --------
+</pre>
+			</p><p>
+			The <i>shortest</i> edit path minimizes the number of non-diagonal elements.
+			</p><p>
+			Myers' idea is to develop forward and backward paths at the same time
+			(increasing the number of non-diagonal elements uniformly), storing
+			only the latest end points.  Once the paths meet, divide and conquer.
+			</p><p>
+			In theory, it would be quicker to store <u>all</u> end points and then just
+			reconstruct the shortest paths, alas, this takes way too much memory.
+			</p><p>
+			My first implementation did not remember start or end of the non-diagonal
+			parts, and had to recurse way more often than really necessary (in the end,
+			we will order the non-diagonal parts into horizontal and vertical parts
+			anyway, so start and end are sufficient).
+			</p><p>
+			The current progress can be seen <a href=http://repo.or.cz/w/egit/dscho.git/>
+			here</a>.
+			</p>
 			<h6>Friday, 17th of April, Anno Domini MMIX, at the hour of the Monkey</h6>
 			<a name=1239975597>
 			<h2>No time for Git</h2>
@@ -281,7 +329,7 @@ topic end super-cool-feature
 			</p><p>
 			So I thought I'd give him a real reason to feel offended: I'll just do his work: 
 			</p><p>
-			http://<a href=http://repo.or.cz>repo.or.cz</a>/w/UnFlowedThunderbird.git
+			http://repo.or.cz/w/UnFlowedThunderbird.git
 			</p><p>
 			It took my free time of two days, being not a Thunderbird developer myself.
 			Hopefully it works, and hopefully some people will feel really ashamed now.
@@ -343,54 +391,6 @@ topic end super-cool-feature
 			rebase using git-gui.  Or gitk.
 			</p><p>
 			Maybe.
-			</p>
-			<h6>Saturday, 7th of February, Anno Domini MMIX, at the hour of the Pig</h6>
-			<a name=1234040744>
-			<h2>The infamous <i>mark</i> command in the <i>rebase</i> command</h2>
-
-			<p>
-			</p><p>
-			I realized today how easy it is to lose commits with the "merge preserving"
-			mode of the interactive rebase.  In my case, it was when I tried to move a
-			bunch of commits from the tip of my branch into a topic branch.
-			</p><p>
-			But after moving the commits, I forgot to update the parent of the merge
-			commit.  Possibly a mark command could have helped.  The very same command
-			I called a nightmare for usability.
-			</p><p>
-			So I was wrong.  Big news.  &#x263a;
-			</p><p>
-			However, I think that the syntax "mark :1" is something best left for
-			machine consumption, not for human beings.
-			</p><p>
-			But I have an idea: we could use some garbled commit subject, or in case of
-			merge parents, the merge subject as some human readable title of the mark.
-			</p><p>
-			The rebase script would then look something like this:
-			</p><p>
-			<table
-							border=1 bgcolor=black>
-						<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
-			</td></tr>
-			<tr><td>
-				<table cellspacing=5 border=0
-					 style="color:white;">
-				<tr><td>
-					<pre>
-pick abcdefg Some ultra cool commit
-bookmark ultra-cool
-goto upstream
-pick hijklmn Some other cool commit
-merge parent ultra-cool Merge 'ultra-cool' into master
-</pre>
-							</td></tr>
-							</table>
-						</td></tr>
-						</table>
-			</p><p>
-			The good news is: I added code that refuses to finish a rebase when there
-			are commits that were rewritten, but not part of the new HEAD's ancestry.
 			</p>
 		</div>
 	</body>

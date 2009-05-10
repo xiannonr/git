@@ -1,0 +1,43 @@
+Working on jgit diff
+
+Shawn did so many useful things that I use on a daily basis that I felt really
+awful when I realized just how _long_ I had promised to clean up that diff
+implementation I wrote for JGit.
+
+Alas, it appears that the thing turned out to be almost a complete rewrite, as
+the original implementation walked the edit graph in a rather inefficient way.
+
+A little background: Myers' algorithm to generate "an edit script" works on
+the ''edit graph'': imagine you have all lines of file ''A'' as columns and
+all lines of file ''B'' as rows, then the ''edit graph'' is a connection of
+the upper left corner to the lower right corner, containing only horizontal,
+vertical or diagonal elements, where diagonal elements are only allowed when
+the lines of both files agree at that point:
+
+<pre>
+ H E L L O , W O R L D
+ ----
+L    \
+      ---
+O        \
+          ---
+W            \
+              --------
+</pre>
+
+The ''shortest'' edit path minimizes the number of non-diagonal elements.
+
+Myers' idea is to develop forward and backward paths at the same time
+(increasing the number of non-diagonal elements uniformly), storing
+only the latest end points.  Once the paths meet, divide and conquer.
+
+In theory, it would be quicker to store _all_ end points and then just
+reconstruct the shortest paths, alas, this takes way too much memory.
+
+My first implementation did not remember start or end of the non-diagonal
+parts, and had to recurse way more often than really necessary (in the end,
+we will order the non-diagonal parts into horizontal and vertical parts
+anyway, so start and end are sufficient).
+
+The current progress can be seen <a href=http://repo.or.cz/w/egit/dscho.git/>
+here</a>.
