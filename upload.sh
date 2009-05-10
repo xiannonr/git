@@ -255,7 +255,7 @@ get_last_removed_entry () {
 box_count=0
 begin_box () {
 	test $box_count = 0 || echo "<br>"
-	echo "<table width=$toc_width bgcolor=#e0e0e0 border=1>"
+	echo "<table width=$toc_width bgcolor=#e0e0e0 border=0>"
 	echo "<tr><th>$1</th></tr>"
 	echo "<tr><td>"
 }
