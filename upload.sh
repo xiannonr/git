@@ -207,7 +207,7 @@ markup () {
 		-e "$(markup_substitution "_" u)" \
 		-e 's!IMHO!in my humble opinion!g' \
 		-e 's!BTW!By the way,!g' \
-		-e 's!repo.or.cz!<a href=http://&>&</a>!g' \
+		-e 's!\([^/]\)repo.or.cz!\1<a href=http://&>&</a>!g' \
 		-e 's!:-)!\&#x263a;!g' \
 		-e "s!\\[\\[\(Image\|SVG\):.*!$THIS handle &!e" \
 		-e 's!<bash>!<table\
