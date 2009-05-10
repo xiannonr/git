@@ -5,8 +5,57 @@
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Fri, 17 Apr 2009 15:39:57 +0200</lastBuildDate>
+<lastBuildDate>Mon, 11 May 2009 00:49:19 +0200</lastBuildDate>
 <language>en-us</language>
+<item>
+<title>Working on jgit diff</title>
+<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1241995759</link>
+<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1241995759</guid>
+<pubDate>Mon, 11 May 2009 00:49:19 +0200</pubDate>
+<description><![CDATA[Working on jgit diff
+</p><p>
+Shawn did so many useful things that I use on a daily basis that I felt really
+awful when I realized just how <u>long</u> I had promised to clean up that diff
+implementation I wrote for JGit.
+</p><p>
+Alas, it appears that the thing turned out to be almost a complete rewrite, as
+the original implementation walked the edit graph in a rather inefficient way.
+</p><p>
+A little background: Myers' algorithm to generate "an edit script" works on
+the <i>edit graph</i>: imagine you have all lines of file <i>A</i> as columns and
+all lines of file <i>B</i> as rows, then the <i>edit graph</i> is a connection of
+the upper left corner to the lower right corner, containing only horizontal,
+vertical or diagonal elements, where diagonal elements are only allowed when
+the lines of both files agree at that point:
+</p><p>
+<pre>
+ H E L L O , W O R L D
+ ----
+L    \
+      ---
+O        \
+          ---
+W            \
+              --------
+</pre>
+</p><p>
+The <i>shortest</i> edit path minimizes the number of non-diagonal elements.
+</p><p>
+Myers' idea is to develop forward and backward paths at the same time
+(increasing the number of non-diagonal elements uniformly), storing
+only the latest end points.  Once the paths meet, divide and conquer.
+</p><p>
+In theory, it would be quicker to store <u>all</u> end points and then just
+reconstruct the shortest paths, alas, this takes way too much memory.
+</p><p>
+My first implementation did not remember start or end of the non-diagonal
+parts, and had to recurse way more often than really necessary (in the end,
+we will order the non-diagonal parts into horizontal and vertical parts
+anyway, so start and end are sufficient).
+</p><p>
+The current progress can be seen <a href=http://repo.or.cz/w/egit/dscho.git/>
+here</a>.]]></description>
+</item>
 <item>
 <title>No time for Git</title>
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1239975597</link>
@@ -208,7 +257,7 @@ he seems really offended.
 </p><p>
 So I thought I'd give him a real reason to feel offended: I'll just do his work: 
 </p><p>
-http://<a href=http://repo.or.cz>repo.or.cz</a>/w/UnFlowedThunderbird.git
+http://repo.or.cz/w/UnFlowedThunderbird.git
 </p><p>
 It took my free time of two days, being not a Thunderbird developer myself.
 Hopefully it works, and hopefully some people will feel really ashamed now.]]></description>
@@ -272,55 +321,6 @@ we can have a sequencer with which I can start to make a graphical interactive
 rebase using git-gui.  Or gitk.
 </p><p>
 Maybe.]]></description>
-</item>
-<item>
-<title>The infamous mark command in the rebase command</title>
-<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1234040744</link>
-<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1234040744</guid>
-<pubDate>Sat, 07 Feb 2009 22:05:44 +0100</pubDate>
-<description><![CDATA[The infamous <i>mark</i> command in the <i>rebase</i> command
-</p><p>
-I realized today how easy it is to lose commits with the "merge preserving"
-mode of the interactive rebase.  In my case, it was when I tried to move a
-bunch of commits from the tip of my branch into a topic branch.
-</p><p>
-But after moving the commits, I forgot to update the parent of the merge
-commit.  Possibly a mark command could have helped.  The very same command
-I called a nightmare for usability.
-</p><p>
-So I was wrong.  Big news.  &#x263a;
-</p><p>
-However, I think that the syntax "mark :1" is something best left for
-machine consumption, not for human beings.
-</p><p>
-But I have an idea: we could use some garbled commit subject, or in case of
-merge parents, the merge subject as some human readable title of the mark.
-</p><p>
-The rebase script would then look something like this:
-</p><p>
-<table
-				border=1 bgcolor=white>
-			<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
-			</td></tr>
-			<tr><td>
-				<table cellspacing=5 border=0
-					 style="color:black;">
-				<tr><td>
-					<pre>
-pick abcdefg Some ultra cool commit
-bookmark ultra-cool
-goto upstream
-pick hijklmn Some other cool commit
-merge parent ultra-cool Merge 'ultra-cool' into master
-</pre>
-				</td></tr>
-				</table>
-			</td></tr>
-			</table>
-</p><p>
-The good news is: I added code that refuses to finish a rebase when there
-are commits that were rewritten, but not part of the new HEAD's ancestry.]]></description>
 </item>
 </channel>
 </rss>
