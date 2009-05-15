@@ -1,0 +1,29 @@
+Wasting way too much time on msysGit
+
+I recently got into the bad habit of spending a large amount of my waking
+hours working on msysGit, more than is really healthy for me.
+
+For example, I spent the whole morning -- when I should have worked on a
+very important day-job project -- on trying to fix issue 258, where
+''git web--browse'' does not work as expected because of quoting issues
+with cmd.exe.
+
+This is reducing my Git time budget to negative numbers, so much so that I
+cannot even work on Git projects that I actually like, such as ''jgit diff''
+or ''git rebase -i -p'', or at least projects I felt obliged to continue
+to work on, such as ''git notes''.
+
+Now, some people who tried to teach me some time management strongly
+criticized me for ignoring their lessons, and unfortunately, I have to agree.
+
+The problem is that I would _hate_ to see msysGit fall to the same state it
+was after I stopped working on it last year.  I started it, and I would like
+it to grow, but too few people took care of the issue tracker, too few tried
+to debug their problems themselves, too few submitted fixes.
+
+I note, though, that there is a positive trend.  But being the impatient person
+I am ("2 seconds is my attention span") I tend to want the trend to be more
+impressive.
+
+Anyway, no work on msysGit for at least 4 days, that's what the doctor (me)
+said...
