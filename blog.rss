@@ -5,8 +5,43 @@
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Mon, 11 May 2009 00:49:19 +0200</lastBuildDate>
+<lastBuildDate>Fri, 15 May 2009 19:24:58 +0200</lastBuildDate>
 <language>en-us</language>
+<item>
+<title>Wasting way too much time on msysGit</title>
+<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1242408298</link>
+<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1242408298</guid>
+<pubDate>Fri, 15 May 2009 19:24:58 +0200</pubDate>
+<description><![CDATA[Wasting way too much time on msysGit
+</p><p>
+I recently got into the bad habit of spending a large amount of my waking
+hours working on msysGit, more than is really healthy for me.
+</p><p>
+For example, I spent the whole morning -- when I should have worked on a
+very important day-job project -- on trying to fix issue 258, where
+<i>git web--browse</i> does not work as expected because of quoting issues
+with cmd.exe.
+</p><p>
+This is reducing my Git time budget to negative numbers, so much so that I
+cannot even work on Git projects that I actually like, such as <i>jgit diff</i>
+or <i>git rebase -i -p</i>, or at least projects I felt obliged to continue
+to work on, such as <i>git notes</i>.
+</p><p>
+Now, some people who tried to teach me some time management strongly
+criticized me for ignoring their lessons, and unfortunately, I have to agree.
+</p><p>
+The problem is that I would <u>hate</u> to see msysGit fall to the same state it
+was after I stopped working on it last year.  I started it, and I would like
+it to grow, but too few people took care of the issue tracker, too few tried
+to debug their problems themselves, too few submitted fixes.
+</p><p>
+I note, though, that there is a positive trend.  But being the impatient person
+I am ("2 seconds is my attention span") I tend to want the trend to be more
+impressive.
+</p><p>
+Anyway, no work on msysGit for at least 4 days, that's what the doctor (me)
+said...]]></description>
+</item>
 <item>
 <title>Working on jgit diff</title>
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1241995759</link>
@@ -292,35 +327,6 @@ you can do that only by editing the config.
 </p><p>
 While at it, I also noticed a bug whereby <i>--thread --in-reply-to=...</i> simply
 forgets the <i>--thread</i>.  Maybe this week I will find time to address this bug.]]></description>
-</item>
-<item>
-<title>rebase updates</title>
-<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1234140696</link>
-<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1234140696</guid>
-<pubDate>Mon, 09 Feb 2009 01:51:36 +0100</pubDate>
-<description><![CDATA[<i>rebase</i> updates
-</p><p>
-Phew.  The last few days, I was mainly chasing bugs I introduced due to being
-too tired to work on the merge-preserving, interactive <i>rebase</i>.
-</p><p>
-But finally I have something I can start working with.  After my failed
-experiment to use git-blame to split topic branches, I will sort the commits
-in my <i>my-next</i> branch into topic branches manually.
-</p><p>
-Then I will add an option to <i>rebase -i -p</i> to rewrite refs which point to
-rewritten commits, so that I can have branches <i>rebase-i-p</i>, <i>add-e</i>, etc
-and all of them are automatically updated when I <i>rebase -i -p</i> the <i>my-next</i>
-branch.
-</p><p>
-In the process, not only have I learnt the value of the <i>bookmark</i> command,
-but made quite a few-much needed cleanups (which make
-<i>git-rebase--interactive.sh</i> longer, but much more understandable).
-</p><p>
-Hopefully Stephan will pick the changes in the "rebase protocol" up, and then
-we can have a sequencer with which I can start to make a graphical interactive
-rebase using git-gui.  Or gitk.
-</p><p>
-Maybe.]]></description>
 </item>
 </channel>
 </rss>
