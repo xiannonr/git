@@ -5,8 +5,31 @@
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Fri, 15 May 2009 19:24:58 +0200</lastBuildDate>
+<lastBuildDate>Fri, 19 Jun 2009 15:53:09 +0200</lastBuildDate>
 <language>en-us</language>
+<item>
+<title>The GraphGUI project</title>
+<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1245419588</link>
+<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1245419588</guid>
+<pubDate>Fri, 19 Jun 2009 15:53:08 +0200</pubDate>
+<description><![CDATA[The GraphGUI project
+</p><p>
+After a few unfortunate delays (and some fortunate ones, just not for us), the
+GraphGUI project finally takes off.  A quick first glance:
+</p><p>
+<center><img src= basic-gui.jpg></center>
+</p><p>
+The delays were a bit unnerving, but the student is really bright and still
+has the chance to pull the project off.
+</p><p>
+Next plans are to show text, too, to invent a rudimentary layout engine that
+can be adjusted manually (this is in contrast to <i>gitk</i> or <i>log --graph</i>).
+</p><p>
+After that, integration into JGit (this probably triggered the eGit/JGit
+split).
+</p><p>
+And then we'll go wild!]]></description>
+</item>
 <item>
 <title>Wasting way too much time on msysGit</title>
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1242408298</link>
@@ -296,37 +319,6 @@ http://repo.or.cz/w/UnFlowedThunderbird.git
 </p><p>
 It took my free time of two days, being not a Thunderbird developer myself.
 Hopefully it works, and hopefully some people will feel really ashamed now.]]></description>
-</item>
-<item>
-<title>format-patch --thread and Alpine</title>
-<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1234141489</link>
-<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1234141489</guid>
-<pubDate>Mon, 09 Feb 2009 02:04:49 +0100</pubDate>
-<description><![CDATA[<i>format-patch --thread</i> and Alpine
-</p><p>
-I started recently to pipe the output of
-<i>git format-patch --cover-letter --stdout ...</i> directly into the
-<i>postponed-msgs</i> folder Alpine uses, instead of pasting files into the
-mailer.
-</p><p>
-The idea is to pretend that I continue a postponed mail, but in reality I
-never wrote it, <i>format-patch</i> did.
-</p><p>
-However, I had problems with the <i>--thread</i> option that is implied by
-<i>--cover-letter</i>.  Alpine always generated new message IDs without adjusting
-the <i>In-reply-to:</i> and <i>References:</i> headers of the other mails.
-</p><p>
-Now I found out that the reason is that the <i>Fcc:</i> headers were missing in
-the mails, and Alpine generated them, making up new message IDs in the process.
-</p><p>
-Therefore I have an alias now which sets not only the <i>Fcc:</i> header, but also
-the <i>To:</i> headers by rewriting the stream using <i>sed</i>.  This is slightly
-ugly, but so is the handling of headers in <i>format-patch</i>: if you thought
-you could specify arbitrary headers using the command line, you are mistaken:
-you can do that only by editing the config.
-</p><p>
-While at it, I also noticed a bug whereby <i>--thread --in-reply-to=...</i> simply
-forgets the <i>--thread</i>.  Maybe this week I will find time to address this bug.]]></description>
 </item>
 </channel>
 </rss>
