@@ -1,0 +1,17 @@
+The GraphGUI project
+
+After a few unfortunate delays (and some fortunate ones, just not for us), the
+GraphGUI project finally takes off.  A quick first glance:
+
+[[Image:basic-gui.jpg]]
+
+The delays were a bit unnerving, but the student is really bright and still
+has the chance to pull the project off.
+
+Next plans are to show text, too, to invent a rudimentary layout engine that
+can be adjusted manually (this is in contrast to ''gitk'' or ''log --graph'').
+
+After that, integration into JGit (this probably triggered the eGit/JGit
+split).
+
+And then we'll go wild!
