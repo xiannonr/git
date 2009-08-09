@@ -1,0 +1,30 @@
+The dilemma of being correct
+
+So I am opinionated.  No news there.  The problem of being opinionated, though,
+is that people do not take you seriously even if you are correct.
+
+For example, I vividly remember having had concerns about the Git wrapper
+being linked to <a href=http://curl.haxx.se/>cURL</a>, and I vividly remember
+that our maintainer did not have such concerns and took Daniel's patch.  I could
+not find proof of my public comment quickly enough to add a link here, though.
+
+Alas, there are serious problems with being correct:
+
+<ol>
+<li>If you're correct, you waste a lot of time trying to convince people (but
+they ignore you nevertheless),
+<li>Other people are regularly p*ssed off, especially when they find out
+(or even worse, when it is pointed out to them) that they were wrong, and
+<li>You can buy _nothing_ for having been correct.
+</ol>
+
+It is a lose-lose situation.
+
+In the current context, I am pretty certain that the rev cache and the pack
+index are so similar in nature that we'll find quite a few issues that we had
+with one repeated with the other.
+
+As I _hate_ losing time over a discussion others try to "win" -- which
+invariably means that they refuse to be convinced of anything disagreeing with
+their opinion :-) -- I will just shut up, and probably have one or two odd
+feelings when it turns out I was right.
