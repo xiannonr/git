@@ -1,0 +1,56 @@
+GitTogether in Berlin
+
+We had a GitTogether in Berlin, called "Alles wird Git" (past tense: "Alles
+wurde Git").  It was great fun, we never had even a single boring minute,
+and our special guest -- Gitzilla -- turned out to be quite some entertainer,
+especially when he starting reciting a few of my most outrageous emails :-)
+
+There were a lot of good discussions, among other things about submodules (our
+neglected child), Git Cheetah, and foreign VCS helpers (in particular Sverre's
+plan to provide some Mercurial backend).
+
+One of the most important outcomes for me was, though, to realize just how
+detached we in the Git project are from our user base.  A few years back, we
+could get away with saying "we have only developers as users, so they should
+just sit down and scratch their own itch".
+
+But today, we have a lot of users who never learnt to code (or who code in
+some other language than C, or whose code we would not even want to review :-)),
+and we lose quite a few brownie points by keeping things complicated.
+
+Now, in a lot of cases it cannot be helped.  For example, we have confusing
+names for things, inconsistent namings even (as with "remote" vs "tracked"
+branches), and we have some odd design decisions (like calling some program
+almost nobody uses "git cherry", which makes tab-completion of the rather
+often-used "git cherry-pick" pretty awkward).  The latter example also
+illustrates that we have names for porcelains that are rather long, when
+they should be rather short.
+
+So, yes, we have a lot of things that do not work well, because we have
+usability issues that need to be preserved for hysterical raisins.
+
+This is unfortunate enough, but it seems that we even fsck up with usability
+issues we _can_ solve.  Just think about "git checkout -b origin/master".  A
+typo?  Yes, of course!  But a rather obvious one.
+
+Another case which was discussed on the mailing list recently: "git checkout
+next" when clearly "git checkout origin/next" was meant.
+
+The biggest problem, though, is that almost all people on the Git mailing list
+who are respected by the maintainer are obviously too detached from the user
+base to realize just how difficult Git _still_ is.  And refuse to do anything
+about it, or even to allow others to do anything about it.
+
+It almost seems as if the Git wizards do not want Git to become easier to
+use, lest they lose their special status.
+
+My biggest problem is that it seems that my input gets more and more ignored,
+or perceived as some crazy ideas that will just go away (which is true, because
+I am pretty happy about a day-job that keeps me more than just busy, so I do not
+have time not fight windmills, let alone motiviation to do so).
+
+Even when a real user comes along to chime in, he's just brushed off, by an
+otherwise very polite maintainer.
+
+I am not even sure if I want to continue sending my patches from my personal
+tree upstream, because things get so frustrating, for little to show in return.

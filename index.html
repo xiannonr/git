@@ -12,6 +12,7 @@
 			<tr><th>Table of contents:</th></tr>
 			<tr><td>
 			<p><ul>
+			<li><a href=#1254868748>07 Oct 2009 GitTogether in Berlin</a>
 			<li><a href=#1249835938>09 Aug 2009 The dilemma of being correct</a>
 			<li><a href=#1245419588>19 Jun 2009 The GraphGUI project</a>
 			<li><a href=#1242408298>15 May 2009 Wasting way too much time on msysGit</a>
@@ -21,9 +22,8 @@
 			<li><a href=#1236554268>09 Mar 2009 So, what is missing from my <i>rebase-i-p</i> branch?</a>
 			<li><a href=#1236479389>08 Mar 2009 New Git for Windows version</a>
 			<li><a href=#1235092615>20 Feb 2009 Code reviews</a>
-			<li><a href=#1234409395>12 Feb 2009 Interactive <i>rebase</i> just learnt a new command: <i>topic</i></a>
 			</ul></p>
-			<a href=dscho.git?a=blob_plain;hb=d328cccacc66bc5d183790eebcf5a3334830ab55;f=index.html>Older posts</a>
+			<a href=dscho.git?a=blob_plain;hb=27b2c2e614f97056a75956e3e27c07cb2bffb1ea;f=index.html>Older posts</a>
 			</td></tr></table>
 			<br>
 			<div style="text-align:right;">
@@ -87,6 +87,67 @@
 			</script>
 			</td></tr></table>
 			</div>
+			<h6>Wednesday, 7th of October, Anno Domini MMIX, at the hour of the Rat</h6>
+			<a name=1254868748>
+			<h2>GitTogether in Berlin</h2>
+
+			<p>
+			</p><p>
+			We had a GitTogether in Berlin, called "Alles wird Git" (past tense: "Alles
+			wurde Git").  It was great fun, we never had even a single boring minute,
+			and our special guest -- Gitzilla -- turned out to be quite some entertainer,
+			especially when he starting reciting a few of my most outrageous emails &#x263a;
+			</p><p>
+			There were a lot of good discussions, among other things about submodules (our
+			neglected child), Git Cheetah, and foreign VCS helpers (in particular Sverre's
+			plan to provide some Mercurial backend).
+			</p><p>
+			One of the most important outcomes for me was, though, to realize just how
+			detached we in the Git project are from our user base.  A few years back, we
+			could get away with saying "we have only developers as users, so they should
+			just sit down and scratch their own itch".
+			</p><p>
+			But today, we have a lot of users who never learnt to code (or who code in
+			some other language than C, or whose code we would not even want to review &#x263a;),
+			and we lose quite a few brownie points by keeping things complicated.
+			</p><p>
+			Now, in a lot of cases it cannot be helped.  For example, we have confusing
+			names for things, inconsistent namings even (as with "remote" vs "tracked"
+			branches), and we have some odd design decisions (like calling some program
+			almost nobody uses "git cherry", which makes tab-completion of the rather
+			often-used "git cherry-pick" pretty awkward).  The latter example also
+			illustrates that we have names for porcelains that are rather long, when
+			they should be rather short.
+			</p><p>
+			So, yes, we have a lot of things that do not work well, because we have
+			usability issues that need to be preserved for hysterical raisins.
+			</p><p>
+			This is unfortunate enough, but it seems that we even fsck up with usability
+			issues we <u>can</u> solve.  Just think about "git checkout -b origin/master".  A
+			typo?  Yes, of course!  But a rather obvious one.
+			</p><p>
+			Another case which was discussed on the mailing list recently: "git checkout
+			next" when clearly "git checkout origin/next" was meant.
+			</p><p>
+			The biggest problem, though, is that almost all people on the Git mailing list
+			who are respected by the maintainer are obviously too detached from the user
+			base to realize just how difficult Git <u>still</u> is.  And refuse to do anything
+			about it, or even to allow others to do anything about it.
+			</p><p>
+			It almost seems as if the Git wizards do not want Git to become easier to
+			use, lest they lose their special status.
+			</p><p>
+			My biggest problem is that it seems that my input gets more and more ignored,
+			or perceived as some crazy ideas that will just go away (which is true, because
+			I am pretty happy about a day-job that keeps me more than just busy, so I do not
+			have time not fight windmills, let alone motiviation to do so).
+			</p><p>
+			Even when a real user comes along to chime in, he's just brushed off, by an
+			otherwise very polite maintainer.
+			</p><p>
+			I am not even sure if I want to continue sending my patches from my personal
+			tree upstream, because things get so frustrating, for little to show in return.
+			</p>
 			<h6>Sunday, 9th of August, Anno Domini MMIX, at the hour of the Rooster</h6>
 			<a name=1249835938>
 			<h2>The dilemma of being correct</h2>
@@ -346,55 +407,6 @@ W            \
 			</p><p>
 			So I guess it is time to reassess my priorities, and maybe stop reviewing
 			Git patches altogether.
-			</p>
-			<h6>Thursday, 12th of February, Anno Domini MMIX, at the hour of the Tiger</h6>
-			<a name=1234409395>
-			<h2>Interactive <i>rebase</i> just learnt a new command: <i>topic</i></h2>
-
-			<p>
-			</p><p>
-			Today I am pretty pleased with myself.  Two projects at my day job got a real
-			boost, and I implemented a shortcut that avoids the ugly 'bookmark' statement
-			in rebase scripts most of the time.
-			</p><p>
-			A typical rebase script, generated by <i>git rebase -i -p $COMMIT</i> will look
-			something like this:
-			</p><p>
-			<table
-							border=1 bgcolor=black>
-						<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
-			</td></tr>
-			<tr><td>
-				<table cellspacing=5 border=0
-					 style="color:white;">
-				<tr><td>
-					<pre>
-pick 1234567 My first commit
-topic begin super-cool-feature
-pick 2345678 The super cool feature
-pick 3456789 Documentation for the super cool feature
-topic end super-cool-feature
-</pre>
-							</td></tr>
-							</table>
-						</td></tr>
-						</table>
-			</p><p>
-			The result will be a merge commit at the HEAD whose first parent is
-			"My first commit", whose second parent is "Documentation for the super
-			cool feature" and whose commit message is "Merge branch 'super-cool-feature'".
-			</p><p>
-			Side note: internally, <i>topic begin $NAME [at $COMMIT]</i> will be handled as if
-			you wrote <i>bookmark merge-parent-of-$NAME; goto $COMMIT</i>, and
-			<i>topic end $NAME [$MESSAGE]</i> will be handled as if you wrote
-			<i>bookmark $NAME; goto merge-parent-of-$NAME; merge parents $NAME [original $MARK Merge branch '$NAME']</i>.
-			</p><p>
-			Of course, being more concise, the 'topic' statement is not only nicer to the
-			eye, but also less error-prone.
-			</p><p>
-			And hopefully many people will agree with me that this rebase script is pretty
-			intuitive.
 			</p>
 		</div>
 	</body>
