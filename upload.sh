@@ -501,8 +501,8 @@ handle_image_file () {
 # parse command line option
 case "$1" in
 *dry*) DRYRUN=1; export DRYRUN; shift;;
-*show*) firefox "$(pwd)"/$TEST; exit;;
-*remote*) firefox $URLPREFIX$URL$OUTPUT; exit;;
+*show*) xdg-open "$(pwd)"/$TEST; exit;;
+*remote*) xdg-open $URLPREFIX$URL$OUTPUT; exit;;
 handle)
 	shift
 	case "$1" in
