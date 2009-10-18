@@ -5,8 +5,27 @@
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Wed, 07 Oct 2009 00:39:08 +0200</lastBuildDate>
+<lastBuildDate>Sun, 18 Oct 2009 14:11:52 +0200</lastBuildDate>
 <language>en-us</language>
+<item>
+<title>Git will never be user-friendly</title>
+<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1255867912</link>
+<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1255867912</guid>
+<pubDate>Sun, 18 Oct 2009 14:11:52 +0200</pubDate>
+<description><![CDATA[Git will never be user-friendly
+</p><p>
+Recently, encouraged by quite some private encouragement, I thought I could
+take on the task of teaching the core Git developers how user-unfriendly
+Git is, and that they should be more open to change (especially given that
+1.7.0 was already announced to be a version that breaks recent expectations,
+something I would have expected to merit a 2.0 -- but who am I anyway?).
+</p><p>
+It is quite ironic, in a very cruel sense, that those people who are such
+big fans of educating the users instead of fixing their tools are unable
+to be educated about something that should be obvious.
+</p><p>
+Yes, I am bitter.]]></description>
+</item>
 <item>
 <title>GitTogether in Berlin</title>
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1254868748</link>
@@ -311,32 +330,6 @@ Sigh.
 </p><p>
 At least I have the feeling that I caught the most important bugs before
 releasing.]]></description>
-</item>
-<item>
-<title>Code reviews</title>
-<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1235092615</link>
-<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1235092615</guid>
-<pubDate>Fri, 20 Feb 2009 02:16:55 +0100</pubDate>
-<description><![CDATA[Code reviews
-</p><p>
-It has been said that reviewing patches is a most thankless job.  As I really
-like the elegance of Git's source code, and care a lot about it, I did not
-think that it was thankless, just a little bit tedious (especially when the
-patch authors mistake criticism for personal attacks).
-</p><p>
-Usually, I am pretty good at ignoring insults as responses to my comments;
-after all, I have a lot more enjoyable things to do than to spend time talking
-to a guy who shows how wise he is when he thinks that I criticize him
-<u>personally</u> when I just try to enhance his work, by offering a little bit of
-my knowledge.
-</p><p>
-However, in the last days, three people really seemed to want to insult me,
-to make me go away, to stop the fun I have with Git.
-</p><p>
-And they almost succeeded.
-</p><p>
-So I guess it is time to reassess my priorities, and maybe stop reviewing
-Git patches altogether.]]></description>
 </item>
 </channel>
 </rss>
