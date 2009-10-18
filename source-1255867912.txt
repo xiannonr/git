@@ -1,0 +1,13 @@
+Git will never be user-friendly
+
+Recently, encouraged by quite some private encouragement, I thought I could
+take on the task of teaching the core Git developers how user-unfriendly
+Git is, and that they should be more open to change (especially given that
+1.7.0 was already announced to be a version that breaks recent expectations,
+something I would have expected to merit a 2.0 -- but who am I anyway?).
+
+It is quite ironic, in a very cruel sense, that those people who are such
+big fans of educating the users instead of fixing their tools are unable
+to be educated about something that should be obvious.
+
+Yes, I am bitter.
