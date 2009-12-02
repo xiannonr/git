@@ -1,0 +1,9 @@
+Avoiding to get angry
+
+It seems that despite many intelligent people realizing that the recent
+change to special case http, https and ftp was a terrible decision, it
+seems that there is enough resistance left on the Git mailing list to
+keep the brain-dead current state.
+
+The Git mailing list is definitely giving me more grief than joy these
+days.

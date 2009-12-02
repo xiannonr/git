@@ -12,6 +12,7 @@
 			<tr><th>Table of contents:</th></tr>
 			<tr><td>
 			<p><ul>
+			<li><a href=#1259765885>02 Dec 2009 Avoiding to get angry</a>
 			<li><a href=#1255867912>18 Oct 2009 Git will never be user-friendly</a>
 			<li><a href=#1254868748>07 Oct 2009 GitTogether in Berlin</a>
 			<li><a href=#1249835938>09 Aug 2009 The dilemma of being correct</a>
@@ -21,9 +22,8 @@
 			<li><a href=#1239975597>17 Apr 2009 No time for Git</a>
 			<li><a href=#1238970571>06 Apr 2009 How to recover from a hackathon</a>
 			<li><a href=#1236554268>09 Mar 2009 So, what is missing from my <i>rebase-i-p</i> branch?</a>
-			<li><a href=#1236479389>08 Mar 2009 New Git for Windows version</a>
 			</ul></p>
-			<a href=dscho.git?a=blob_plain;hb=b7dbe3cf0681c075f6664972158b746c56b934f1;f=index.html>Older posts</a>
+			<a href=dscho.git?a=blob_plain;hb=71fef8325f71a36fcdf8a1e74c5c30d37aa5ce3c;f=index.html>Older posts</a>
 			</td></tr></table>
 			<br>
 			<div style="text-align:right;">
@@ -87,6 +87,20 @@
 			</script>
 			</td></tr></table>
 			</div>
+			<h6>Wednesday, 2nd of December, Anno Domini MMIX, at the hour of the Monkey</h6>
+			<a name=1259765885>
+			<h2>Avoiding to get angry</h2>
+
+			<p>
+			</p><p>
+			It seems that despite many intelligent people realizing that the recent
+			change to special case http, https and ftp was a terrible decision, it
+			seems that there is enough resistance left on the Git mailing list to
+			keep the brain-dead current state.
+			</p><p>
+			The Git mailing list is definitely giving me more grief than joy these
+			days.
+			</p>
 			<h6>Sunday, 18th of October, Anno Domini MMIX, at the hour of the Goat</h6>
 			<a name=1255867912>
 			<h2>Git will never be user-friendly</h2>
@@ -370,36 +384,6 @@ W            \
 			April.
 			</p><p>
 			Oh well, the joys of being excited by several competing projects! &#x263a;
-			</p>
-			<h6>Sunday, 8th of March, Anno Domini MMIX, at the hour of the Tiger</h6>
-			<a name=1236479389>
-			<h2>New Git for Windows version</h2>
-
-			<p>
-			</p><p>
-			Phew.  That was quite a day, almost exclusively spent on finishing that
-			installer.  The worst part: updating GCC seemed not to be such a good idea
-			after all...
-			</p><p>
-			For Windows, we need to use the printf format <i>%I64u</i> (which is
-			non-standard, in the common way of Microsoft) if you want to print 64-bit
-			wide unsigned numbers.  The rest of the world accepts the standard <i>%llu</i>.
-			</p><p>
-			After upgrading to the new GCC, a lot of warnings appeared, complaining
-			about <i>%I64u</i>.  The warnings went away when I replaced the format with
-			<i>%llu</i>.
-			</p><p>
-			Being the naive I am, I mistook that for a sign that we could finally go
-			more standards-compliant.
-			</p><p>
-			However, it only means that we have to live with the warnings for now, as
-			the C runtime provided on Windows still strongly disagrees with standards
-			(and it has to continue to do so, lest it break existing programs).
-			</p><p>
-			Sigh.
-			</p><p>
-			At least I have the feeling that I caught the most important bugs before
-			releasing.
 			</p>
 		</div>
 	</body>
