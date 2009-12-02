@@ -5,8 +5,23 @@
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Sun, 18 Oct 2009 14:11:52 +0200</lastBuildDate>
+<lastBuildDate>Wed, 02 Dec 2009 15:58:05 +0100</lastBuildDate>
 <language>en-us</language>
+<item>
+<title>Avoiding to get angry</title>
+<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1259765885</link>
+<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1259765885</guid>
+<pubDate>Wed, 02 Dec 2009 15:58:05 +0100</pubDate>
+<description><![CDATA[Avoiding to get angry
+</p><p>
+It seems that despite many intelligent people realizing that the recent
+change to special case http, https and ftp was a terrible decision, it
+seems that there is enough resistance left on the Git mailing list to
+keep the brain-dead current state.
+</p><p>
+The Git mailing list is definitely giving me more grief than joy these
+days.]]></description>
+</item>
 <item>
 <title>Git will never be user-friendly</title>
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1255867912</link>
@@ -299,37 +314,6 @@ week.  If not then, due to a heavy workload, it will be postponed to early
 April.
 </p><p>
 Oh well, the joys of being excited by several competing projects! &#x263a;]]></description>
-</item>
-<item>
-<title>New Git for Windows version</title>
-<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1236479389</link>
-<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1236479389</guid>
-<pubDate>Sun, 08 Mar 2009 03:29:49 +0100</pubDate>
-<description><![CDATA[New Git for Windows version
-</p><p>
-Phew.  That was quite a day, almost exclusively spent on finishing that
-installer.  The worst part: updating GCC seemed not to be such a good idea
-after all...
-</p><p>
-For Windows, we need to use the printf format <i>%I64u</i> (which is
-non-standard, in the common way of Microsoft) if you want to print 64-bit
-wide unsigned numbers.  The rest of the world accepts the standard <i>%llu</i>.
-</p><p>
-After upgrading to the new GCC, a lot of warnings appeared, complaining
-about <i>%I64u</i>.  The warnings went away when I replaced the format with
-<i>%llu</i>.
-</p><p>
-Being the naive I am, I mistook that for a sign that we could finally go
-more standards-compliant.
-</p><p>
-However, it only means that we have to live with the warnings for now, as
-the C runtime provided on Windows still strongly disagrees with standards
-(and it has to continue to do so, lest it break existing programs).
-</p><p>
-Sigh.
-</p><p>
-At least I have the feeling that I caught the most important bugs before
-releasing.]]></description>
 </item>
 </channel>
 </rss>
