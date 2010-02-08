@@ -5,8 +5,28 @@
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Wed, 02 Dec 2009 15:58:05 +0100</lastBuildDate>
+<lastBuildDate>Mon, 08 Feb 2010 14:04:17 +0100</lastBuildDate>
 <language>en-us</language>
+<item>
+<title>Trying to get more time for msysGit</title>
+<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1265634257</link>
+<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1265634257</guid>
+<pubDate>Mon, 08 Feb 2010 14:04:17 +0100</pubDate>
+<description><![CDATA[Trying to get more time for msysGit
+</p><p>
+Nowadays, the msysGit project is driven forward mostly by Heiko Voigt,
+Erik Faye-Lund, and of course the invaluable mingw.git work of Hannes
+Sixt. The new-SVN, MinGW-SVN and MinGW-Python projects have stalled.
+The latest msysGit release is <u>months</u> old.
+</p><p>
+It does not help that certain people on the Git mailing list write
+looooong emails that nobody with my schedule can hope to read, rather
+than being nice and spending some time to phrase what they have to
+say in a <u>concise</u> manner.
+</p><p>
+Oh well. I will just concentrate on JGit and msysGit instead of
+upstream Git, if I get some Git time.]]></description>
+</item>
 <item>
 <title>Avoiding to get angry</title>
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1259765885</link>
@@ -14,7 +34,7 @@
 <pubDate>Wed, 02 Dec 2009 15:58:05 +0100</pubDate>
 <description><![CDATA[Avoiding to get angry
 </p><p>
-It seems that despite many intelligent people realizing that the recent
+Despite many intelligent people realizing that the recent
 change to special case http, https and ftp was a terrible decision, it
 seems that there is enough resistance left on the Git mailing list to
 keep the brain-dead current state.
@@ -274,46 +294,6 @@ more than 4 hours a night again. learn to watch a movie without thinking
 about code. go for a run.
 </p><p>
 And after recovering, back to the rebase-i-p branch!]]></description>
-</item>
-<item>
-<title>So, what is missing from my rebase-i-p branch?</title>
-<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1236554268</link>
-<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1236554268</guid>
-<pubDate>Mon, 09 Mar 2009 00:17:48 +0100</pubDate>
-<description><![CDATA[So, what is missing from my <i>rebase-i-p</i> branch?
-</p><p>
-I regularly use <i>rebase -i -p</i> these days, to update my personal Git
-tree (which used to be <i>my-next</i>).
-</p><p>
-There are a few things missing before I can start assembling a patch
-series for submission:
-</p><p>
-<ul>
-<li>I need to handle the commit parents which are outside of the rebased
-ones properly.  In other words, when a commit is picked whose parent is
-not rebased, it needs to be rebased onto $ONTO.
-<li>The patch which uses patch-id to generate DROPPED directly also tries to
-consolidate the handling of DROPPED commits by putting them into REWRITTEN
-instead of DROPPED, but that breaks the tests.  So, this patch needs to be
-split.
-<li>I want to introduce one more command, <i>rephrase</i>, which allows you to
-modify the commit message, and nothing more, and <i>halt</i>, which does the
-same as <i>edit</i> without <i>pick</i>.  Then there needs to be a new test script
-for those commands, and this will be an early patch series.
-<li>Time.  I need time, desperately.  If my day job was not as exciting as it
-is, I would have more time for Git.  As it is, I have to budget my time so
-that I get anything done at all.
-</ul>
-</p><p>
-These issues have been postponed due to Steffen taking a well-deserved
-vacation, which means that I have to act as msysGit maintainer again.
-</p><p>
-And this coming week, I will have other things to do in all likeliness, so
-that I expect to be able to submit a <i>rebase -i -p</i> patch series only next
-week.  If not then, due to a heavy workload, it will be postponed to early
-April.
-</p><p>
-Oh well, the joys of being excited by several competing projects! &#x263a;]]></description>
 </item>
 </channel>
 </rss>
