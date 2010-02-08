@@ -1,0 +1,14 @@
+Trying to get more time for msysGit
+
+Nowadays, the msysGit project is driven forward mostly by Heiko Voigt,
+Erik Faye-Lund, and of course the invaluable mingw.git work of Hannes
+Sixt. The new-SVN, MinGW-SVN and MinGW-Python projects have stalled.
+The latest msysGit release is _months_ old.
+
+It does not help that certain people on the Git mailing list write
+looooong emails that nobody with my schedule can hope to read, rather
+than being nice and spending some time to phrase what they have to
+say in a _concise_ manner.
+
+Oh well. I will just concentrate on JGit and msysGit instead of
+upstream Git, if I get some Git time.
