@@ -5,7 +5,7 @@
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Fri, 11 Jun 2010 13:30:07 +0200</lastBuildDate>
+<lastBuildDate>Fri, 11 Jun 2010 13:30:59 +0200</lastBuildDate>
 <language>en-us</language>
 <item>
 <title>New msysGit imminent</title>
