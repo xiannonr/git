@@ -1,6 +1,0 @@
-[gitweb]
-        url = http://repo.or.cz/w/git/dscho.git
-[blog]
-        title = Dscho's git log
-        background = paper.jpg
-        branch = blog

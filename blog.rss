@@ -1,12 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
-<title>Dscho's Git log</title>
+<title>Dscho's git log</title>
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Mon, 08 Feb 2010 14:04:17 +0100</lastBuildDate>
+<lastBuildDate>Fri, 11 Jun 2010 13:30:07 +0200</lastBuildDate>
 <language>en-us</language>
+<item>
+<title>New msysGit imminent</title>
+<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1276255806</link>
+<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1276255806</guid>
+<pubDate>Fri, 11 Jun 2010 13:30:06 +0200</pubDate>
+<description><![CDATA[New msysGit imminent
+</p><p>
+Sebastian Schuberth worked so much on msysGit, and he wants a new release. That is the reason why there will be a new msysGit version very soon.]]></description>
+</item>
 <item>
 <title>Trying to get more time for msysGit</title>
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1265634257</link>
@@ -278,22 +287,6 @@ days.
 </p><p>
 But at least msysGit is moving again; I'll probably write a Herald about
 it.]]></description>
-</item>
-<item>
-<title>How to recover from a hackathon</title>
-<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1238970571</link>
-<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1238970571</guid>
-<pubDate>Mon, 06 Apr 2009 00:29:31 +0200</pubDate>
-<description><![CDATA[How to recover from a hackathon
-</p><p>
-Phew, 2 crazy and fantastic weeks are behind me.  But it takes its toll:
-a weekend I was more offline than online.
-</p><p>
-Things that are important now: relax. sleep. take a walk. learn to sleep
-more than 4 hours a night again. learn to watch a movie without thinking
-about code. go for a run.
-</p><p>
-And after recovering, back to the rebase-i-p branch!]]></description>
 </item>
 </channel>
 </rss>
