@@ -50,8 +50,20 @@ cd "$(dirname "$0")"
 
 GITWEBURL="$(git config gitweb.url)"
 test -z "$GITWEBURL" && {
-	echo "Please set gitweb.url in the Git config first!" >&2
-	exit 1
+	if test -f .gitconfig
+	then
+		git config -l -f .gitconfig |
+		while read line
+		do
+			key=${line%%=*}
+			value=${line#*=}
+			test -z "$(git config "$key")" &&
+			git config "$key" "$value"
+		done
+	else
+		echo "Please set gitweb.url in the Git config first!" >&2
+		exit 1
+	fi
 }
 
 get_config () {
