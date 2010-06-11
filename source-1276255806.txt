@@ -1,0 +1,3 @@
+New msysGit imminent
+
+Sebastian Schuberth worked so much on msysGit, and he wants a new release. That is the reason why there will be a new msysGit version very soon.
