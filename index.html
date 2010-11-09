@@ -125,7 +125,7 @@
 			<table
 							border=1 bgcolor=black>
 						<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
+				<pre>                                                      </pre>
 			</td></tr>
 			<tr><td>
 				<table cellspacing=5 border=0
@@ -144,7 +144,7 @@ ugh
 			<table
 							border=1 bgcolor=black>
 						<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
+				<pre>                                                      </pre>
 			</td></tr>
 			<tr><td>
 				<table cellspacing=5 border=0
@@ -163,7 +163,7 @@ ugh get URL
 			<table
 							border=1 bgcolor=black>
 						<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
+				<pre>                                                      </pre>
 			</td></tr>
 			<tr><td>
 				<table cellspacing=5 border=0
@@ -186,7 +186,7 @@ ugh show [ANYTHING, INCLUDING COMMIT NAMES]
 			<table
 							border=1 bgcolor=black>
 						<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
+				<pre>                                                      </pre>
 			</td></tr>
 			<tr><td>
 				<table cellspacing=5 border=0
@@ -206,7 +206,7 @@ ugh help COMMAND
 			<table
 							border=1 bgcolor=black>
 						<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
+				<pre>                                                      </pre>
 			</td></tr>
 			<tr><td>
 				<table cellspacing=5 border=0
@@ -228,7 +228,7 @@ ugh commit
 			<table
 							border=1 bgcolor=black>
 						<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
+				<pre>                                                      </pre>
 			</td></tr>
 			<tr><td>
 				<table cellspacing=5 border=0
@@ -249,7 +249,7 @@ ugh publish [REMOTE]
 			<table
 							border=1 bgcolor=black>
 						<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
+				<pre>                                                      </pre>
 			</td></tr>
 			<tr><td>
 				<table cellspacing=5 border=0
@@ -279,7 +279,7 @@ ugh undo
 			<table
 							border=1 bgcolor=black>
 						<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
+				<pre>                                                      </pre>
 			</td></tr>
 			<tr><td>
 				<table cellspacing=5 border=0
@@ -293,8 +293,8 @@ ugh merge [REMOTE [BRANCH]]
 						</td></tr>
 						</table>
 			</p><p>
-			Since people are familiar with other commands, "ugh <command> --help" would be
-			an alias to "ugh help <command>". But it would not be advertised in the
+			Since people are familiar with other commands, "ugh COMMAND --help" would be
+			an alias to "ugh help COMMAND". But it would not be advertised in the
 			documentation, because documentation is where you learn how the program is
 			intended to be used.
 			</p><p>
@@ -308,24 +308,7 @@ ugh merge [REMOTE [BRANCH]]
 			<table
 							border=1 bgcolor=black>
 						<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
-			</td></tr>
-			<tr><td>
-				<table cellspacing=5 border=0
-					 style="color:white;">
-				<tr><td>
-					<pre>
-ugh branch
-</pre>
-							</td></tr>
-							</table>
-						</td></tr>
-						</table>
-			</p><p>
-			<table
-							border=1 bgcolor=black>
-						<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
+				<pre>                                                      </pre>
 			</td></tr>
 			<tr><td>
 				<table cellspacing=5 border=0
@@ -339,12 +322,12 @@ ugh branches
 						</td></tr>
 						</table>
 			</p><p>
-			shows the branches.
+			shows the branches. Make a new branch from the current state:
 			</p><p>
 			<table
 							border=1 bgcolor=black>
 						<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
+				<pre>                                                      </pre>
 			</td></tr>
 			<tr><td>
 				<table cellspacing=5 border=0
@@ -358,19 +341,41 @@ ugh branch create BRANCH
 						</td></tr>
 						</table>
 			</p><p>
-			If you want to know what "rebase" means, this is how it would be spelt out:
+			Make a new branch from another state:
 			</p><p>
 			<table
 							border=1 bgcolor=black>
 						<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
+				<pre>                                                      </pre>
 			</td></tr>
 			<tr><td>
 				<table cellspacing=5 border=0
 					 style="color:white;">
 				<tr><td>
 					<pre>
-ugh branch move BRANCH
+ugh branch create BRANCH from OTHER-BRANCH
+</pre>
+							</td></tr>
+							</table>
+						</td></tr>
+						</table>
+			</p><p>
+			where the other branch can be a local or a remote one. If there are more than
+			one possibility, the command asks you.
+			</p><p>
+			If you want to know what "rebase" means, this is how it would be spelt out:
+			</p><p>
+			<table
+							border=1 bgcolor=black>
+						<tr><td bgcolor=lightblue colspan=3>
+				<pre>                                                      </pre>
+			</td></tr>
+			<tr><td>
+				<table cellspacing=5 border=0
+					 style="color:white;">
+				<tr><td>
+					<pre>
+ugh branch move onto BRANCH
 </pre>
 							</td></tr>
 							</table>
@@ -381,12 +386,12 @@ ugh branch move BRANCH
 			</p><p>
 			Now, how to handle "backward compatibility"?
 			</p><p>
-			No backwards compatibility. Not needed. Old farts like us can always use
+			No backwards compatibility. Not needed. Old farts like me can always use
 			</p><p>
 			<table
 							border=1 bgcolor=black>
 						<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
+				<pre>                                                      </pre>
 			</td></tr>
 			<tr><td>
 				<table cellspacing=5 border=0
@@ -405,7 +410,7 @@ git make --me --sad
 			<table
 							border=1 bgcolor=black>
 						<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
+				<pre>                                                      </pre>
 			</td></tr>
 			<tr><td>
 				<table cellspacing=5 border=0
@@ -429,8 +434,9 @@ git make ME^..sad
 			repositories to get from somewhere, so it is obvious why the initial user
 			interface design did not make that easy. Now, you might think that a "git clone"
 			is not too bad, but why all these differences between "clone", "fetch", "pull"?
-			Exactly, because the technical details -- the very same users could not care
-			less about -- are different.
+			This is exactly the problem, because the technical details are different. The 
+			very same details the users could not care less about. The very same details the
+			users should not <u>need</u> to care about.
 			</p>
 			<h6>Friday, 11th of June, Anno Domini MMX, at the hour of the Goat</h6>
 			<a name=1276255806>
