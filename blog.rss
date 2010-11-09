@@ -1,12 +1,358 @@
 <?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
-<title>Dscho's git log</title>
+<title>Dscho's Git log</title>
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Fri, 11 Jun 2010 13:30:59 +0200</lastBuildDate>
+<lastBuildDate>Tue, 09 Nov 2010 18:59:07 +0100</lastBuildDate>
 <language>en-us</language>
+<item>
+<title>Fun brainstorm session about "Users' Git Helper", a potential new porcelain</title>
+<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1289325547</link>
+<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1289325547</guid>
+<pubDate>Tue, 09 Nov 2010 18:59:07 +0100</pubDate>
+<description><![CDATA[Fun brainstorm session about "Users' Git Helper", a potential new porcelain
+</p><p>
+In a not so serious Skype conversation, the issue of Git's usability came
+up. Once again. It is a sad thing that still, the user interface design of
+Git has nothing in common with the straight-forward, beautiful and simple
+design of the data structures beneath.
+</p><p>
+It is still quite common for me to suggest using Subversion to other people
+because it is easier to use.
+</p><p>
+So the idea was to have a new "porcelain" for Git, which would try much,
+much harder to be intuitive than all the other porcelains which try to fix
+the user interface warts of the Git command line interface.
+</p><p>
+In other words, the idea is that there is no way you can fix the command-line
+interface, for a number of reasons, not the least of which is the inertia of
+a precious few power-users, which according to <a href="http://developer.apple.com/library/mac/documentation/UserExperience/Conceptual/AppleHIGuidelines/XHIGIntro/XHIGIntro.html">Apple's Human Interface Guidelines</a> is not a good thing:
+<a href="http://developer.apple.com/library/mac/documentation/UserExperience/Conceptual/AppleHIGuidelines/XHIGDesignProcess/XHIGDesignProcess.html#//apple_ref/doc/uid/TP40002718-TPXREF136">"If you try to design for the 20 percent of your target audience who are power users, your design may not be usable by the other 80 percent of users."</a>. Just as an example, what does splitting a mailbox into individual mails have to do with Version Control? Exactly.
+</p><p>
+Guiding principle would be the 80 percent solution, or analogously:
+</p><p>
+<ul>
+<li> Optimize for the common case.
+<li> Make the simple easy and the difficult possible.
+<li> Before the green button, the Xerox machine was unusable.
+</ul>
+</p><p>
+So many different ways to describe the same thing &#x263a;
+</p><p>
+But enough of the philosophical talk. Let's look at some possible interface design. First things first, the name. Users' Git Helper:
+</p><p>
+<table
+				border=1 bgcolor=white>
+			<tr><td bgcolor=lightblue colspan=3>
+				<pre>                                                                                </pre>
+			</td></tr>
+			<tr><td>
+				<table cellspacing=5 border=0
+					 style="color:black;">
+				<tr><td>
+					<pre>
+ugh
+</pre>
+				</td></tr>
+				</table>
+			</td></tr>
+			</table>
+</p><p>
+The first thing you usually want to do<sup><a name="ref-1" /><a href="#foot-1">1</a></sup>: get the project from somewhere:
+</p><p>
+<table
+				border=1 bgcolor=white>
+			<tr><td bgcolor=lightblue colspan=3>
+				<pre>                                                                                </pre>
+			</td></tr>
+			<tr><td>
+				<table cellspacing=5 border=0
+					 style="color:black;">
+				<tr><td>
+					<pre>
+ugh get URL
+</pre>
+				</td></tr>
+				</table>
+			</td></tr>
+			</table>
+</p><p>
+The next thing is probably that you want to look at what you got.
+</p><p>
+<table
+				border=1 bgcolor=white>
+			<tr><td bgcolor=lightblue colspan=3>
+				<pre>                                                                                </pre>
+			</td></tr>
+			<tr><td>
+				<table cellspacing=5 border=0
+					 style="color:black;">
+				<tr><td>
+					<pre>
+ugh show [ANYTHING, INCLUDING COMMIT NAMES]
+</pre>
+				</td></tr>
+				</table>
+			</td></tr>
+			</table>
+</p><p>
+It would default at showing the current commit, with the branch name and then
+the abbreviated commit name in parentheses.
+</p><p>
+In general, no command would show the usage when called without options. That
+is what
+</p><p>
+<table
+				border=1 bgcolor=white>
+			<tr><td bgcolor=lightblue colspan=3>
+				<pre>                                                                                </pre>
+			</td></tr>
+			<tr><td>
+				<table cellspacing=5 border=0
+					 style="color:black;">
+				<tr><td>
+					<pre>
+ugh help COMMAND
+</pre>
+				</td></tr>
+				</table>
+			</td></tr>
+			</table>
+</p><p>
+is for. And this command would not call 'man' to do the job. It would do the
+job.
+</p><p>
+<table
+				border=1 bgcolor=white>
+			<tr><td bgcolor=lightblue colspan=3>
+				<pre>                                                                                </pre>
+			</td></tr>
+			<tr><td>
+				<table cellspacing=5 border=0
+					 style="color:black;">
+				<tr><td>
+					<pre>
+ugh commit
+</pre>
+				</td></tr>
+				</table>
+			</td></tr>
+			</table>
+</p><p>
+would have no options, as it tries to discover what is there, and lets the user
+choose between options, most sensible ones first.
+</p><p>
+To share your work with others,
+</p><p>
+<table
+				border=1 bgcolor=white>
+			<tr><td bgcolor=lightblue colspan=3>
+				<pre>                                                                                </pre>
+			</td></tr>
+			<tr><td>
+				<table cellspacing=5 border=0
+					 style="color:black;">
+				<tr><td>
+					<pre>
+ugh publish [REMOTE]
+</pre>
+				</td></tr>
+				</table>
+			</td></tr>
+			</table>
+</p><p>
+would do that. The default remote would be the one from which you branched off.
+</p><p>
+Oh, and of course, there <a href="http://developer.apple.com/library/mac/documentation/UserExperience/Conceptual/AppleHIGuidelines/XHIGHIDesign/XHIGHIDesign.html#//apple_ref/doc/uid/TP30000353-TPXREF107">must be an undo</a>:
+</p><p>
+<table
+				border=1 bgcolor=white>
+			<tr><td bgcolor=lightblue colspan=3>
+				<pre>                                                                                </pre>
+			</td></tr>
+			<tr><td>
+				<table cellspacing=5 border=0
+					 style="color:black;">
+				<tr><td>
+					<pre>
+ugh undo
+</pre>
+				</td></tr>
+				</table>
+			</td></tr>
+			</table>
+</p><p>
+The 'undo' command must be intelligent about what makes sense and what not.
+For example, once published, the commit should not be undoable, except on
+another branch. And undoing a "publish" should not be possible, except if
+the respective remote is marked as "personal", and the user should be told
+how to set this conveniently.
+</p><p>
+Inside a repository, "ugh get" would try to pull the tracked branch if it
+fast-forwards (but it would not say the word "fast-forward"; I had to explain
+the meaning of that term one hundred billion times; one hundred billion times
+too many, if you ask me), but fetch in any case and error out with the message
+that there are local commits in addition to remote ones, so a merge is
+necessary:
+</p><p>
+<table
+				border=1 bgcolor=white>
+			<tr><td bgcolor=lightblue colspan=3>
+				<pre>                                                                                </pre>
+			</td></tr>
+			<tr><td>
+				<table cellspacing=5 border=0
+					 style="color:black;">
+				<tr><td>
+					<pre>
+ugh merge [REMOTE [BRANCH]]
+</pre>
+				</td></tr>
+				</table>
+			</td></tr>
+			</table>
+</p><p>
+Since people are familiar with other commands, "ugh <command> --help" would be
+an alias to "ugh help <command>". But it would not be advertised in the
+documentation, because documentation is where you learn how the program is
+intended to be used.
+</p><p>
+No rebase.
+</p><p>
+What is a "rebase"? What would you have answered in 2004? Me, too, I would have
+said "dunno, tell me!".
+</p><p>
+So it is all about branches.
+</p><p>
+<table
+				border=1 bgcolor=white>
+			<tr><td bgcolor=lightblue colspan=3>
+				<pre>                                                                                </pre>
+			</td></tr>
+			<tr><td>
+				<table cellspacing=5 border=0
+					 style="color:black;">
+				<tr><td>
+					<pre>
+ugh branch
+</pre>
+				</td></tr>
+				</table>
+			</td></tr>
+			</table>
+</p><p>
+<table
+				border=1 bgcolor=white>
+			<tr><td bgcolor=lightblue colspan=3>
+				<pre>                                                                                </pre>
+			</td></tr>
+			<tr><td>
+				<table cellspacing=5 border=0
+					 style="color:black;">
+				<tr><td>
+					<pre>
+ugh branches
+</pre>
+				</td></tr>
+				</table>
+			</td></tr>
+			</table>
+</p><p>
+shows the branches.
+</p><p>
+<table
+				border=1 bgcolor=white>
+			<tr><td bgcolor=lightblue colspan=3>
+				<pre>                                                                                </pre>
+			</td></tr>
+			<tr><td>
+				<table cellspacing=5 border=0
+					 style="color:black;">
+				<tr><td>
+					<pre>
+ugh branch create BRANCH
+</pre>
+				</td></tr>
+				</table>
+			</td></tr>
+			</table>
+</p><p>
+If you want to know what "rebase" means, this is how it would be spelt out:
+</p><p>
+<table
+				border=1 bgcolor=white>
+			<tr><td bgcolor=lightblue colspan=3>
+				<pre>                                                                                </pre>
+			</td></tr>
+			<tr><td>
+				<table cellspacing=5 border=0
+					 style="color:black;">
+				<tr><td>
+					<pre>
+ugh branch move BRANCH
+</pre>
+				</td></tr>
+				</table>
+			</td></tr>
+			</table>
+</p><p>
+Or something else, if you can come up with a more sensible name.
+</p><p>
+Now, how to handle "backward compatibility"?
+</p><p>
+No backwards compatibility. Not needed. Old farts like us can always use
+</p><p>
+<table
+				border=1 bgcolor=white>
+			<tr><td bgcolor=lightblue colspan=3>
+				<pre>                                                                                </pre>
+			</td></tr>
+			<tr><td>
+				<table cellspacing=5 border=0
+					 style="color:black;">
+				<tr><td>
+					<pre>
+git make --me --sad
+</pre>
+				</td></tr>
+				</table>
+			</td></tr>
+			</table>
+</p><p>
+or even
+</p><p>
+<table
+				border=1 bgcolor=white>
+			<tr><td bgcolor=lightblue colspan=3>
+				<pre>                                                                                </pre>
+			</td></tr>
+			<tr><td>
+				<table cellspacing=5 border=0
+					 style="color:black;">
+				<tr><td>
+					<pre>
+git make ME^..sad
+</pre>
+				</td></tr>
+				</table>
+			</td></tr>
+			</table>
+</p><p>
+By the way, even the usability of the string "ugh" is thought through: if you
+use just one hand to type it very quickly, you end up with the correct finger
+in the end.
+</p><p>
+<h4>Footnotes</h4>
+</p><p>
+<a name="foot-1" /><a href="#ref-1">1</a>: In the olden days, there were no
+repositories to get from somewhere, so it is obvious why the initial user
+interface design did not make that easy. Now, you might think that a "git clone"
+is not too bad, but why all these differences between "clone", "fetch", "pull"?
+Exactly, because the technical details -- the very same users could not care
+less about -- are different.]]></description>
+</item>
 <item>
 <title>New msysGit imminent</title>
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1276255806</link>
@@ -274,19 +620,6 @@ anyway, so start and end are sufficient).
 </p><p>
 The current progress can be seen <a href=http://repo.or.cz/w/egit/dscho.git/>
 here</a>.]]></description>
-</item>
-<item>
-<title>No time for Git</title>
-<link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1239975597</link>
-<guid>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html#1239975597</guid>
-<pubDate>Fri, 17 Apr 2009 15:39:57 +0200</pubDate>
-<description><![CDATA[No time for Git
-</p><p>
-It is a shame, but most of my Git time budget is taken by msysGit these
-days.
-</p><p>
-But at least msysGit is moving again; I'll probably write a Herald about
-it.]]></description>
 </item>
 </channel>
 </rss>
