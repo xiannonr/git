@@ -289,6 +289,7 @@ make_html () {
 	text_style="$text_style;margin-top:50px"
 	text_style="$text_style;align:left"
 	text_style="$text_style;vertical-align:top;"
+	text_style="$text_style;font-family: Arial, sans-serif;"
 	cat << EOF
 <html>
 	<head>
