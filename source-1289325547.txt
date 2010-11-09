@@ -96,8 +96,8 @@ necessary:
 ugh merge [REMOTE [BRANCH]]
 </bash>
 
-Since people are familiar with other commands, "ugh <command> --help" would be
-an alias to "ugh help <command>". But it would not be advertised in the
+Since people are familiar with other commands, "ugh COMMAND --help" would be
+an alias to "ugh help COMMAND". But it would not be advertised in the
 documentation, because documentation is where you learn how the program is
 intended to be used.
 
@@ -109,30 +109,35 @@ said "dunno, tell me!".
 So it is all about branches.
 
 <bash>
-ugh branch
-</bash>
-
-<bash>
 ugh branches
 </bash>
 
-shows the branches.
+shows the branches. Make a new branch from the current state:
 
 <bash>
 ugh branch create BRANCH
 </bash>
 
+Make a new branch from another state:
+
+<bash>
+ugh branch create BRANCH from OTHER-BRANCH
+</bash>
+
+where the other branch can be a local or a remote one. If there are more than
+one possibility, the command asks you.
+
 If you want to know what "rebase" means, this is how it would be spelt out:
 
 <bash>
-ugh branch move BRANCH
+ugh branch move onto BRANCH
 </bash>
 
 Or something else, if you can come up with a more sensible name.
 
 Now, how to handle "backward compatibility"?
 
-No backwards compatibility. Not needed. Old farts like us can always use
+No backwards compatibility. Not needed. Old farts like me can always use
 
 <bash>
 git make --me --sad
@@ -154,5 +159,6 @@ in the end.
 repositories to get from somewhere, so it is obvious why the initial user
 interface design did not make that easy. Now, you might think that a "git clone"
 is not too bad, but why all these differences between "clone", "fetch", "pull"?
-Exactly, because the technical details -- the very same users could not care
-less about -- are different.
+This is exactly the problem, because the technical details are different. The 
+very same details the users could not care less about. The very same details the
+users should not _need_ to care about.
