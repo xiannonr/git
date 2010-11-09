@@ -5,7 +5,7 @@
 <link>http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=index.html</link>
 <atom:link href="http://repo.or.cz/w/git/dscho.git?a=blob_plain;hb=blog;f=blog.rss" rel="self" type="application/rss+xml"/>
 <description>A few stories told by Dscho</description>
-<lastBuildDate>Tue, 09 Nov 2010 18:59:07 +0100</lastBuildDate>
+<lastBuildDate>Tue, 09 Nov 2010 19:13:33 +0100</lastBuildDate>
 <language>en-us</language>
 <item>
 <title>Fun brainstorm session about "Users' Git Helper", a potential new porcelain</title>
@@ -46,7 +46,7 @@ But enough of the philosophical talk. Let's look at some possible interface desi
 <table
 				border=1 bgcolor=white>
 			<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
+				<pre>                                                      </pre>
 			</td></tr>
 			<tr><td>
 				<table cellspacing=5 border=0
@@ -65,7 +65,7 @@ The first thing you usually want to do<sup><a name="ref-1" /><a href="#foot-1">1
 <table
 				border=1 bgcolor=white>
 			<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
+				<pre>                                                      </pre>
 			</td></tr>
 			<tr><td>
 				<table cellspacing=5 border=0
@@ -84,7 +84,7 @@ The next thing is probably that you want to look at what you got.
 <table
 				border=1 bgcolor=white>
 			<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
+				<pre>                                                      </pre>
 			</td></tr>
 			<tr><td>
 				<table cellspacing=5 border=0
@@ -107,7 +107,7 @@ is what
 <table
 				border=1 bgcolor=white>
 			<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
+				<pre>                                                      </pre>
 			</td></tr>
 			<tr><td>
 				<table cellspacing=5 border=0
@@ -127,7 +127,7 @@ job.
 <table
 				border=1 bgcolor=white>
 			<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
+				<pre>                                                      </pre>
 			</td></tr>
 			<tr><td>
 				<table cellspacing=5 border=0
@@ -149,7 +149,7 @@ To share your work with others,
 <table
 				border=1 bgcolor=white>
 			<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
+				<pre>                                                      </pre>
 			</td></tr>
 			<tr><td>
 				<table cellspacing=5 border=0
@@ -170,7 +170,7 @@ Oh, and of course, there <a href="http://developer.apple.com/library/mac/documen
 <table
 				border=1 bgcolor=white>
 			<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
+				<pre>                                                      </pre>
 			</td></tr>
 			<tr><td>
 				<table cellspacing=5 border=0
@@ -200,7 +200,7 @@ necessary:
 <table
 				border=1 bgcolor=white>
 			<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
+				<pre>                                                      </pre>
 			</td></tr>
 			<tr><td>
 				<table cellspacing=5 border=0
@@ -214,8 +214,8 @@ ugh merge [REMOTE [BRANCH]]
 			</td></tr>
 			</table>
 </p><p>
-Since people are familiar with other commands, "ugh <command> --help" would be
-an alias to "ugh help <command>". But it would not be advertised in the
+Since people are familiar with other commands, "ugh COMMAND --help" would be
+an alias to "ugh help COMMAND". But it would not be advertised in the
 documentation, because documentation is where you learn how the program is
 intended to be used.
 </p><p>
@@ -229,24 +229,7 @@ So it is all about branches.
 <table
 				border=1 bgcolor=white>
 			<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
-			</td></tr>
-			<tr><td>
-				<table cellspacing=5 border=0
-					 style="color:black;">
-				<tr><td>
-					<pre>
-ugh branch
-</pre>
-				</td></tr>
-				</table>
-			</td></tr>
-			</table>
-</p><p>
-<table
-				border=1 bgcolor=white>
-			<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
+				<pre>                                                      </pre>
 			</td></tr>
 			<tr><td>
 				<table cellspacing=5 border=0
@@ -260,12 +243,12 @@ ugh branches
 			</td></tr>
 			</table>
 </p><p>
-shows the branches.
+shows the branches. Make a new branch from the current state:
 </p><p>
 <table
 				border=1 bgcolor=white>
 			<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
+				<pre>                                                      </pre>
 			</td></tr>
 			<tr><td>
 				<table cellspacing=5 border=0
@@ -279,19 +262,41 @@ ugh branch create BRANCH
 			</td></tr>
 			</table>
 </p><p>
-If you want to know what "rebase" means, this is how it would be spelt out:
+Make a new branch from another state:
 </p><p>
 <table
 				border=1 bgcolor=white>
 			<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
+				<pre>                                                      </pre>
 			</td></tr>
 			<tr><td>
 				<table cellspacing=5 border=0
 					 style="color:black;">
 				<tr><td>
 					<pre>
-ugh branch move BRANCH
+ugh branch create BRANCH from OTHER-BRANCH
+</pre>
+				</td></tr>
+				</table>
+			</td></tr>
+			</table>
+</p><p>
+where the other branch can be a local or a remote one. If there are more than
+one possibility, the command asks you.
+</p><p>
+If you want to know what "rebase" means, this is how it would be spelt out:
+</p><p>
+<table
+				border=1 bgcolor=white>
+			<tr><td bgcolor=lightblue colspan=3>
+				<pre>                                                      </pre>
+			</td></tr>
+			<tr><td>
+				<table cellspacing=5 border=0
+					 style="color:black;">
+				<tr><td>
+					<pre>
+ugh branch move onto BRANCH
 </pre>
 				</td></tr>
 				</table>
@@ -302,12 +307,12 @@ Or something else, if you can come up with a more sensible name.
 </p><p>
 Now, how to handle "backward compatibility"?
 </p><p>
-No backwards compatibility. Not needed. Old farts like us can always use
+No backwards compatibility. Not needed. Old farts like me can always use
 </p><p>
 <table
 				border=1 bgcolor=white>
 			<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
+				<pre>                                                      </pre>
 			</td></tr>
 			<tr><td>
 				<table cellspacing=5 border=0
@@ -326,7 +331,7 @@ or even
 <table
 				border=1 bgcolor=white>
 			<tr><td bgcolor=lightblue colspan=3>
-				<pre>                                                                                </pre>
+				<pre>                                                      </pre>
 			</td></tr>
 			<tr><td>
 				<table cellspacing=5 border=0
@@ -350,8 +355,9 @@ in the end.
 repositories to get from somewhere, so it is obvious why the initial user
 interface design did not make that easy. Now, you might think that a "git clone"
 is not too bad, but why all these differences between "clone", "fetch", "pull"?
-Exactly, because the technical details -- the very same users could not care
-less about -- are different.]]></description>
+This is exactly the problem, because the technical details are different. The 
+very same details the users could not care less about. The very same details the
+users should not <u>need</u> to care about.]]></description>
 </item>
 <item>
 <title>New msysGit imminent</title>
