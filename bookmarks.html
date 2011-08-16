@@ -27,7 +27,7 @@
 <ul>
 <li><a href="http://www.heise.de/newsticker/">heise online: 7-Tage-News</a>
 <li><a href="http://www.zeit.de/">ZEIT online</a>
-<li><a href="http://www.spiegel.de/">Spiegel Online</a>
+<li><a href="http://www.spiegel.de/" android="http://m.spiegel.de/index.html">Spiegel Online</a>
 <li><a href="http://blog.zeit.de/weisslog/">Die Zeit - Weisslog</a>
 <li><a href="http://www.brandeins.de/home/index.asp">brand eins Online - Das Wirtschaftsmagazin</a>
 <li><a href="http://www.ikp.uni-bonn.de/kant/">Kants Gesammelte Werke</a>
@@ -93,5 +93,16 @@
 </td>
 </tr>
 </table>
+<script>
+	var ua = navigator.userAgent.toLowerCase();
+	var isAndroid = ua.indexOf("android") > -1;
+
+	if (isAndroid) {
+		var a = document.getElementsByTagName('a');
+		for (var i = 0; i < a.length; i++)
+			if (a[i].getAttribute('android'))
+				a[i].href = a[i].getAttribute('android');
+	}
+</script>
 </body>
 </html>
