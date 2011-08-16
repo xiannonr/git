@@ -102,6 +102,16 @@
 		for (var i = 0; i < a.length; i++)
 			if (a[i].getAttribute('android'))
 				a[i].href = a[i].getAttribute('android');
+
+		var row = document.getElementsByTagName('tr')[0];
+		var left = row.childNodes[1];
+		var right = row.childNodes[3];
+		while (right.childNodes.length > 0) {
+			var child = right.childNodes[0];
+			right.removeChild(child);
+			left.appendChild(child);
+		}
+		row.removeChild(right);
 	}
 </script>
 </body>
