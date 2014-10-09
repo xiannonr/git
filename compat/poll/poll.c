@@ -76,6 +76,18 @@
 
 #ifdef WIN32_NATIVE
 
+/*
+ * Work around https://sourceforge.net/p/mingw-w64/bugs/397. In short, some
+ * definitions were put into the GUI-only section of winuser.h by mistake
+ * in MinGW-w64 versions up to 3.1.0.
+ */
+#ifndef QS_ALLINPUT
+#define QS_ALLINPUT 0xff
+extern WINUSERAPI DWORD WINAPI MsgWaitForMultipleObjects(DWORD nCount,
+	CONST HANDLE *pHandles, WINBOOL fWaitAll, DWORD dwMilliseconds,
+	DWORD dwWakeMask);
+#endif
+
 #define IsConsoleHandle(h) (((intptr_t) (h) & 3) == 3)
 
 static BOOL
