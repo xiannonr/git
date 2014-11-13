@@ -76,7 +76,7 @@ static int fsck_error_func(struct object *obj, int type, const char *err, ...)
 
 static struct object_array pending;
 
-static int mark_object(struct object *obj, int type, void *data)
+static int mark_object(struct object *obj, int type, void *data, struct fsck_options *options)
 {
 	struct object *parent = data;
 
@@ -119,12 +119,13 @@ static int mark_object(struct object *obj, int type, void *data)
 
 static void mark_object_reachable(struct object *obj)
 {
-	mark_object(obj, OBJ_ANY, NULL);
+	mark_object(obj, OBJ_ANY, NULL, NULL);
 }
 
 static int traverse_one_object(struct object *obj)
 {
 	int result;
+	struct fsck_options opts = FSCK_OPTIONS_INIT;
 	struct tree *tree = NULL;
 
 	if (obj->type == OBJ_TREE) {
@@ -132,7 +133,8 @@ static int traverse_one_object(struct object *obj)
 		if (parse_tree(tree) < 0)
 			return 1; /* error already displayed */
 	}
-	result = fsck_walk(obj, mark_object, obj);
+	opts.walk = mark_object;
+	result = fsck_walk(obj, obj, &opts);
 	if (tree)
 		free_tree_buffer(tree);
 	return result;
@@ -158,7 +160,7 @@ static int traverse_reachable(void)
 	return !!result;
 }
 
-static int mark_used(struct object *obj, int type, void *data)
+static int mark_used(struct object *obj, int type, void *data, struct fsck_options *options)
 {
 	if (!obj)
 		return 1;
@@ -288,6 +290,8 @@ static void check_connectivity(void)
 
 static int fsck_obj(struct object *obj)
 {
+	struct fsck_options opts = FSCK_OPTIONS_INIT;
+
 	if (obj->flags & SEEN)
 		return 0;
 	obj->flags |= SEEN;
@@ -296,9 +300,13 @@ static int fsck_obj(struct object *obj)
 		fprintf(stderr, "Checking %s %s\n",
 			typename(obj->type), sha1_to_hex(obj->sha1));
 
-	if (fsck_walk(obj, mark_used, NULL))
+	opts.walk = mark_used;
+	opts.error_func = fsck_error_func;
+	if (check_strict)
+		opts.strict = 1;
+	if (fsck_walk(obj, NULL, &opts))
 		objerror(obj, "broken links");
-	if (fsck_object(obj, NULL, 0, check_strict, fsck_error_func))
+	if (fsck_object(obj, NULL, 0, &opts))
 		return -1;
 
 	if (obj->type == OBJ_TREE) {
