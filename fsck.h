@@ -6,6 +6,54 @@
 
 struct fsck_options;
 
+enum fsck_msg_id {
+	FSCK_MSG_NULL_SHA1,
+	FSCK_MSG_FULL_PATHNAME,
+	FSCK_MSG_EMPTY_NAME,
+	FSCK_MSG_HAS_DOT,
+	FSCK_MSG_HAS_DOTDOT,
+	FSCK_MSG_HAS_DOTGIT,
+	FSCK_MSG_ZERO_PADDED_FILEMODE,
+	FSCK_MSG_BAD_FILEMODE,
+	FSCK_MSG_DUPLICATE_ENTRIES,
+	FSCK_MSG_NOT_SORTED,
+	FSCK_MSG_NUL_IN_HEADER,
+	FSCK_MSG_UNTERMINATED_HEADER,
+	FSCK_MSG_MISSING_NAME_BEFORE_EMAIL,
+	FSCK_MSG_BAD_NAME,
+	FSCK_MSG_MISSING_EMAIL,
+	FSCK_MSG_MISSING_SPACE_BEFORE_EMAIL,
+	FSCK_MSG_BAD_EMAIL,
+	FSCK_MSG_MISSING_SPACE_BEFORE_DATE,
+	FSCK_MSG_ZERO_PADDED_DATE,
+	FSCK_MSG_DATE_OVERFLOW,
+	FSCK_MSG_BAD_DATE,
+	FSCK_MSG_BAD_TIMEZONE,
+	FSCK_MSG_MISSING_TREE,
+	FSCK_MSG_BAD_TREE_SHA1,
+	FSCK_MSG_BAD_PARENT_SHA1,
+	FSCK_MSG_MISSING_GRAFT,
+	FSCK_MSG_MISSING_PARENT,
+	FSCK_MSG_MISSING_AUTHOR,
+	FSCK_MSG_MISSING_COMMITTER,
+	FSCK_MSG_INVALID_TREE,
+	FSCK_MSG_MISSING_TAG_OBJECT,
+	FSCK_MSG_TAG_OBJECT_NOT_TAG,
+	FSCK_MSG_MISSING_OBJECT,
+	FSCK_MSG_INVALID_OBJECT_SHA1,
+	FSCK_MSG_MISSING_TYPE_ENTRY,
+	FSCK_MSG_MISSING_TYPE,
+	FSCK_MSG_INVALID_TYPE,
+	FSCK_MSG_MISSING_TAG_ENTRY,
+	FSCK_MSG_MISSING_TAG,
+	FSCK_MSG_INVALID_TAG_NAME,
+	FSCK_MSG_MISSING_TAGGER_ENTRY,
+	FSCK_MSG_INVALID_TAG_OBJECT,
+	FSCK_MSG_UNKNOWN_TYPE
+};
+
+int fsck_msg_type(enum fsck_msg_id msg_id, struct fsck_options *options);
+
 /*
  * callback function for fsck_walk
  * type is the expected type of the object or OBJ_ANY
@@ -17,10 +65,9 @@ struct fsck_options;
 typedef int (*fsck_walk_func)(struct object *obj, int type, void *data, struct fsck_options *options);
 
 /* callback for fsck_object, type is FSCK_ERROR or FSCK_WARN */
-typedef int (*fsck_error)(struct object *obj, int type, const char *err, ...);
+typedef int (*fsck_error)(struct object *obj, int type, const char *message);
 
-__attribute__((format (printf, 3, 4)))
-int fsck_error_function(struct object *obj, int type, const char *fmt, ...);
+int fsck_error_function(struct object *obj, int type, const char *message);
 
 struct fsck_options {
 	fsck_walk_func walk;
