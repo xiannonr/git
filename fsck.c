@@ -98,7 +98,61 @@ static int parse_msg_id(const char *text, int len)
 
 int fsck_msg_type(enum fsck_msg_id msg_id, struct fsck_options *options)
 {
+	if (options->strict_mode && msg_id >= 0 && msg_id < FSCK_MSG_MAX)
+		return options->strict_mode[msg_id];
+	if (options->strict)
+		return FSCK_ERROR;
 	return msg_id < FIRST_WARNING ? FSCK_ERROR : FSCK_WARN;
+}
+
+static inline int substrcmp(const char *string, int len, const char *match)
+{
+	int match_len = strlen(match);
+	if (match_len != len)
+		return -1;
+	return memcmp(string, match, len);
+}
+
+void fsck_strict_mode(struct fsck_options *options, const char *mode)
+{
+	int type = FSCK_ERROR;
+
+	if (!options->strict_mode) {
+		int i;
+		int *strict_mode = malloc(sizeof(int) * FSCK_MSG_MAX);
+		for (i = 0; i < FSCK_MSG_MAX; i++)
+			strict_mode[i] = fsck_msg_type(i, options);
+		options->strict_mode = strict_mode;
+	}
+
+	while (*mode) {
+		int len = strcspn(mode, " ,|"), equal, msg_id;
+
+		if (!len) {
+			mode++;
+			continue;
+		}
+
+		for (equal = 0; equal < len; equal++)
+			if (mode[equal] == '=')
+				break;
+
+		if (equal < len) {
+			const char *type_str = mode + equal + 1;
+			int type_len = len - equal - 1;
+			if (!substrcmp(type_str, type_len, "error"))
+				type = FSCK_ERROR;
+			else if (!substrcmp(type_str, type_len, "warn"))
+				type = FSCK_WARN;
+			else
+				die("Unknown fsck message type: '%.*s'",
+					len - equal - 1, type_str);
+		}
+
+		msg_id = parse_msg_id(mode, equal);
+		options->strict_mode[msg_id] = type;
+		mode += len;
+	}
 }
 
 __attribute__((format (printf, 4, 5)))
@@ -590,6 +644,10 @@ int fsck_object(struct object *obj, void *data, unsigned long size,
 
 int fsck_error_function(struct object *obj, int type, const char *message)
 {
+	if (type == FSCK_WARN) {
+		warning("object %s: %s", sha1_to_hex(obj->sha1), message);
+		return 0;
+	}
 	error("object %s: %s", sha1_to_hex(obj->sha1), message);
 	return 1;
 }
