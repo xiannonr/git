@@ -36,6 +36,7 @@ static enum deny_action deny_current_branch = DENY_UNCONFIGURED;
 static enum deny_action deny_delete_current = DENY_UNCONFIGURED;
 static int receive_fsck_objects = -1;
 static int transfer_fsck_objects = -1;
+static struct strbuf fsck_severity = STRBUF_INIT;
 static int receive_unpack_limit = -1;
 static int transfer_unpack_limit = -1;
 static int advertise_atomic_push = 1;
@@ -112,6 +113,12 @@ static int receive_pack_config(const char *var, const char *value, void *cb)
 
 	if (strcmp(var, "transfer.unpacklimit") == 0) {
 		transfer_unpack_limit = git_config_int(var, value);
+		return 0;
+	}
+
+	if (strcmp(var, "receive.fsck.severity") == 0) {
+		strbuf_addf(&fsck_severity, "%c%s",
+			fsck_severity.len ? ',' : '=', value);
 		return 0;
 	}
 
@@ -1471,7 +1478,8 @@ static const char *unpack(int err_fd, struct shallow_info *si)
 		if (quiet)
 			argv_array_push(&child.args, "-q");
 		if (fsck_objects)
-			argv_array_push(&child.args, "--strict");
+			argv_array_pushf(&child.args, "--strict%s",
+				fsck_severity.buf);
 		child.no_stdout = 1;
 		child.err = err_fd;
 		child.git_cmd = 1;
@@ -1489,7 +1497,8 @@ static const char *unpack(int err_fd, struct shallow_info *si)
 		argv_array_pushl(&child.args, "index-pack",
 				 "--stdin", hdr_arg, keep_arg, NULL);
 		if (fsck_objects)
-			argv_array_push(&child.args, "--strict");
+			argv_array_pushf(&child.args, "--strict%s",
+				fsck_severity.buf);
 		if (fix_thin)
 			argv_array_push(&child.args, "--fix-thin");
 		child.out = -1;
