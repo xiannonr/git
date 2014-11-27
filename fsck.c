@@ -64,6 +64,38 @@ enum fsck_msg_id {
 	FSCK_MSG_MAX
 };
 
+#define STR(x) #x
+#define MSG_ID_STR(x) STR(x),
+static const char *msg_id_str[FSCK_MSG_MAX + 1] = {
+	FOREACH_MSG_ID(MSG_ID_STR)
+	NULL
+};
+
+static int parse_msg_id(const char *text, int len)
+{
+	int i, j;
+
+	for (i = 0; i < FSCK_MSG_MAX; i++) {
+		const char *key = msg_id_str[i];
+		/* msg_id_str is upper-case, with underscores */
+		for (j = 0; j < len; j++) {
+			char c = *(key++);
+			if (c == '_') {
+				if (isalpha(text[j]))
+					c = *(key++);
+				else if (text[j] != '_')
+					c = '-';
+			}
+			if (toupper(text[j]) != c)
+				break;
+		}
+		if (j == len && !*key)
+			return i;
+	}
+
+	die("Unhandled type: %.*s", len, text);
+}
+
 int fsck_msg_type(enum fsck_msg_id msg_id, struct fsck_options *options)
 {
 	return msg_id < FIRST_WARNING ? FSCK_ERROR : FSCK_WARN;
