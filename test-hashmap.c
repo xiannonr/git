@@ -62,6 +62,8 @@ static unsigned int hash(unsigned int method, unsigned int i, const char *key)
 	case HASH_METHOD_0:
 		hash = 0;
 		break;
+	default:
+		die("Unknown method: %d", method);
 	}
 
 	if (method & HASH_METHOD_X2)
