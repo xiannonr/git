@@ -8,6 +8,66 @@
 #include "fsck.h"
 #include "refs.h"
 
+static struct {
+	const char *name;
+	enum fsck_msg_id id;
+} msg_ids[FSCK_MSG_MAX] = {
+	{ "bad_date", FSCK_MSG_BAD_DATE },
+	{ "bad_email", FSCK_MSG_BAD_EMAIL },
+	{ "bad_filemode", FSCK_MSG_BAD_FILEMODE },
+	{ "bad_name", FSCK_MSG_BAD_NAME },
+	{ "bad_parent_sha1", FSCK_MSG_BAD_PARENT_SHA1 },
+	{ "bad_timezone", FSCK_MSG_BAD_TIMEZONE },
+	{ "bad_tree_sha1", FSCK_MSG_BAD_TREE_SHA1 },
+	{ "date_overflow", FSCK_MSG_DATE_OVERFLOW },
+	{ "duplicate_entries", FSCK_MSG_DUPLICATE_ENTRIES },
+	{ "empty_name", FSCK_MSG_EMPTY_NAME },
+	{ "full_pathname", FSCK_MSG_FULL_PATHNAME },
+	{ "has_dot", FSCK_MSG_HAS_DOT },
+	{ "has_dotdot", FSCK_MSG_HAS_DOTDOT },
+	{ "has_dotgit", FSCK_MSG_HAS_DOTGIT },
+	{ "invalid_object_sha1", FSCK_MSG_INVALID_OBJECT_SHA1 },
+	{ "invalid_tag_name", FSCK_MSG_INVALID_TAG_NAME },
+	{ "invalid_tag_object", FSCK_MSG_INVALID_TAG_OBJECT },
+	{ "invalid_tree", FSCK_MSG_INVALID_TREE },
+	{ "invalid_type", FSCK_MSG_INVALID_TYPE },
+	{ "missing_author", FSCK_MSG_MISSING_AUTHOR },
+	{ "missing_committer", FSCK_MSG_MISSING_COMMITTER },
+	{ "missing_email", FSCK_MSG_MISSING_EMAIL },
+	{ "missing_graft", FSCK_MSG_MISSING_GRAFT },
+	{ "missing_name_before_email", FSCK_MSG_MISSING_NAME_BEFORE_EMAIL },
+	{ "missing_object", FSCK_MSG_MISSING_OBJECT },
+	{ "missing_parent", FSCK_MSG_MISSING_PARENT },
+	{ "missing_space_before_date", FSCK_MSG_MISSING_SPACE_BEFORE_DATE },
+	{ "missing_space_before_email", FSCK_MSG_MISSING_SPACE_BEFORE_EMAIL },
+	{ "missing_tag", FSCK_MSG_MISSING_TAG },
+	{ "missing_tag_entry", FSCK_MSG_MISSING_TAG_ENTRY },
+	{ "missing_tag_object", FSCK_MSG_MISSING_TAG_OBJECT },
+	{ "missing_tagger_entry", FSCK_MSG_MISSING_TAGGER_ENTRY },
+	{ "missing_tree", FSCK_MSG_MISSING_TREE },
+	{ "missing_type", FSCK_MSG_MISSING_TYPE },
+	{ "missing_type_entry", FSCK_MSG_MISSING_TYPE_ENTRY },
+	{ "not_sorted", FSCK_MSG_NOT_SORTED },
+	{ "nul_in_header", FSCK_MSG_NUL_IN_HEADER },
+	{ "null_sha1", FSCK_MSG_NULL_SHA1 },
+	{ "tag_object_not_tag", FSCK_MSG_TAG_OBJECT_NOT_TAG },
+	{ "unknown_type", FSCK_MSG_UNKNOWN_TYPE },
+	{ "unterminated_header", FSCK_MSG_UNTERMINATED_HEADER },
+	{ "zero_padded_date", FSCK_MSG_ZERO_PADDED_DATE },
+	{ "zero_padded_filemode", FSCK_MSG_ZERO_PADDED_FILEMODE }
+};
+
+static int parse_msg_id(const char *text, int len)
+{
+	int i;
+
+	for (i = 0; i < FSCK_MSG_MAX; i++)
+		if (!strncasecmp(text, msg_ids[i].name, len))
+			return msg_ids[i].id;
+
+	die("Unhandled type: %.*s", len, text);
+}
+
 int fsck_msg_type(enum fsck_msg_id msg_id, struct fsck_options *options)
 {
 	switch (msg_id) {
