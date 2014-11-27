@@ -68,8 +68,44 @@ static int parse_msg_id(const char *text, int len)
 	die("Unhandled type: %.*s", len, text);
 }
 
+void fsck_strict_mode(struct fsck_options *options, const char *mode)
+{
+	int type;
+
+	if (!options->strict_mode) {
+		int i;
+		int *strict_mode = malloc(sizeof(int) * FSCK_MSG_MAX);
+		for (i = 0; i < FSCK_MSG_MAX; i++)
+			strict_mode[i] = fsck_msg_type(i, options);
+		options->strict_mode = strict_mode;
+	}
+
+	while (*mode) {
+		int len = strcspn(mode, " ,|");
+
+		if (!len) {
+			mode++;
+			continue;
+		}
+
+		if (*mode != '+' && *mode != '-')
+			type = FSCK_ERROR;
+		else {
+			type = *mode == '+' ? FSCK_ERROR : FSCK_WARN;
+			mode++;
+			len--;
+		}
+		options->strict_mode[parse_msg_id(mode, len)] = type;
+
+		mode += len;
+	}
+}
+
 int fsck_msg_type(enum fsck_msg_id msg_id, struct fsck_options *options)
 {
+	if (options->strict_mode && msg_id >= 0 && msg_id < FSCK_MSG_MAX)
+		return options->strict_mode[msg_id];
+
 	switch (msg_id) {
 	case FSCK_MSG_BAD_DATE:
 	case FSCK_MSG_BAD_EMAIL:
@@ -104,6 +140,7 @@ int fsck_msg_type(enum fsck_msg_id msg_id, struct fsck_options *options)
 	case FSCK_MSG_UNKNOWN_TYPE:
 	case FSCK_MSG_UNTERMINATED_HEADER:
 	case FSCK_MSG_ZERO_PADDED_DATE:
+	case FSCK_MSG_MAX:
 		return FSCK_ERROR;
 	case FSCK_MSG_BAD_FILEMODE:
 	case FSCK_MSG_EMPTY_NAME:
@@ -607,6 +644,10 @@ int fsck_object(struct object *obj, void *data, unsigned long size,
 
 int fsck_error_function(struct object *obj, int type, const char *message)
 {
+	if (type == FSCK_WARN) {
+		warning("object %s: %s", sha1_to_hex(obj->sha1), message);
+		return 0;
+	}
 	error("object %s: %s", sha1_to_hex(obj->sha1), message);
 	return 1;
 }

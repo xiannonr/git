@@ -49,9 +49,11 @@ enum fsck_msg_id {
 	FSCK_MSG_INVALID_TAG_NAME,
 	FSCK_MSG_MISSING_TAGGER_ENTRY,
 	FSCK_MSG_INVALID_TAG_OBJECT,
-	FSCK_MSG_UNKNOWN_TYPE
+	FSCK_MSG_UNKNOWN_TYPE,
+	FSCK_MSG_MAX
 };
 
+void fsck_strict_mode(struct fsck_options *options, const char *mode);
 int fsck_msg_type(enum fsck_msg_id msg_id, struct fsck_options *options);
 
 /*
@@ -73,10 +75,11 @@ struct fsck_options {
 	fsck_walk_func walk;
 	fsck_error error_func;
 	int strict:1;
+	int *strict_mode;
 };
 
-#define FSCK_OPTIONS_INIT { NULL, fsck_error_function, 0 }
-#define FSCK_OPTIONS_STRICT { NULL, fsck_error_function, 1 }
+#define FSCK_OPTIONS_INIT { NULL, fsck_error_function, 0, NULL }
+#define FSCK_OPTIONS_STRICT { NULL, fsck_error_function, 1, NULL }
 
 /* descend in all linked child objects
  * the return value is:
