@@ -117,8 +117,8 @@ test_expect_success 'push with transfer.fsckobjects' '
 
 cat >bogus-commit << EOF
 tree 4b825dc642cb6eb9a060e54bf8d69288fbee4904
-author Bugs Bunny <bugs@bun.ni> 1234567890 +0000
-committer Bugs Bunny 1234567890 +0000
+author Bugs Bunny 1234567890 +0000
+committer Bugs Bunny <bugs@bun.ni> 1234567890 +0000
 
 This commit object intentionally broken
 EOF
