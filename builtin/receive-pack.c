@@ -35,6 +35,7 @@ static enum deny_action deny_current_branch = DENY_UNCONFIGURED;
 static enum deny_action deny_delete_current = DENY_UNCONFIGURED;
 static int receive_fsck_objects = -1;
 static int transfer_fsck_objects = -1;
+static const char *fsck_strict_mode;
 static int receive_unpack_limit = -1;
 static int transfer_unpack_limit = -1;
 static int unpack_limit = 100;
@@ -110,8 +111,13 @@ static int receive_pack_config(const char *var, const char *value, void *cb)
 	}
 
 	if (strcmp(var, "receive.fsckobjects") == 0) {
-		receive_fsck_objects = git_config_bool(var, value);
-		return 0;
+		int fsck = git_config_maybe_bool(var, value);
+		if (fsck != -1) {
+			receive_fsck_objects = fsck;
+			return 0;
+		}
+		receive_fsck_objects = 1;
+		return git_config_string(&fsck_strict_mode, var, value);
 	}
 
 	if (strcmp(var, "transfer.fsckobjects") == 0) {
@@ -1266,8 +1272,13 @@ static const char *unpack(int err_fd, struct shallow_info *si)
 		argv_array_pushl(&child.args, "unpack-objects", hdr_arg, NULL);
 		if (quiet)
 			argv_array_push(&child.args, "-q");
-		if (fsck_objects)
-			argv_array_push(&child.args, "--strict");
+		if (fsck_objects) {
+			if (fsck_strict_mode)
+				argv_array_pushf(&child.args, "--strict=%s",
+					fsck_strict_mode);
+			else
+				argv_array_push(&child.args, "--strict");
+		}
 		child.no_stdout = 1;
 		child.err = err_fd;
 		child.git_cmd = 1;
@@ -1284,8 +1295,13 @@ static const char *unpack(int err_fd, struct shallow_info *si)
 
 		argv_array_pushl(&child.args, "index-pack",
 				 "--stdin", hdr_arg, keep_arg, NULL);
-		if (fsck_objects)
-			argv_array_push(&child.args, "--strict");
+		if (fsck_objects) {
+			if (fsck_strict_mode)
+				argv_array_pushf(&child.args, "--strict=%s",
+					fsck_strict_mode);
+			else
+				argv_array_push(&child.args, "--strict");
+		}
 		if (fix_thin)
 			argv_array_push(&child.args, "--fix-thin");
 		child.out = -1;
