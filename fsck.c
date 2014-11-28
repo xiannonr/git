@@ -9,7 +9,12 @@
 #include "refs.h"
 #include "utf8.h"
 
+#define FSCK_FATAL -1
+
 #define FOREACH_MSG_ID(FUNC) \
+	/* fatal errors */ \
+	FUNC(NUL_IN_HEADER, FATAL) \
+	FUNC(UNTERMINATED_HEADER, FATAL) \
 	/* errors */ \
 	FUNC(BAD_DATE, ERROR) \
 	FUNC(BAD_EMAIL, ERROR) \
@@ -40,10 +45,8 @@
 	FUNC(MISSING_TYPE_ENTRY, ERROR) \
 	FUNC(MULTIPLE_AUTHORS, ERROR) \
 	FUNC(NOT_SORTED, ERROR) \
-	FUNC(NUL_IN_HEADER, ERROR) \
 	FUNC(TAG_OBJECT_NOT_TAG, ERROR) \
 	FUNC(UNKNOWN_TYPE, ERROR) \
-	FUNC(UNTERMINATED_HEADER, ERROR) \
 	FUNC(ZERO_PADDED_DATE, ERROR) \
 	/* warnings */ \
 	FUNC(BAD_FILEMODE, WARN) \
@@ -163,6 +166,9 @@ void fsck_set_severity(struct fsck_options *options, const char *mode)
 					len2, p);
 		}
 
+		if (severity != FSCK_ERROR &&
+				msg_id_info[msg_id].severity == FSCK_FATAL)
+			die("Cannot demote %.*s", len, mode);
 		options->msg_severity[msg_id] = severity;
 		mode += len;
 	}
@@ -192,6 +198,9 @@ static int report(struct fsck_options *options, struct object *object,
 	va_list ap;
 	struct strbuf sb = STRBUF_INIT;
 	int msg_severity = fsck_msg_severity(id, options), result;
+
+	if (msg_severity == FSCK_FATAL)
+		msg_severity = FSCK_ERROR;
 
 	append_msg_id(&sb, msg_id_info[id].id_string);
 
