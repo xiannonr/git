@@ -10,6 +10,9 @@
 #include "utf8.h"
 
 #define FOREACH_MSG_ID(FUNC) \
+	/* fatal errors */ \
+	FUNC(NUL_IN_HEADER) \
+	FUNC(UNTERMINATED_HEADER) \
 	/* errors */ \
 	FUNC(BAD_DATE) \
 	FUNC(BAD_EMAIL) \
@@ -40,10 +43,8 @@
 	FUNC(MISSING_TYPE_ENTRY) \
 	FUNC(MULTIPLE_AUTHORS) \
 	FUNC(NOT_SORTED) \
-	FUNC(NUL_IN_HEADER) \
 	FUNC(TAG_OBJECT_NOT_TAG) \
 	FUNC(UNKNOWN_TYPE) \
-	FUNC(UNTERMINATED_HEADER) \
 	FUNC(ZERO_PADDED_DATE) \
 	/* warnings */ \
 	FUNC(BAD_FILEMODE) \
@@ -57,6 +58,7 @@
 	FUNC(NULL_SHA1) \
 	FUNC(ZERO_PADDED_FILEMODE)
 
+#define FIRST_NON_FATAL_ERROR FSCK_MSG_BAD_DATE
 #define FIRST_WARNING FSCK_MSG_BAD_FILEMODE
 
 #define MSG_ID(x) FSCK_MSG_##x,
@@ -151,6 +153,8 @@ void fsck_strict_mode(struct fsck_options *options, const char *mode)
 		}
 
 		msg_id = parse_msg_id(mode, equal);
+		if (type != FSCK_ERROR && msg_id < FIRST_NON_FATAL_ERROR)
+			die("Cannot demote %.*s", len, mode);
 		options->strict_mode[msg_id] = type;
 		mode += len;
 	}
