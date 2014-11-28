@@ -135,4 +135,13 @@ test_expect_success 'push with receive.fsck.missing-mail = warn' '
 	grep "missing-email" act
 '
 
+test_expect_success 'receive.fsck.unterminated-header = warn triggers error' '
+	rm -rf dst &&
+	git init dst &&
+	git --git-dir=dst/.git config receive.fsckobjects true &&
+	git --git-dir=dst/.git config receive.fsck.unterminated-header warn &&
+	test_must_fail git push --porcelain dst HEAD >act 2>&1 &&
+	grep "Cannot demote unterminated-header=warn" act
+'
+
 test_done
