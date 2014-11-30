@@ -38,6 +38,7 @@
 	FUNC(MISSING_TREE) \
 	FUNC(MISSING_TYPE) \
 	FUNC(MISSING_TYPE_ENTRY) \
+	FUNC(MULTIPLE_AUTHORS) \
 	FUNC(NOT_SORTED) \
 	FUNC(NUL_IN_HEADER) \
 	FUNC(TAG_OBJECT_NOT_TAG) \
@@ -539,6 +540,13 @@ static int fsck_commit_buffer(struct commit *commit, const char *buffer,
 	err = fsck_ident(&buffer, &commit->object, options);
 	if (err)
 		return err;
+	while (skip_prefix(buffer, "author ", &buffer)) {
+		err = report(options, &commit->object, FSCK_MSG_MULTIPLE_AUTHORS, "invalid format - multiple 'author' lines");
+		if (err)
+			return err;
+		/* require_end_of_header() ensured that there is a newline */
+		buffer = strchr(buffer, '\n') + 1;
+	}
 	if (!skip_prefix(buffer, "committer ", &buffer))
 		return report(options, &commit->object, FSCK_MSG_MISSING_COMMITTER, "invalid format - expected 'committer' line");
 	err = fsck_ident(&buffer, &commit->object, options);
