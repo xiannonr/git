@@ -53,13 +53,15 @@
 	FUNC(HAS_DOT) \
 	FUNC(HAS_DOTDOT) \
 	FUNC(HAS_DOTGIT) \
-	FUNC(INVALID_TAG_NAME) \
-	FUNC(MISSING_TAGGER_ENTRY) \
 	FUNC(NULL_SHA1) \
-	FUNC(ZERO_PADDED_FILEMODE)
+	FUNC(ZERO_PADDED_FILEMODE) \
+	/* infos (reported as warnings, but ignored by default) */ \
+	FUNC(INVALID_TAG_NAME) \
+	FUNC(MISSING_TAGGER_ENTRY)
 
 #define FIRST_NON_FATAL_ERROR FSCK_MSG_BAD_DATE
 #define FIRST_WARNING FSCK_MSG_BAD_FILEMODE
+#define FIRST_INFO FSCK_MSG_INVALID_TAG_NAME
 
 #define MSG_ID(x) FSCK_MSG_##x,
 enum fsck_msg_id {
@@ -104,7 +106,7 @@ int fsck_msg_type(enum fsck_msg_id msg_id, struct fsck_options *options)
 	if (options->strict_mode && msg_id >= 0 && msg_id < FSCK_MSG_MAX)
 		return options->strict_mode[msg_id];
 	if (options->strict)
-		return FSCK_ERROR;
+		return msg_id < FIRST_INFO ? FSCK_ERROR : FSCK_WARN;
 	return msg_id < FIRST_WARNING ? FSCK_ERROR : FSCK_WARN;
 }
 
@@ -646,15 +648,21 @@ static int fsck_tag_buffer(struct tag *tag, const char *data,
 		goto done;
 	}
 	strbuf_addf(&sb, "refs/tags/%.*s", (int)(eol - buffer), buffer);
-	if (check_refname_format(sb.buf, 0))
-		report(options, &tag->object, FSCK_MSG_INVALID_TAG_NAME,
+	if (check_refname_format(sb.buf, 0)) {
+		ret = report(options, &tag->object, FSCK_MSG_INVALID_TAG_NAME,
 			   "invalid 'tag' name: %.*s",
 			   (int)(eol - buffer), buffer);
+		if (ret)
+			goto done;
+	}
 	buffer = eol + 1;
 
-	if (!skip_prefix(buffer, "tagger ", &buffer))
+	if (!skip_prefix(buffer, "tagger ", &buffer)) {
 		/* early tags do not contain 'tagger' lines; warn only */
-		report(options, &tag->object, FSCK_MSG_MISSING_TAGGER_ENTRY, "invalid format - expected 'tagger' line");
+		ret = report(options, &tag->object, FSCK_MSG_MISSING_TAGGER_ENTRY, "invalid format - expected 'tagger' line");
+		if (ret)
+			goto done;
+	}
 	else
 		ret = fsck_ident(&buffer, &tag->object, options);
 
