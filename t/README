@@ -203,6 +203,10 @@ and either can match the "t[0-9]{4}" part to skip the whole
 test, or t[0-9]{4} followed by ".$number" to say which
 particular test to skip.
 
+As a special convenience, a GIT_SKIP_TESTS pattern starting with
+a '<' skips all tests before a given test case, e.g.
+GIT_SKIP_TESTS='<t5516' make will skip all tests before t5516.
+
 For an individual test suite --run could be used to specify that
 only some tests should be run or that some tests should be
 excluded from a run.

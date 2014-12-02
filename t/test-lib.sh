@@ -375,6 +375,15 @@ match_pattern_list () {
 	test -z "$*" && return 1
 	for pattern_
 	do
+		case "$pattern_" in
+		'<'*)
+			prefix_="${pattern_#<}"
+			prefix_="${prefix_%%[0-9]*}"
+			test "${pattern_#<$prefix_}" '<' "${arg#$prefix_}" ||
+			return 0
+			continue
+			;;
+		esac
 		case "$arg" in
 		$pattern_)
 			return 0
