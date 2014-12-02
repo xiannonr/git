@@ -859,16 +859,6 @@ HOME="$TRASH_DIRECTORY"
 GNUPGHOME="$HOME/gnupg-home-not-used"
 export HOME GNUPGHOME
 
-if test -z "$TEST_NO_CREATE_REPO"
-then
-	test_create_repo "$TRASH_DIRECTORY"
-else
-	mkdir -p "$TRASH_DIRECTORY"
-fi
-# Use -P to resolve symlinks in our working directory so that the cwd
-# in subprocesses like git equals our $PWD (for pathname comparisons).
-cd -P "$TRASH_DIRECTORY" || exit 1
-
 this_test=${0##*/}
 this_test=${this_test%%-*}
 if match_pattern_list "$this_test" $GIT_SKIP_TESTS
@@ -876,6 +866,16 @@ then
 	say_color info >&3 "skipping test $this_test altogether"
 	skip_all="skip all tests in $this_test"
 	test_done
+else
+	if test -z "$TEST_NO_CREATE_REPO"
+	then
+		test_create_repo "$TRASH_DIRECTORY"
+	else
+		mkdir -p "$TRASH_DIRECTORY"
+	fi
+	# Use -P to resolve symlinks in our working directory so that the cwd
+	# in subprocesses like git equals our $PWD (for pathname comparisons).
+	cd -P "$TRASH_DIRECTORY" || exit 1
 fi
 
 # Provide an implementation of the 'yes' utility
