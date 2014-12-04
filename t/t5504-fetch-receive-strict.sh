@@ -133,7 +133,12 @@ test_expect_success 'push with receive.fsck.severity = missing-email=warn' '
 	git --git-dir=dst/.git config \
 		receive.fsck.severity missing-email=warn &&
 	git push --porcelain dst bogus >act 2>&1 &&
-	grep "missing-email" act
+	grep "missing-email" act &&
+	git --git-dir=dst/.git branch -D bogus &&
+	git  --git-dir=dst/.git config --add \
+		receive.fsck.severity missing-email=ignore,bad-date=warn &&
+	git push --porcelain dst bogus >act 2>&1 &&
+	test_must_fail grep "missing-email" act
 '
 
 test_expect_success \
