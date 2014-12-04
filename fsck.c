@@ -155,6 +155,23 @@ void fsck_strict_mode(struct fsck_options *options, const char *mode)
 	}
 }
 
+static void append_msg_id(struct strbuf *sb, const char *msg_id)
+{
+	for (;;) {
+		char c = *(msg_id)++;
+
+		if (!c)
+			break;
+		if (c == '_')
+			c = '-';
+		else
+			c = tolower(c);
+		strbuf_addch(sb, c);
+	}
+
+	strbuf_addstr(sb, ": ");
+}
+
 __attribute__((format (printf, 4, 5)))
 static int report(struct fsck_options *options, struct object *object,
 	enum fsck_msg_id id, const char *fmt, ...)
@@ -162,6 +179,8 @@ static int report(struct fsck_options *options, struct object *object,
 	va_list ap;
 	struct strbuf sb = STRBUF_INIT;
 	int msg_type = fsck_msg_type(id, options), result;
+
+	append_msg_id(&sb, msg_id_str[id]);
 
 	va_start(ap, fmt);
 	strbuf_vaddf(&sb, fmt, ap);
