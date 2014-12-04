@@ -147,6 +147,8 @@ void fsck_strict_mode(struct fsck_options *options, const char *mode)
 				type = FSCK_ERROR;
 			else if (!substrcmp(type_str, type_len, "warn"))
 				type = FSCK_WARN;
+			else if (!substrcmp(type_str, type_len, "ignore"))
+				type = FSCK_IGNORE;
 			else
 				die("Unknown fsck message type: '%.*s'",
 					len - equal - 1, type_str);
@@ -184,6 +186,9 @@ static int report(struct fsck_options *options, struct object *object,
 	va_list ap;
 	struct strbuf sb = STRBUF_INIT;
 	int msg_type = fsck_msg_type(id, options), result;
+
+	if (msg_type == FSCK_IGNORE)
+		return 0;
 
 	append_msg_id(&sb, msg_id_str[id]);
 

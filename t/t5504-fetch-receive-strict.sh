@@ -132,7 +132,12 @@ test_expect_success 'push with receive.fsck.missing-mail = warn' '
 	test_must_fail git push --porcelain dst bogus &&
 	git --git-dir=dst/.git config receive.fsck.missing-email warn &&
 	git push --porcelain dst bogus >act 2>&1 &&
-	grep "missing-email" act
+	grep "missing-email" act &&
+	git --git-dir=dst/.git branch -D bogus &&
+	git  --git-dir=dst/.git config receive.fsck.missing-email ignore &&
+	git  --git-dir=dst/.git config receive.fsck.bad-date warn &&
+	git push --porcelain dst bogus >act 2>&1 &&
+	test_must_fail grep "missing-email" act
 '
 
 test_expect_success 'receive.fsck.unterminated-header = warn triggers error' '
