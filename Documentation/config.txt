@@ -1208,6 +1208,19 @@ filter.<driver>.smudge::
 	object to a worktree file upon checkout.  See
 	linkgit:gitattributes[5] for details.
 
+fsck.*::
+	With these options, fsck errors can be switched to warnings and
+	vice versa by setting e.g. `fsck.bad-name` to `warn` or `error`
+	(or `ignore` to hide those errors completely). For convenience,
+	fsck prefixes the error/warning with the name of the option, e.g.
+	"missing-email: invalid author/committer line - missing email"
+	means that setting `fsck.missing-email` to `ignore` will hide that
+	issue.  For convenience, camelCased options are accepted, too (e.g.
+	`fsck.missingEmail`).
++
+This feature is intended to support working with legacy repositories
+which cannot be repaired without disruptive changes.
+
 gc.aggressiveDepth::
 	The depth parameter used in the delta compression
 	algorithm used by 'git gc --aggressive'.  This defaults
