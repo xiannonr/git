@@ -116,6 +116,15 @@ static int receive_pack_config(const char *var, const char *value, void *cb)
 		return 0;
 	}
 
+	if (starts_with(var, "receive.fsck.skip-list")) {
+		const char *path = is_absolute_path(value) ?
+			value : git_path("%s", value);
+		if (fsck_strict_mode.len)
+			strbuf_addch(&fsck_strict_mode, ',');
+		strbuf_addf(&fsck_strict_mode, "skip-list=%s", path);
+		return 0;
+	}
+
 	if (starts_with(var, "receive.fsck.")) {
 		if (fsck_strict_mode.len)
 			strbuf_addch(&fsck_strict_mode, ',');
