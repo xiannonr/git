@@ -29,6 +29,8 @@ struct fsck_options {
 	fsck_error error_func;
 	int strict:1;
 	int *strict_mode;
+	/* TODO: consider reading into a hashmap */
+	struct sha1_array *skip_list;
 };
 
 #define FSCK_OPTIONS_DEFAULT { NULL, fsck_error_function, 0, NULL }

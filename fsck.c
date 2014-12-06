@@ -8,6 +8,7 @@
 #include "fsck.h"
 #include "refs.h"
 #include "utf8.h"
+#include "sha1-array.h"
 
 #define FOREACH_MSG_ID(FUNC) \
 	/* fatal errors */ \
@@ -57,7 +58,9 @@
 	FUNC(ZERO_PADDED_FILEMODE) \
 	/* infos (reported as warnings, but ignored by default) */ \
 	FUNC(INVALID_TAG_NAME) \
-	FUNC(MISSING_TAGGER_ENTRY)
+	FUNC(MISSING_TAGGER_ENTRY) \
+	/* special value */ \
+	FUNC(SKIP_LIST)
 
 #define FIRST_NON_FATAL_ERROR FSCK_MSG_BAD_DATE
 #define FIRST_WARNING FSCK_MSG_BAD_FILEMODE
@@ -110,6 +113,43 @@ int fsck_msg_type(enum fsck_msg_id msg_id, struct fsck_options *options)
 	return msg_id < FIRST_WARNING ? FSCK_ERROR : FSCK_WARN;
 }
 
+static void init_skip_list(struct fsck_options *options, const char *path)
+{
+	static struct sha1_array skip_list = SHA1_ARRAY_INIT;
+	int sorted, fd;
+	char buffer[41];
+	unsigned char sha1[20];
+
+	if (options->skip_list)
+		sorted = options->skip_list->sorted;
+	else {
+		sorted = 1;
+		options->skip_list = &skip_list;
+	}
+
+	fd = open(path, O_RDONLY);
+	if (fd < 0)
+		die("Could not open skip list: %s", path);
+	for (;;) {
+		int result = read_in_full(fd, buffer, sizeof(buffer));
+		if (result < 0)
+			die_errno("Could not read '%s'", path);
+		if (!result)
+			break;
+		if (get_sha1_hex(buffer, sha1) || buffer[40] != '\n')
+			die("Invalid SHA-1: %s", buffer);
+		sha1_array_append(&skip_list, sha1);
+		if (sorted && skip_list.nr > 1 &&
+				hashcmp(skip_list.sha1[skip_list.nr - 2],
+					sha1) > 0)
+			sorted = 0;
+	}
+	close(fd);
+
+	if (sorted)
+		skip_list.sorted = 1;
+}
+
 static inline int substrcmp(const char *string, int len, const char *match)
 {
 	int match_len = strlen(match);
@@ -142,6 +182,18 @@ void fsck_strict_mode(struct fsck_options *options, const char *mode)
 			if (mode[equal] == '=')
 				break;
 
+		msg_id = parse_msg_id(mode, equal);
+		if (msg_id == FSCK_MSG_SKIP_LIST) {
+			char *path = xstrndup(mode + equal + 1, len - equal - 1);
+
+			if (equal == len)
+				die("skip-list requires a path");
+			init_skip_list(options, path);
+			free(path);
+			mode += len;
+			continue;
+		}
+
 		if (equal < len) {
 			const char *type_str = mode + equal + 1;
 			int type_len = len - equal - 1;
@@ -156,7 +208,6 @@ void fsck_strict_mode(struct fsck_options *options, const char *mode)
 					len - equal - 1, type_str);
 		}
 
-		msg_id = parse_msg_id(mode, equal);
 		if (type != FSCK_ERROR && msg_id < FIRST_NON_FATAL_ERROR)
 			die("Cannot demote %.*s", len, mode);
 		options->strict_mode[msg_id] = type;
@@ -686,6 +737,10 @@ static int fsck_tag(struct tag *tag, const char *data,
 int fsck_object(struct object *obj, void *data, unsigned long size,
 	struct fsck_options *options)
 {
+	if (options->skip_list &&
+			sha1_array_lookup(options->skip_list, obj->sha1) >= 0)
+		return 0;
+
 	if (!obj)
 		return report(options, obj, FSCK_MSG_INVALID_OBJECT_SHA1, "no valid object to fsck");
 
