@@ -201,4 +201,18 @@ test_expect_success 'corrupt tag' '
 	test_must_fail git hash-object -t tag --stdin </dev/null
 '
 
+cat >bogus-commit <<EOF
+tree $(git write-tree)
+author Bugs Bunny [bugs@bun.ny] 123456789 +0100
+committer Elmer Fudd <elmer@fu.dd> 123459876 +0100
+
+This commit message intentionally left blank
+EOF
+
+test_expect_success 'hash-object --strict' '
+	test_must_fail git hash-object \
+		--strict -t commit --stdin -w <bogus-commit &&
+	git hash-object -t commit --stdin <bogus-commit
+'
+
 test_done
