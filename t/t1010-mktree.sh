@@ -66,4 +66,10 @@ test_expect_success 'mktree refuses to read ls-tree -r output (2)' '
 	test_must_fail git mktree <all.withsub >actual
 '
 
+test_expect_success '`mktree --strict` validates before writing' '
+	printf "40000 tree %s\t.\n" $(git rev-parse HEAD:) > bogus-tree &&
+	test_must_fail git mktree --strict <bogus-tree &&
+	git mktree <bogus-tree
+'
+
 test_done
