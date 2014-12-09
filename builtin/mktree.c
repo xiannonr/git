@@ -7,7 +7,10 @@
 #include "quote.h"
 #include "tree.h"
 #include "parse-options.h"
+#include "tree.h"
+#include "fsck.h"
 
+static int strict;
 static struct treeent {
 	unsigned mode;
 	unsigned char sha1[20];
@@ -54,6 +57,16 @@ static void write_tree(unsigned char *sha1)
 		struct treeent *ent = entries[i];
 		strbuf_addf(&buf, "%o %s%c", ent->mode, ent->name, '\0');
 		strbuf_add(&buf, ent->sha1, 20);
+	}
+
+	if (strict) {
+		struct tree tree;
+		memset(&tree, 0, sizeof(tree));
+		tree.object.type = OBJ_TREE;
+		parse_tree_buffer(&tree, buf.buf, buf.len);
+		if (fsck_object(&tree.object, buf.buf, buf.len, 1,
+				fsck_error_function))
+			exit(1);
 	}
 
 	write_sha1_file(buf.buf, buf.len, tree_type, sha1);
@@ -150,6 +163,7 @@ int cmd_mktree(int ac, const char **av, const char *prefix)
 		OPT_SET_INT('z', NULL, &line_termination, N_("input is NUL terminated"), '\0'),
 		OPT_SET_INT( 0 , "missing", &allow_missing, N_("allow missing objects"), 1),
 		OPT_SET_INT( 0 , "batch", &is_batch_mode, N_("allow creation of more than one tree"), 1),
+		OPT_BOOL( 0 , "strict", &strict, N_("validate the tree object")),
 		OPT_END()
 	};
 

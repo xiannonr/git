@@ -9,7 +9,7 @@ git-mktree - Build a tree-object from ls-tree formatted text
 SYNOPSIS
 --------
 [verse]
-'git mktree' [-z] [--missing] [--batch]
+'git mktree' [-z] [--strict] [--missing] [--batch]
 
 DESCRIPTION
 -----------
@@ -22,6 +22,10 @@ OPTIONS
 -------
 -z::
 	Read the NUL-terminated `ls-tree -z` output instead.
+
+--strict::
+	Validate the tree object before writing (the validation is equivalent
+	to the one performed by linkgit:git-fsck[1]).
 
 --missing::
 	Allow missing objects.  The default behaviour (without this option)
