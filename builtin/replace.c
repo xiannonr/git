@@ -236,7 +236,7 @@ static void import_object(unsigned char *sha1, enum object_type type,
 		die_errno("unable to open %s for reading", filename);
 
 	if (!raw && type == OBJ_TREE) {
-		const char *argv[] = { "mktree", NULL };
+		const char *argv[] = { "mktree", "--strict", NULL };
 		struct child_process cmd = CHILD_PROCESS_INIT;
 		struct strbuf result = STRBUF_INIT;
 
@@ -260,7 +260,8 @@ static void import_object(unsigned char *sha1, enum object_type type,
 		strbuf_release(&result);
 	} else {
 		struct stat st;
-		int flags = HASH_FORMAT_CHECK | HASH_WRITE_OBJECT;
+		int flags = HASH_FORMAT_CHECK | HASH_FORMAT_STRICT |
+			HASH_WRITE_OBJECT;
 
 		if (fstat(fd, &st) < 0)
 			die_errno("unable to fstat %s", filename);
