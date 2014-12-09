@@ -378,6 +378,17 @@ test_expect_success '--edit and change nothing or command failed' '
 	git cat-file commit "$PARA3" | grep "A fake Thor"
 '
 
+test_expect_success 'setup an intentionally broken fake editor' '
+	write_script fakeeditor <<-\EOF
+		tr -d "<>" <"$1" >"$1.new"
+		mv "$1.new" "$1"
+	EOF
+'
+
+test_expect_success '--edit validates before replacing the object' '
+	test_must_fail env GIT_EDITOR=./fakeeditor git replace --edit "$PARA3"
+'
+
 test_expect_success 'replace ref cleanup' '
 	test -n "$(git replace)" &&
 	git replace -d $(git replace) &&
