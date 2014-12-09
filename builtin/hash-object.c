@@ -79,8 +79,8 @@ static void hash_stdin_paths(const char *type, int no_filters, unsigned flags,
 int cmd_hash_object(int argc, const char **argv, const char *prefix)
 {
 	static const char * const hash_object_usage[] = {
-		N_("git hash-object [-t <type>] [-w] [--path=<file> | --no-filters] [--stdin] [--] <file>..."),
-		N_("git hash-object  --stdin-paths < <list-of-paths>"),
+		N_("git hash-object [--strict] [-t <type>] [-w] [--path=<file> | --no-filters] [--stdin] [--] <file>..."),
+		N_("git hash-object [--strict] --stdin-paths < <list-of-paths>"),
 		NULL
 	};
 	const char *type = blob_type;
@@ -88,6 +88,7 @@ int cmd_hash_object(int argc, const char **argv, const char *prefix)
 	int stdin_paths = 0;
 	int no_filters = 0;
 	int literally = 0;
+	int strict = 0;
 	unsigned flags = HASH_FORMAT_CHECK;
 	const char *vpath = NULL;
 	const struct option hash_object_options[] = {
@@ -97,6 +98,7 @@ int cmd_hash_object(int argc, const char **argv, const char *prefix)
 		OPT_COUNTUP( 0 , "stdin", &hashstdin, N_("read the object from stdin")),
 		OPT_BOOL( 0 , "stdin-paths", &stdin_paths, N_("read file names from stdin")),
 		OPT_BOOL( 0 , "no-filters", &no_filters, N_("store file as is without filters")),
+		OPT_BOOL( 0, "strict", &strict, N_("validate thoroughly before writing")),
 		OPT_BOOL( 0, "literally", &literally, N_("just hash any random garbage to create corrupt objects for debugging Git")),
 		OPT_STRING( 0 , "path", &vpath, N_("file"), N_("process file as it were from this path")),
 		OPT_END()
@@ -136,6 +138,9 @@ int cmd_hash_object(int argc, const char **argv, const char *prefix)
 		error("%s", errstr);
 		usage_with_options(hash_object_usage, hash_object_options);
 	}
+
+	if (strict)
+		flags |= HASH_FORMAT_STRICT;
 
 	if (hashstdin)
 		hash_fd(0, type, vpath, flags, literally);

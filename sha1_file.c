@@ -23,6 +23,7 @@
 #include "bulk-checkin.h"
 #include "streaming.h"
 #include "dir.h"
+#include "fsck.h"
 
 #ifndef O_NOATIME
 #if defined(__linux__) && (defined(__i386__) || defined(__PPC__))
@@ -3117,11 +3118,21 @@ static int index_mem(unsigned char *sha1, void *buf, size_t size,
 		}
 	}
 	if (flags & HASH_FORMAT_CHECK) {
-		if (type == OBJ_TREE)
+		if (flags & HASH_FORMAT_STRICT) {
+			struct object object;
+
+			memset(&object, 0, sizeof(object));
+			object.type = type;
+			memcpy(object.sha1, sha1, 20);
+			if (fsck_object(&object, buf, size, 1,
+					fsck_error_function))
+				exit(1);
+		}
+		else if (type == OBJ_TREE)
 			check_tree(buf, size);
-		if (type == OBJ_COMMIT)
+		else if (type == OBJ_COMMIT)
 			check_commit(buf, size);
-		if (type == OBJ_TAG)
+		else if (type == OBJ_TAG)
 			check_tag(buf, size);
 	}
 

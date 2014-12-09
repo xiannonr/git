@@ -9,8 +9,8 @@ git-hash-object - Compute object ID and optionally creates a blob from a file
 SYNOPSIS
 --------
 [verse]
-'git hash-object' [-t <type>] [-w] [--path=<file>|--no-filters] [--stdin] [--] <file>...
-'git hash-object' [-t <type>] [-w] --stdin-paths [--no-filters] < <list-of-paths>
+'git hash-object' [--strict] [-t <type>] [-w] [--path=<file>|--no-filters] [--stdin] [--] <file>...
+'git hash-object' [--strict] [-t <type>] [-w] --stdin-paths [--no-filters] < <list-of-paths>
 
 DESCRIPTION
 -----------
@@ -24,6 +24,9 @@ specified, it defaults to "blob".
 
 OPTIONS
 -------
+
+--strict::
+	Validate the object (equivalent to linkgit:git-fsck[1]).
 
 -t <type>::
 	Specify the type (default: "blob").
