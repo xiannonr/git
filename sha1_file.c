@@ -333,6 +333,7 @@ static int link_alt_odb_entry(const char *entry, const char *relative_base,
 	read_info_alternates(ent->base, depth + 1);
 
 	ent->base[pfxlen] = '/';
+	ent->base[pfxlen + 1] = 0;
 
 	return 0;
 }
