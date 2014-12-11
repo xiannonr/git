@@ -1183,6 +1183,107 @@ int is_ntfs_dotgit(const char *name)
 		}
 }
 
+static const unsigned char legal_in_dos[256] = {
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,		/*  0.. 15 */
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,		/* 16.. 31 */
+	1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0,		/* " * /   */
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0,		/* : < > ? */
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,		/*         */
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1,		/* \       */
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,		/*         */
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1,		/* |       */
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,		/*         */
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,		/*         */
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,		/*         */
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,		/*         */
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,		/*         */
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,		/*         */
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,		/*         */
+	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 		/*         */
+};
+
+static int conflicts_with_dos_short_name(const char *path, size_t len)
+{
+	if (len < 3 || len > 8 + 1 + 3)
+		return 0;
+
+	/* strip extension, if any */
+	if (path[len - 1] == '.')
+		len--;
+	else if (path[len - 2] == '.')
+		len -= 2;
+	else if (path[len - 3] == '.')
+		len -= 3;
+	else if (len > 3 && path[len - 4] == '.')
+		len -= 4;
+
+	/* short names are in 8.3 format */
+	if (len < 3 || len > 8)
+		return 0;
+
+	if (!isdigit(path[len - 1]))
+		return 0;
+
+	while (len && isdigit(path[len - 1]))
+		len--;
+
+	return len > 0 && path[len - 1] == '~';
+}
+
+/*
+ * This function rejects path components
+ * - with trailing ~<N>, i.e. paths conflicting with 8.3 DOS paths
+ * - ending in a dot, a space or a colon,
+ * - that are reserved on Windows (CON, PRN, etc)
+ * - that contain characters that are illegal in DOS paths
+ */
+int valid_dos_path(const char *path, int full_path)
+{
+	const char *p = path;
+	size_t len;
+
+	for (;;) {
+		char c = *(p++);
+		if (legal_in_dos[(unsigned char) c])
+			continue;
+
+		if (c && (!is_dir_sep(c) || !full_path))
+			return 0;
+
+		len = p - 1 - path;
+
+		/* ignore empty path components, i.e. double slashes */
+		if (!len)
+			continue;
+
+		if (conflicts_with_dos_short_name(path, len))
+			return 0;
+
+		switch (path[len - 1]) {
+			case '.':
+			case ' ':
+			case ':':
+				return 0;
+		}
+
+		if (len == 3) {
+			if (!strncasecmp(path, "CON", 3) ||
+					!strncasecmp(path, "PRN", 3) ||
+					!strncasecmp(path, "AUX", 3) ||
+					!strncasecmp(path, "NUL", 3))
+				return 0;
+		}
+		else if (len == 4 && isdigit(path[3])) {
+			if (!strncasecmp(path, "COM", 3) ||
+					!strncasecmp(path, "LPT", 3))
+				return 0;
+		}
+
+		if (!c)
+			return 1;
+	}
+}
+
 char *xdg_config_home(const char *filename)
 {
 	const char *home, *config_home;

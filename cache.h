@@ -999,6 +999,8 @@ int longest_ancestor_length(const char *path, struct string_list *prefixes);
 char *strip_path_suffix(const char *path, const char *suffix);
 int daemon_avoid_alias(const char *path);
 extern int is_ntfs_dotgit(const char *name);
+/* if full_path == 0, a path component without directories is expected */
+extern int valid_dos_path(const char *path, int full_path);
 
 /**
  * Return a newly allocated string with the evaluation of

@@ -52,6 +52,7 @@
 	FUNC(ZERO_PADDED_DATE, ERROR) \
 	/* warnings */ \
 	FUNC(BAD_FILEMODE, WARN) \
+	FUNC(DOS_INCOMPATIBLE, WARN) \
 	FUNC(EMPTY_NAME, WARN) \
 	FUNC(FULL_PATHNAME, WARN) \
 	FUNC(HAS_DOT, WARN) \
@@ -433,6 +434,7 @@ static int fsck_tree(struct tree *item, struct fsck_options *options)
 	int has_dot = 0;
 	int has_dotdot = 0;
 	int has_dotgit = 0;
+	int dos_compatible = 1;
 	int has_zero_pad = 0;
 	int has_bad_modes = 0;
 	int has_dup_entries = 0;
@@ -461,6 +463,8 @@ static int fsck_tree(struct tree *item, struct fsck_options *options)
 		has_dotgit |= (!strcmp(name, ".git") ||
 			       is_hfs_dotgit(name) ||
 			       is_ntfs_dotgit(name));
+		dos_compatible &= has_dot || has_dotdot ||
+			valid_dos_path(name, 1);
 		has_zero_pad |= *(char *)desc.buffer == '0';
 		update_tree_entry(&desc);
 
@@ -516,6 +520,8 @@ static int fsck_tree(struct tree *item, struct fsck_options *options)
 		retval += report(options, &item->object, FSCK_MSG_HAS_DOTDOT, "contains '..'");
 	if (has_dotgit)
 		retval += report(options, &item->object, FSCK_MSG_HAS_DOTGIT, "contains '.git'");
+	if (!dos_compatible)
+		retval += report(options, &item->object, FSCK_MSG_DOS_INCOMPATIBLE, "is not a valid DOS file name");
 	if (has_zero_pad)
 		retval += report(options, &item->object, FSCK_MSG_ZERO_PADDED_FILEMODE, "contains zero-padded file modes");
 	if (has_bad_modes)
