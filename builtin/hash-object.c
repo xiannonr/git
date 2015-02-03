@@ -143,7 +143,14 @@ int cmd_hash_object(int argc, const char **argv, const char *prefix)
 		flags |= HASH_FORMAT_STRICT;
 
 	if (hashstdin)
+{
+if (getenv("DEBUG_BOGUS_COMMIT")) {
+int fd = open("bogus-commit", O_RDONLY);
+hash_fd(fd, type, vpath, flags, literally);
+close(fd);
+} else
 		hash_fd(0, type, vpath, flags, literally);
+}
 
 	for (i = 0 ; i < argc; i++) {
 		const char *arg = argv[i];
