@@ -2196,6 +2196,19 @@ void mingw_startup()
 		__argv[i] = wcstoutfdup_startup(buffer, wargv[i], maxlen);
 	for (i = 0; wenv[i]; i++)
 		environ[i] = wcstoutfdup_startup(buffer, wenv[i], maxlen);
+		if (!strncasecmp(environ[i], "TMP=", 4)) {
+			/*
+			 * Convert all dir separators to forward slashes,
+			 * to help shell commands called from the Git
+			 * executable (by not mistaking the dir separators
+			 * for escape characters).
+			 */
+			char *p;
+			for (p = environ[i]; *p; p++)
+				if (*p == '\\')
+					*p = '/';
+		}
+	}
 	environ[i] = NULL;
 	free(buffer);
 
