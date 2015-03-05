@@ -38,7 +38,10 @@ test_expect_success \
 		mkdir bar &&
 		echo "zzz" >bar/zzz &&
 		echo "#!/bin/sh" >exec.sh &&
-		chmod +x exec.sh &&
+		{
+			test_have_prereq !POSIXPERM ||
+			chmod +x exec.sh
+		} &&
 		svn_cmd import -m "import for git svn" . "$svnrepo" >/dev/null
 	) &&
 	rm -rf import &&
