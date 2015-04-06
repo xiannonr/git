@@ -2225,13 +2225,26 @@ int handle_long_path(wchar_t *path, int len, int max_path, int expand)
 
 static void setup_windows_environment()
 {
+	char *tmp;
+
 	/* on Windows it is TMP and TEMP */
 	if (!getenv("TMPDIR")) {
-		const char *tmp = getenv("TMP");
-		if (!tmp)
+		if (!(tmp = getenv("TMP")))
 			tmp = getenv("TEMP");
 		if (tmp)
 			setenv("TMPDIR", tmp, 1);
+	}
+
+	if ((tmp = getenv("TMPDIR"))) {
+		/*
+		 * Convert all dir separators to forward slashes,
+		 * to help shell commands called from the Git
+		 * executable (by not mistaking the dir separators
+		 * for escape characters).
+		 */
+		for (; *tmp; tmp++)
+			if (*tmp == '\\')
+				*tmp = '/';
 	}
 
 	/* simulate TERM to enable auto-color (see color.c) */
@@ -2310,19 +2323,6 @@ void mingw_startup()
 		__argv[i] = wcstoutfdup_startup(buffer, wargv[i], maxlen);
 	for (i = 0; wenv[i]; i++)
 		environ[i] = wcstoutfdup_startup(buffer, wenv[i], maxlen);
-		if (!strncasecmp(environ[i], "TMP=", 4)) {
-			/*
-			 * Convert all dir separators to forward slashes,
-			 * to help shell commands called from the Git
-			 * executable (by not mistaking the dir separators
-			 * for escape characters).
-			 */
-			char *p;
-			for (p = environ[i]; *p; p++)
-				if (*p == '\\')
-					*p = '/';
-		}
-	}
 	environ[i] = NULL;
 	free(buffer);
 
