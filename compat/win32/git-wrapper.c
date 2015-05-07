@@ -16,6 +16,27 @@
 
 static WCHAR msystem_bin[64];
 
+static const char *debug_file;
+
+static void debug(LPCWSTR fmt, ...)
+{
+	va_list params;
+	FILE *f;
+
+debug_file = "a1.log";
+debug_file = NULL;
+	if (!debug_file)
+		return;
+
+	va_start(params, fmt);
+	f = !strcmp(debug_file, "1") ? stderr : fopen(debug_file, "at");
+	vfwprintf(f, fmt, params);
+	fputc('\n', f);
+	if (f != stderr)
+		fclose(f);
+	va_end(params);
+}
+
 static void print_error(LPCWSTR prefix, DWORD error_number)
 {
 	LPWSTR buffer = NULL;
@@ -203,6 +224,7 @@ static int configure_via_resource(LPWSTR basename, LPWSTR exepath, LPWSTR exep,
 		len = LoadString(NULL, id, buf, BUFSIZE);
 
 		if (!len) {
+			debug(L"Resource %d is empty", id);
 			if (!id)
 				return 0; /* no resources found */
 
@@ -210,6 +232,7 @@ static int configure_via_resource(LPWSTR basename, LPWSTR exepath, LPWSTR exep,
 				L"Edit the string resources accordingly\n");
 			exit(1);
 		}
+		debug(L"Resource %d: '%s'", id, buf);
 
 		if (len >= BUFSIZE) {
 			fwprintf(stderr,
@@ -323,9 +346,12 @@ int main(void)
 	LPWSTR working_directory = NULL;
 	UINT codepage = 0;
 
+	debug_file = getenv("GIT_WRAPPER_DEBUG");
+
 	/* Determine MSys2-based Git path. */
 	swprintf(msystem_bin, sizeof(msystem_bin),
 		L"mingw%d\\bin", (int) sizeof(void *) * 8);
+	debug(L"msystem_bin: %s", msystem_bin);
 
 	/* get the installation location */
 	GetModuleFileName(NULL, exepath, MAX_PATH);
@@ -463,15 +489,17 @@ int main(void)
 			STD_HANDLE(Input, INPUT_HANDLE);
 			STD_HANDLE(Output, OUTPUT_HANDLE);
 			STD_HANDLE(Error, ERROR_HANDLE);
-			si.dwFlags = STARTF_USESTDHANDLES;
+			//si.dwFlags = STARTF_USESTDHANDLES;
 
 
 			creation_flags |= CREATE_NO_WINDOW;
 		}
 		if (show_console) {
+			debug(L"Showing console");
 			si.dwFlags |= STARTF_USESHOWWINDOW;
 			si.wShowWindow = SW_SHOW;
 		}
+		debug(L"Creating process with exep '%s' and command-line '%s'", exep, cmd);
 		br = CreateProcess(/* module: null means use command line */
 				exep,
 				cmd,  /* modified command line */
