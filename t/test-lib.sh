@@ -937,9 +937,18 @@ case $(uname -s) in
 		md5sum "$@"
 	}
 	# git sees Windows-style pwd
-	pwd () {
-		builtin pwd -W
-	}
+	case "$_" in
+	*/bash)
+		pwd () {
+			/usr/bin/pwd -W
+		}
+		;;
+	*)
+		pwd () {
+			cygpath.exe -am . | sed 's/\/$//'
+		}
+		;;
+	esac
 	# no POSIX permissions
 	# backslashes in pathspec are converted to '/'
 	# exec does not inherit the PID
