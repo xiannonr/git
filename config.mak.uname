@@ -542,6 +542,7 @@ ifneq (,$(wildcard ../THIS_IS_MSYSGIT))
 else
 	ifeq ($(shell expr "$(uname_R)" : '2\.'),2)
 		# MSys2
+		SHELL_PATH = /usr/bin/dash.exe
 		prefix = /usr/
 		ifeq (MINGW32,$(MSYSTEM))
 			prefix = /mingw32
