@@ -6,6 +6,11 @@
 #include <malloc.h>
 #include <io.h>
 
+#pragma warning(disable: 4018)
+#pragma warning(disable: 4244)
+#define _ANONYMOUS_UNION
+#define O_ACCMODE (O_WRONLY | O_RDWR)
+
 /* porting function */
 #define inline __inline
 #define __inline__ __inline

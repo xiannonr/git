@@ -45,11 +45,13 @@ typedef unsigned long long uintmax_t;
 
 typedef int64_t off64_t;
 
+#if 0
 #define INTMAX_MIN  _I64_MIN
 #define INTMAX_MAX  _I64_MAX
 #define UINTMAX_MAX _UI64_MAX
 
 #define UINT32_MAX 0xffffffff  /* 4294967295U */
+#endif
 
 #define STDIN_FILENO  0
 #define STDOUT_FILENO 1
@@ -95,5 +97,8 @@ typedef int64_t off64_t;
 #define	S_ISDIR(m)	(((m) & S_IFMT) == S_IFDIR)
 #define	S_ISREG(m)	(((m) & S_IFMT) == S_IFREG)
 #define	S_ISFIFO(m)	(((m) & S_IFMT) == S_IFIFO)
+
+typedef uint32_t _sigset_t;
+typedef uint32_t pid_t;
 
 #endif

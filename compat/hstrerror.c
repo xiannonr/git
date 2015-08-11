@@ -1,11 +1,11 @@
 #include <string.h>
 #include <stdio.h>
-#include <netdb.h>
+//#include <netdb.h>
 
 const char *githstrerror(int err)
 {
 	static char buffer[48];
-	switch (err)
+/*	switch (err)
 	{
 	case HOST_NOT_FOUND:
 		return "Authoritative answer: host not found";
@@ -15,7 +15,7 @@ const char *githstrerror(int err)
 		return "Non recoverable errors, FORMERR, REFUSED, NOTIMP";
 	case TRY_AGAIN:
 		return "Non-authoritative \"host not found\", or SERVERFAIL";
-	}
+	}*/
 	sprintf(buffer, "Name resolution error %d", err);
 	return buffer;
 }

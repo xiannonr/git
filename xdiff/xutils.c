@@ -271,6 +271,7 @@ static unsigned long xdl_hash_record_with_whitespace(char const **data,
 #define HIGHBITS	REPEAT_BYTE(0x80)
 
 /* Return the high bit set in the first byte that is a zero */
+#define inline
 static inline unsigned long has_zero(unsigned long a)
 {
 	return ((a - ONEBYTES) & ~a) & HIGHBITS;
