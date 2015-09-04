@@ -207,7 +207,7 @@ static int create_default_files(const char *template_path)
 	int reinit;
 	int filemode;
 
-	if (len > sizeof(path)-50)
+	if (!core_long_paths && len > sizeof(path)-50)
 		die(_("insane git directory %s"), git_dir);
 	memcpy(path, git_dir, len);
 
