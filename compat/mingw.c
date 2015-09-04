@@ -436,12 +436,13 @@ int mingw_mkdir(const char *path, int mode)
 {
 	int ret;
 	wchar_t wpath[MAX_LONG_PATH];
-	/* CreateDirectoryW path limit is 248 (MAX_PATH - 8.3 file name) */
 	if (xutftowcs_path_ex(wpath, path, MAX_LONG_PATH, -1, 248,
 			core_long_paths) < 0)
 		return -1;
 
-	ret = _wmkdir(wpath);
+	ret = !CreateDirectoryW(wpath, NULL);
+	if (ret)
+		errno = err_win_to_posix(GetLastError());
 	if (!ret)
 		process_phantom_symlinks();
 	if (!ret && hide_dotfiles == HIDE_DOTFILES_TRUE) {
