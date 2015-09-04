@@ -850,9 +850,8 @@ unsigned int sleep (unsigned int seconds)
 
 char *mingw_mktemp(char *template)
 {
-	wchar_t wtemplate[MAX_PATH];
-	/* we need to return the path, thus no long paths here! */
-	if (xutftowcs_path(wtemplate, template) < 0)
+	wchar_t wtemplate[MAX_LONG_PATH];
+	if (xutftowcs(wtemplate, template, sizeof(wtemplate)) < 0)
 		return NULL;
 	if (!_wmktemp(wtemplate))
 		return NULL;
