@@ -473,7 +473,8 @@ static const char *setup_explicit_git_dir(const char *gitdirenv,
 	char *gitfile;
 	int offset;
 
-	if (PATH_MAX - 40 < strlen(gitdirenv))
+error("long: %d", core_long_paths);
+	if (!core_long_paths && PATH_MAX - 40 < strlen(gitdirenv))
 		die("'$%s' too big", GIT_DIR_ENVIRONMENT);
 
 	gitfile = (char*)read_gitfile(gitdirenv);

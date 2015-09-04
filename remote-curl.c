@@ -964,6 +964,7 @@ int main(int argc, const char **argv)
 	git_setup_gettext();
 
 	git_extract_argv0_path(argv[0]);
+	git_config(git_default_config, NULL);
 	setup_git_directory_gently(&nongit);
 	if (argc < 2) {
 		error("remote-curl: usage: git remote-curl <remote> [<url>]");
