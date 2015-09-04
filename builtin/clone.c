@@ -768,8 +768,12 @@ int cmd_clone(int argc, const char **argv, const char *prefix)
 		usage_msg_opt(_("You must specify a repository to clone."),
 			builtin_clone_usage, builtin_clone_options);
 
+error("123");
 	for (i = 0; i < option_config.nr; i++)
+{error("%d/%d: %s", i, option_config.nr, option_config.items[i].string);
 		git_config_push_parameter(option_config.items[i].string);
+}
+error("git config");
 	git_config(git_default_config, NULL);
 
 	if (option_single_branch == -1)
