@@ -9,7 +9,9 @@
 static inline int file_attr_to_st_mode (DWORD attr, DWORD tag)
 {
 	int fMode = S_IREAD;
-	if ((attr & FILE_ATTRIBUTE_REPARSE_POINT) && tag == IO_REPARSE_TAG_SYMLINK)
+	if ((attr & FILE_ATTRIBUTE_REPARSE_POINT) &&
+			(tag == IO_REPARSE_TAG_SYMLINK ||
+			 tag == IO_REPARSE_TAG_MOUNT_POINT))
 		fMode |= S_IFLNK;
 	else if (attr & FILE_ATTRIBUTE_DIRECTORY)
 		fMode |= S_IFDIR;
