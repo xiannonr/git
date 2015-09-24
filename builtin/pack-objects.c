@@ -2499,6 +2499,7 @@ static void get_object_list(int ac, const char **av)
 	int flags = 0;
 
 	init_revisions(&revs, NULL);
+	revs.ignore_missing = 1;
 	save_commit_buffer = 0;
 	setup_revisions(ac, av, &revs, NULL);
 
