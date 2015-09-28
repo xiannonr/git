@@ -139,7 +139,6 @@ int cmd_prune(int argc, const char **argv, const char *prefix)
 	if (show_progress)
 		progress = start_progress_delay(_("Checking connectivity"), 0, 0, 2);
 
-	revs.ignore_missing = 1;
 	mark_reachable_objects(&revs, 1, expire, progress, &broken_symrefs);
 	for (i = 0; i < broken_symrefs.nr; i++) {
 		char *path = broken_symrefs.items[i].string;
