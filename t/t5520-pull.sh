@@ -249,6 +249,8 @@ test_expect_success 'failed --rebase shows advice' '
 	grep "When you have resolved this problem" out
 '
 
+exit 1
+
 test_expect_success '--rebase fails with multiple branches' '
 	git reset --hard before-rebase &&
 	test_must_fail git pull --rebase . copy master 2>err &&
