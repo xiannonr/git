@@ -633,12 +633,13 @@ static void log_setup_revisions_tweak(struct rev_info *rev,
 		DIFF_OPT_SET(&rev->diffopt, FOLLOW_RENAMES);
 
 	/* Turn --cc/-c into -p --cc/-c when -p was not given */
-	if (!rev->diffopt.output_format && rev->combine_merges)
+	if (!rev->diffopt.output_format &&
+			merge_diff_mode_is_any_combined(rev))
 		rev->diffopt.output_format = DIFF_FORMAT_PATCH;
 
 	/* Turn -m on when --cc/-c was given */
-	if (rev->combine_merges)
-		rev->ignore_merges = 0;
+	if (merge_diff_mode_is_any_combined(rev))
+		rev->merge_diff_mode |= MERGE_DIFF_IGNORE;
 }
 
 int cmd_log(int argc, const char **argv, const char *prefix)
