@@ -13,6 +13,12 @@ void child_process_init(struct child_process *child)
 	argv_array_init(&child->env_array);
 }
 
+static void child_process_deinit(struct child_process *child)
+{
+	argv_array_clear(&child->args);
+	argv_array_clear(&child->env_array);
+}
+
 struct child_to_clean {
 	pid_t pid;
 	struct child_to_clean *next;
@@ -338,8 +344,7 @@ int start_command(struct child_process *cmd)
 fail_pipe:
 			error("cannot create %s pipe for %s: %s",
 				str, cmd->argv[0], strerror(failed_errno));
-			argv_array_clear(&cmd->args);
-			argv_array_clear(&cmd->env_array);
+			child_process_deinit(cmd);
 			errno = failed_errno;
 			return -1;
 		}
@@ -525,8 +530,7 @@ fail_pipe:
 			close_pair(fderr);
 		else if (cmd->err)
 			close(cmd->err);
-		argv_array_clear(&cmd->args);
-		argv_array_clear(&cmd->env_array);
+		child_process_deinit(cmd);
 		errno = failed_errno;
 		return -1;
 	}
@@ -552,8 +556,7 @@ fail_pipe:
 int finish_command(struct child_process *cmd)
 {
 	int ret = wait_or_whine(cmd->pid, cmd->argv[0]);
-	argv_array_clear(&cmd->args);
-	argv_array_clear(&cmd->env_array);
+	child_process_deinit(cmd);
 	return ret;
 }
 
@@ -962,6 +965,7 @@ static struct parallel_processes *pp_init(int n,
 
 	for (i = 0; i < n; i++) {
 		strbuf_init(&pp->children[i].err, 0);
+		child_process_init(&pp->children[i].process);
 		pp->pfd[i].events = POLLIN;
 		pp->pfd[i].fd = -1;
 	}
@@ -973,8 +977,10 @@ static void pp_cleanup(struct parallel_processes *pp)
 {
 	int i;
 
-	for (i = 0; i < pp->max_processes; i++)
+	for (i = 0; i < pp->max_processes; i++) {
 		strbuf_release(&pp->children[i].err);
+		child_process_deinit(&pp->children[i].process);
+	}
 
 	free(pp->children);
 	free(pp->pfd);
@@ -1128,12 +1134,11 @@ static int pp_collect_finished(struct parallel_processes *pp)
 				      &pp->children[i].data))
 			result = 1;
 
-		argv_array_clear(&pp->children[i].process.args);
-		argv_array_clear(&pp->children[i].process.env_array);
-
 		pp->nr_processes--;
 		pp->children[i].in_use = 0;
 		pp->pfd[i].fd = -1;
+		child_process_deinit(&pp->children[i].process);
+		child_process_init(&pp->children[i].process);
 
 		if (i != pp->output_owner) {
 			strbuf_addbuf(&pp->buffered_output, &pp->children[i].err);
