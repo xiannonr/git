@@ -13,7 +13,7 @@ unset CDPATH
 # do not equate an unset IFS with IFS with the default, so here is
 # an explicit SP HT LF.
 IFS=' 	
-'
+'"$(printf '\r')"
 
 git_broken_path_fix () {
 	case ":$PATH:" in
