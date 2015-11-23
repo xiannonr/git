@@ -81,6 +81,7 @@ int cmd_merge_file(int argc, const char **argv, const char *prefix)
 					argv[i]);
 	}
 
+	xmp.crlf = eol_for_path(names[0], NULL, 0) == EOL_CRLF;
 	xmp.ancestor = names[1];
 	xmp.file1 = names[0];
 	xmp.file2 = names[2];
