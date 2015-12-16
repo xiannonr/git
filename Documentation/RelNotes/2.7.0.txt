@@ -22,7 +22,7 @@ UI, Workflows & Features
 
  * Users who are too busy to type three extra keystrokes to ask for
    "git stash show -p" can now set stash.showPatch configuration
-   varible to true to always see the actual patch, not just the list
+   variable to true to always see the actual patch, not just the list
    of paths affected with feel for the extent of damage via diffstat.
 
  * "quiltimport" allows to specify the series file by honoring the
