@@ -905,6 +905,7 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 	strbuf_release(&committer_ident);
 
 	fclose(s->fp);
+	adjust_shared_perm(git_path(commit_editmsg));
 
 	/*
 	 * Reject an attempt to record a non-merge empty commit without
