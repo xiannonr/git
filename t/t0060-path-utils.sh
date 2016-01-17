@@ -7,6 +7,13 @@ test_description='Test various path utilities'
 
 . ./test-lib.sh
 
+# On Windows, the root directory "/" is translated into a Windows directory.
+# As it is not well-defined whether that Windows directory should end in a
+# slash or not, let's test for that and adjust our expected longest ancestor
+# length accordingly.
+root_offset=0
+case "$(test-path-utils print_path /)" in ?*/) root_offset=-1;; esac
+
 norm_path() {
 	expected=$(test-path-utils print_path "$2")
 	test_expect_success $3 "normalize path: $1 => $2" \
@@ -112,30 +119,30 @@ norm_path /d1/.../d2 /d1/.../d2
 norm_path /d1/..././../d2 /d1/d2
 
 ancestor / / -1
-ancestor /foo / 0
+ancestor /foo / $root_offset
 ancestor /foo /fo -1
 ancestor /foo /foo -1
 ancestor /foo /bar -1
 ancestor /foo /foo/bar -1
 ancestor /foo /foo:/bar -1
-ancestor /foo /:/foo:/bar 0
-ancestor /foo /foo:/:/bar 0
-ancestor /foo /:/bar:/foo 0
-ancestor /foo/bar / 0
+ancestor /foo /:/foo:/bar $root_offset
+ancestor /foo /foo:/:/bar $root_offset
+ancestor /foo /:/bar:/foo $root_offset
+ancestor /foo/bar / $root_offset
 ancestor /foo/bar /fo -1
-ancestor /foo/bar /foo 4
+ancestor /foo/bar /foo $((4+$root_offset))
 ancestor /foo/bar /foo/ba -1
-ancestor /foo/bar /:/fo 0
-ancestor /foo/bar /foo:/foo/ba 4
+ancestor /foo/bar /:/fo $root_offset
+ancestor /foo/bar /foo:/foo/ba $((4+$root_offset))
 ancestor /foo/bar /bar -1
 ancestor /foo/bar /fo -1
-ancestor /foo/bar /foo:/bar 4
-ancestor /foo/bar /:/foo:/bar 4
-ancestor /foo/bar /foo:/:/bar 4
-ancestor /foo/bar /:/bar:/fo 0
-ancestor /foo/bar /:/bar 0
-ancestor /foo/bar /foo 4
-ancestor /foo/bar /foo:/bar 4
+ancestor /foo/bar /foo:/bar $((4+$root_offset))
+ancestor /foo/bar /:/foo:/bar $((4+$root_offset))
+ancestor /foo/bar /foo:/:/bar $((4+$root_offset))
+ancestor /foo/bar /:/bar:/fo $root_offset
+ancestor /foo/bar /:/bar $root_offset
+ancestor /foo/bar /foo $((4+$root_offset))
+ancestor /foo/bar /foo:/bar $((4+$root_offset))
 ancestor /foo/bar /bar -1
 
 test_expect_success 'strip_path_suffix' '
