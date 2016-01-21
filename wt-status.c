@@ -1068,14 +1068,17 @@ static void abbrev_sha1_in_line(struct strbuf *line)
 
 }
 
-static void read_rebase_todolist(const char *fname, struct string_list *lines)
+static int read_rebase_todolist(const char *fname, struct string_list *lines)
 {
 	struct strbuf line = STRBUF_INIT;
 	FILE *f = fopen(git_path("%s", fname), "r");
 
-	if (!f)
+	if (!f) {
+		if (errno == ENOENT)
+			return -1;
 		die_errno("Could not open file %s for reading",
 			  git_path("%s", fname));
+	}
 	while (!strbuf_getline(&line, f, '\n')) {
 		if (line.len && line.buf[0] == comment_line_char)
 			continue;
@@ -1085,6 +1088,7 @@ static void read_rebase_todolist(const char *fname, struct string_list *lines)
 		abbrev_sha1_in_line(&line);
 		string_list_append(lines, line.buf);
 	}
+	return 0;
 }
 
 static void show_rebase_information(struct wt_status *s,
@@ -1098,10 +1102,12 @@ static void show_rebase_information(struct wt_status *s,
 		struct string_list have_done = STRING_LIST_INIT_DUP;
 		struct string_list yet_to_do = STRING_LIST_INIT_DUP;
 
-		read_rebase_todolist("rebase-merge/done", &have_done);
-		read_rebase_todolist("rebase-merge/git-rebase-todo", &yet_to_do);
-
-		if (have_done.nr == 0)
+		if ((read_rebase_todolist("rebase-merge/done", &have_done)) ||
+		    (read_rebase_todolist("rebase-merge/git-rebase-todo",
+				  &yet_to_do)))
+			status_printf_ln(s, color,
+				_("rebase-i not started yet."));
+		else if (have_done.nr == 0)
 			status_printf_ln(s, color, _("No commands done."));
 		else {
 			status_printf_ln(s, color,
@@ -1119,7 +1125,9 @@ static void show_rebase_information(struct wt_status *s,
 					_("  (see more in file %s)"), git_path("rebase-merge/done"));
 		}
 
-		if (yet_to_do.nr == 0)
+		if (have_done.nr == 0)
+			; /* do nothing */
+		else if (yet_to_do.nr == 0)
 			status_printf_ln(s, color,
 					 _("No commands remaining."));
 		else {
