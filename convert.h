@@ -33,6 +33,8 @@ enum eol {
 
 extern enum eol core_eol;
 
+extern enum eol eol_for_path(const char *path, const char *src, size_t len);
+
 /* returns 1 if *dst was used */
 extern int convert_to_git(const char *path, const char *src, size_t len,
 			  struct strbuf *dst, enum safe_crlf checksafe);

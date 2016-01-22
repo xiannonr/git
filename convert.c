@@ -758,6 +758,35 @@ static void convert_attrs(struct conv_attrs *ca, const char *path)
 	}
 }
 
+enum eol eol_for_path(const char *path, const char *src, size_t len)
+{
+	struct conv_attrs ca;
+	struct text_stat stats;
+
+	if (!path) {
+		memset(&ca, 0, sizeof(ca));
+		ca.crlf_action = CRLF_AUTO;
+		ca.eol_attr = EOL_UNSET;
+	} else {
+		convert_attrs(&ca, path);
+		if (ca.eol_attr == EOL_UNSET)
+			ca.eol_attr = output_eol(ca.crlf_action);
+		if (ca.eol_attr != EOL_UNSET)
+			return ca.eol_attr;
+	}
+	if (!len || (ca.crlf_action != CRLF_AUTO &&
+				ca.crlf_action != CRLF_GUESS))
+		return core_eol;
+	ca.crlf_action = input_crlf_action(ca.crlf_action, ca.eol_attr);
+	gather_stats(src, len, &stats);
+	if (ca.crlf_action == CRLF_GUESS && stats.cr > stats.crlf)
+		return core_eol;
+	else if (stats.crlf)
+		return EOL_CRLF;
+	else
+		return EOL_LF;
+}
+
 int would_convert_to_git_filter_fd(const char *path)
 {
 	struct conv_attrs ca;
