@@ -5,20 +5,12 @@ test_description='test for-each-refs usage of ref-filter APIs'
 . ./test-lib.sh
 . "$TEST_DIRECTORY"/lib-gpg.sh
 
-if ! test_have_prereq GPG
-then
-	skip_all="skipping for-each-ref tests, GPG not available"
-	test_done
-fi
-
 test_expect_success 'setup some history and refs' '
 	test_commit one &&
 	test_commit two &&
 	test_commit three &&
 	git checkout -b side &&
 	test_commit four &&
-	git tag -s -m "A signed tag message" signed-tag &&
-	git tag -s -m "Annonated doubly" double-tag signed-tag &&
 	git checkout master &&
 	git update-ref refs/odd/spot master
 '
@@ -33,7 +25,10 @@ test_expect_success 'filtering with --points-at' '
 	test_cmp expect actual
 '
 
-test_expect_success 'check signed tags with --points-at' '
+test_expect_success GPG 'check signed tags with --points-at' '
+	git tag -s -m "A signed tag message" signed-tag side &&
+	git tag -s -m "Annonated doubly" double-tag signed-tag &&
+	test_when_finished git tag -d signed-tag &&
 	sed -e "s/Z$//" >expect <<-\EOF &&
 	refs/heads/side Z
 	refs/tags/four Z
@@ -58,9 +53,7 @@ test_expect_success 'filtering with --merged' '
 test_expect_success 'filtering with --no-merged' '
 	cat >expect <<-\EOF &&
 	refs/heads/side
-	refs/tags/double-tag
 	refs/tags/four
-	refs/tags/signed-tag
 	EOF
 	git for-each-ref --format="%(refname)" --no-merged=master >actual &&
 	test_cmp expect actual
@@ -71,9 +64,7 @@ test_expect_success 'filtering with --contains' '
 	refs/heads/master
 	refs/heads/side
 	refs/odd/spot
-	refs/tags/double-tag
 	refs/tags/four
-	refs/tags/signed-tag
 	refs/tags/three
 	refs/tags/two
 	EOF
@@ -90,10 +81,8 @@ test_expect_success 'left alignment is default' '
 	refname is refs/heads/master  |refs/heads/master
 	refname is refs/heads/side    |refs/heads/side
 	refname is refs/odd/spot      |refs/odd/spot
-	refname is refs/tags/double-tag|refs/tags/double-tag
 	refname is refs/tags/four     |refs/tags/four
 	refname is refs/tags/one      |refs/tags/one
-	refname is refs/tags/signed-tag|refs/tags/signed-tag
 	refname is refs/tags/three    |refs/tags/three
 	refname is refs/tags/two      |refs/tags/two
 	EOF
@@ -106,10 +95,8 @@ test_expect_success 'middle alignment' '
 	| refname is refs/heads/master |refs/heads/master
 	|  refname is refs/heads/side  |refs/heads/side
 	|   refname is refs/odd/spot   |refs/odd/spot
-	|refname is refs/tags/double-tag|refs/tags/double-tag
 	|  refname is refs/tags/four   |refs/tags/four
 	|   refname is refs/tags/one   |refs/tags/one
-	|refname is refs/tags/signed-tag|refs/tags/signed-tag
 	|  refname is refs/tags/three  |refs/tags/three
 	|   refname is refs/tags/two   |refs/tags/two
 	EOF
@@ -122,10 +109,8 @@ test_expect_success 'right alignment' '
 	|  refname is refs/heads/master|refs/heads/master
 	|    refname is refs/heads/side|refs/heads/side
 	|      refname is refs/odd/spot|refs/odd/spot
-	|refname is refs/tags/double-tag|refs/tags/double-tag
 	|     refname is refs/tags/four|refs/tags/four
 	|      refname is refs/tags/one|refs/tags/one
-	|refname is refs/tags/signed-tag|refs/tags/signed-tag
 	|    refname is refs/tags/three|refs/tags/three
 	|      refname is refs/tags/two|refs/tags/two
 	EOF
@@ -140,10 +125,8 @@ test_expect_success 'alignment with format quote' "
 	|'      '\''master| A U Thor'\''      '|
 	|'       '\''side| A U Thor'\''       '|
 	|'     '\''odd/spot| A U Thor'\''     '|
-	|'        '\''double-tag| '\''        '|
 	|'       '\''four| A U Thor'\''       '|
 	|'       '\''one| A U Thor'\''        '|
-	|'        '\''signed-tag| '\''        '|
 	|'      '\''three| A U Thor'\''       '|
 	|'       '\''two| A U Thor'\''        '|
 	EOF
@@ -156,10 +139,8 @@ test_expect_success 'nested alignment with quote formatting' "
 	|'         master               '|
 	|'           side               '|
 	|'       odd/spot               '|
-	|'     double-tag               '|
 	|'           four               '|
 	|'            one               '|
-	|'     signed-tag               '|
 	|'          three               '|
 	|'            two               '|
 	EOF
@@ -172,10 +153,8 @@ test_expect_success 'check `%(contents:lines=1)`' '
 	master |three
 	side |four
 	odd/spot |three
-	double-tag |Annonated doubly
 	four |four
 	one |one
-	signed-tag |A signed tag message
 	three |three
 	two |two
 	EOF
@@ -188,10 +167,8 @@ test_expect_success 'check `%(contents:lines=0)`' '
 	master |
 	side |
 	odd/spot |
-	double-tag |
 	four |
 	one |
-	signed-tag |
 	three |
 	two |
 	EOF
@@ -204,10 +181,8 @@ test_expect_success 'check `%(contents:lines=99999)`' '
 	master |three
 	side |four
 	odd/spot |three
-	double-tag |Annonated doubly
 	four |four
 	one |one
-	signed-tag |A signed tag message
 	three |three
 	two |two
 	EOF
