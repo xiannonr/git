@@ -122,7 +122,7 @@ mark_action_done () {
 	mv -f "$todo".new "$todo"
 	new_count=$(git stripspace --strip-comments <"$done" | wc -l)
 	echo $new_count >"$msgnum"
-	total=$(($new_count + $(git stripspace --strip-comments <"$todo" | wc -l)))
+	total=$(($new_count+$(git stripspace --strip-comments <"$todo" | wc -l)))
 	echo $total >"$end"
 	if test "$last_count" != "$new_count"
 	then
@@ -895,7 +895,7 @@ check_bad_cmd_and_sha () {
 	lineno=0
 	while read -r command rest
 	do
-		lineno=$(( $lineno + 1 ))
+		lineno=$(($lineno+1))
 		case $command in
 		"$comment_char"*|''|noop|x|exec)
 			# Doesn't expect a SHA-1
