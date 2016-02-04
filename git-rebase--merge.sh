@@ -48,7 +48,7 @@ continue_merge () {
 	GIT_PAGER='' git log --format=%s -1 "$cmt"
 
 	# onto the next patch:
-	msgnum=$(($msgnum + 1))
+	msgnum=$(($msgnum+1))
 	echo "$msgnum" >"$state_dir/msgnum"
 }
 
@@ -59,7 +59,7 @@ call_merge () {
 	echo "$cmt" > "$state_dir/current"
 	hd=$(git rev-parse --verify HEAD)
 	cmt_name=$(git symbolic-ref HEAD 2> /dev/null || echo HEAD)
-	eval GITHEAD_$cmt='"${cmt_name##refs/heads/}~$(($end - $msgnum))"'
+	eval GITHEAD_$cmt='"${cmt_name##refs/heads/}~$(($end-$msgnum))"'
 	eval GITHEAD_$hd='$onto_name'
 	export GITHEAD_$cmt GITHEAD_$hd
 	if test -n "$GIT_QUIET"
@@ -126,7 +126,7 @@ continue)
 skip)
 	read_state
 	git rerere clear
-	msgnum=$(($msgnum + 1))
+	msgnum=$(($msgnum+1))
 	while test "$msgnum" -le "$end"
 	do
 		call_merge "$msgnum"
@@ -144,7 +144,7 @@ write_basic_state
 msgnum=0
 for cmt in $(git rev-list --reverse --no-merges "$revisions")
 do
-	msgnum=$(($msgnum + 1))
+	msgnum=$(($msgnum+1))
 	echo "$cmt" > "$state_dir/cmt.$msgnum"
 done
 
