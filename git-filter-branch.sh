@@ -283,13 +283,13 @@ report_progress ()
 		count=$git_filter_branch__commit_count
 
 		now=$(date +%s)
-		elapsed=$(($now - $start_timestamp))
-		remaining=$(( ($commits - $count) * $elapsed / $count ))
+		elapsed=$(($now-$start_timestamp))
+		remaining=$((($commits-$count)*$elapsed/$count))
 		if test $elapsed -gt 0
 		then
-			next_sample_at=$(( ($elapsed + 1) * $count / $elapsed ))
+			next_sample_at=$((($elapsed+1)*$count/$elapsed))
 		else
-			next_sample_at=$(($next_sample_at + 1))
+			next_sample_at=$(($next_sample_at+1))
 		fi
 		progress=" ($elapsed seconds passed, remaining $remaining predicted)"
 	fi
