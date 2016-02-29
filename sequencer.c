@@ -38,6 +38,17 @@ static GIT_PATH_FUNC(git_path_rebase_dir, "rebase-merge")
  */
 static GIT_PATH_FUNC(git_path_rebase_todo, "rebase-merge/git-rebase-todo")
 /*
+ * The commit message that is planned to be used for any changes that
+ * need to be committed following a user interaction.
+ */
+static GIT_PATH_FUNC(git_path_rebase_msg, "rebase-merge/message")
+/*
+ * A script to set the GIT_AUTHOR_NAME, GIT_AUTHOR_EMAIL, and
+ * GIT_AUTHOR_DATE that will be used for the commit that is currently
+ * being rebased.
+ */
+static GIT_PATH_FUNC(author_script, "rebase-merge/author-script")
+/*
  * When an "edit" rebase command is being processed, the SHA1 of the
  * commit to be edited is recorded in this file.  When "git rebase
  * --continue" is executed, if there are any staged changes then they
@@ -401,19 +412,75 @@ static int is_index_unchanged(void)
 	return !hashcmp(active_cache_tree->sha1, head_commit->tree->object.oid.hash);
 }
 
+static char **read_author_script(void)
+{
+	struct strbuf script = STRBUF_INIT;
+	int i, count = 0;
+	char *p, *p2, **env;
+	size_t env_size;
+
+	if (strbuf_read_file(&script, author_script(), 256) <= 0)
+		return NULL;
+
+	for (p = script.buf; *p; p++)
+		if (skip_prefix(p, "'\\\\''", (const char **)&p2))
+			strbuf_splice(&script, p - script.buf, p2 - p, "'", 1);
+		else if (*p == '\'')
+			strbuf_splice(&script, p-- - script.buf, 1, "", 0);
+		else if (*p == '\n') {
+			*p = '\0';
+			count++;
+		}
+
+	env_size = (count + 1) * sizeof(*env);
+	strbuf_grow(&script, env_size);
+	memmove(script.buf + env_size, script.buf, script.len);
+	p = script.buf + env_size;
+	env = (char **)strbuf_detach(&script, NULL);
+
+	for (i = 0; i < count; i++) {
+		env[i] = p;
+		p += strlen(p) + 1;
+	}
+	env[count] = NULL;
+
+	return env;
+}
+
 /*
  * If we are cherry-pick, and if the merge did not result in
  * hand-editing, we will hit this commit and inherit the original
  * author date and name.
  * If we are revert, or if our cherry-pick results in a hand merge,
- * we had better say that the current user is responsible for that.
+ * we had better say that the current user is responsible for that
+ * (except, of course, while running an interactive rebase).
  */
-static int run_git_commit(const char *defmsg, struct replay_opts *opts,
+int sequencer_commit(const char *defmsg, struct replay_opts *opts,
 			  int allow_empty)
 {
+	char **env = NULL;
 	struct argv_array array;
 	int rc;
 	const char *value;
+
+	if (IS_REBASE_I()) {
+		if (!defmsg)
+			defmsg = git_path_rebase_msg();
+
+		env = read_author_script();
+		if (!env)
+			/* TODO: gpg_sign_opt */
+			return error("You have staged changes in your working "
+				"tree. If these changes are meant to be\n"
+				"squashed into the previous commit, run:\n\n"
+				"  git commit --amend $gpg_sign_opt_quoted\n\n"
+				"If they are meant to go into a new commit, "
+				"run:\n\n"
+				"  git commit $gpg_sign_opt_quoted\n\n"
+				"In both case, once you're done, continue "
+				"with:\n\n"
+				"  git rebase --continue\n");
+	}
 
 	argv_array_init(&array);
 	argv_array_push(&array, "commit");
@@ -423,7 +490,7 @@ static int run_git_commit(const char *defmsg, struct replay_opts *opts,
 		argv_array_pushf(&array, "-S%s", opts->gpg_sign);
 	if (opts->signoff)
 		argv_array_push(&array, "-s");
-	if (!opts->edit) {
+	if (!opts->edit || IS_REBASE_I()) {
 		argv_array_push(&array, "-F");
 		argv_array_push(&array, defmsg);
 		if (!opts->signoff &&
@@ -431,6 +498,8 @@ static int run_git_commit(const char *defmsg, struct replay_opts *opts,
 		    git_config_get_value("commit.cleanup", &value))
 			argv_array_push(&array, "--cleanup=verbatim");
 	}
+	if (opts->edit && IS_REBASE_I())
+		argv_array_push(&array, "-e");
 
 	if (allow_empty)
 		argv_array_push(&array, "--allow-empty");
@@ -438,8 +507,11 @@ static int run_git_commit(const char *defmsg, struct replay_opts *opts,
 	if (opts->allow_empty_message)
 		argv_array_push(&array, "--allow-empty-message");
 
-	rc = run_command_v_opt(array.argv, RUN_GIT_CMD);
+	rc = run_command_v_opt_cd_env(array.argv, RUN_GIT_CMD, NULL,
+			(const char *const *)env);
 	argv_array_clear(&array);
+	free(env);
+
 	return rc;
 }
 
@@ -693,7 +765,7 @@ static int do_pick_commit(enum todo_command command, struct commit *commit,
 		goto leave;
 	}
 	if (!opts->no_commit)
-		res = run_git_commit(git_path_merge_msg(), opts, allow);
+		res = sequencer_commit(git_path_merge_msg(), opts, allow);
 
 leave:
 	free_message(commit, &msg);
