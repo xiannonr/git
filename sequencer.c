@@ -38,6 +38,12 @@ static GIT_PATH_FUNC(git_path_rebase_dir, "rebase-merge")
  */
 static GIT_PATH_FUNC(git_path_rebase_todo, "rebase-merge/git-rebase-todo")
 /*
+ * The rebase command lines that have already been processed. A line
+ * is moved here when it is first handled, before any associated user
+ * actions.
+ */
+static GIT_PATH_FUNC(git_path_rebase_done, "rebase-merge/done")
+/*
  * The commit message that is planned to be used for any changes that
  * need to be committed following a user interaction.
  */
@@ -1131,6 +1137,20 @@ static int save_todo(struct todo_list *todo_list, struct replay_opts *opts)
 			todo_path, strerror(errno));
 	if (commit_lock_file(&todo_lock) < 0)
 		return error(_("Error wrapping up %s."), todo_path);
+
+	if (IS_REBASE_I()) {
+		const char *done_path = git_path_rebase_done();
+		int fd = open(done_path, O_CREAT | O_WRONLY, 0666);
+		int prev_offset = todo_list->items[next - 1].offset_in_buf;
+
+		lseek(fd, 0, SEEK_END);
+		if (offset > prev_offset && write_in_full(fd,
+				todo_list->buf.buf + prev_offset,
+				offset - prev_offset) < 0)
+			return error(_("Could not write to %s (%s)"),
+				done_path, strerror(errno));
+		close(fd);
+	}
 	return 0;
 }
 
