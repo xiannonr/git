@@ -468,7 +468,7 @@ static char **read_author_script()
  * (except, of course, while running an interactive rebase).
  */
 int sequencer_commit(const char *defmsg, struct replay_opts *opts,
-			  int allow_empty)
+			  int allow_empty, int edit)
 {
 	char **env = NULL;
 	struct argv_array array;
@@ -502,7 +502,7 @@ int sequencer_commit(const char *defmsg, struct replay_opts *opts,
 		argv_array_pushf(&array, "-S%s", opts->gpg_sign);
 	if (opts->signoff)
 		argv_array_push(&array, "-s");
-	if (!opts->edit || IS_REBASE_I()) {
+	if (!edit || IS_REBASE_I()) {
 		argv_array_push(&array, "-F");
 		argv_array_push(&array, defmsg);
 		if (!opts->signoff &&
@@ -510,7 +510,7 @@ int sequencer_commit(const char *defmsg, struct replay_opts *opts,
 		    git_config_get_value("commit.cleanup", &value))
 			argv_array_push(&array, "--cleanup=verbatim");
 	}
-	if (opts->edit && IS_REBASE_I())
+	if (edit && IS_REBASE_I())
 		argv_array_push(&array, "-e");
 
 	if (allow_empty)
@@ -777,7 +777,8 @@ static int do_pick_commit(enum todo_command command, struct commit *commit,
 		goto leave;
 	}
 	if (!opts->no_commit)
-		res = sequencer_commit(git_path_merge_msg(), opts, allow);
+		res = sequencer_commit(git_path_merge_msg(), opts, allow,
+			opts->edit);
 
 leave:
 	free_message(commit, &msg);
