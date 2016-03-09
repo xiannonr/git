@@ -836,7 +836,7 @@ static int create_seq_dir(void)
 	return 0;
 }
 
-static void save_head(const char *head)
+static int save_head(const char *head)
 {
 	static struct lock_file head_lock;
 	struct strbuf buf = STRBUF_INIT;
@@ -845,9 +845,11 @@ static void save_head(const char *head)
 	fd = hold_lock_file_for_update(&head_lock, git_path_head_file(), LOCK_DIE_ON_ERROR);
 	strbuf_addf(&buf, "%s\n", head);
 	if (write_in_full(fd, buf.buf, buf.len) < 0)
-		die_errno(_("Could not write to %s"), git_path_head_file());
+		return error(_("Could not write to %s (%s)"),
+			git_path_head_file(), strerror(errno));
 	if (commit_lock_file(&head_lock) < 0)
-		die(_("Error wrapping up %s."), git_path_head_file());
+		return error(_("Error wrapping up %s."), git_path_head_file());
+	return 0;
 }
 
 static int reset_for_rollback(const unsigned char *sha1)
@@ -1110,7 +1112,8 @@ int sequencer_pick_revisions(struct replay_opts *opts)
 			return error(_("Can't revert as initial commit"));
 		return error(_("Can't cherry-pick into empty head"));
 	}
-	save_head(sha1_to_hex(sha1));
+	if (save_head(sha1_to_hex(sha1)))
+		return -1;
 	save_opts(opts);
 	return pick_commits(todo_list, opts);
 }
