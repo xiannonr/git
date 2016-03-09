@@ -1546,6 +1546,18 @@ static void post_read_index_from(struct index_state *istate)
 	tweak_untracked_cache(istate);
 }
 
+#if defined(GIT_WINDOWS_NATIVE)
+static void do_poke(struct strbuf *sb, int refresh_cache)
+{
+	HWND hwnd;
+	if (!starts_with(sb->buf, "HWND"))
+		return;
+	hwnd = FindWindow("git-index-helper", sb->buf);
+	if (!hwnd)
+		return;
+	PostMessage(hwnd, refresh_cache ? WM_USER : WM_USER + 1, 0, 0);
+}
+#else
 static void do_poke(struct strbuf *sb, int refresh_cache)
 {
 	char	*start = sb->buf;
@@ -1555,6 +1567,7 @@ static void do_poke(struct strbuf *sb, int refresh_cache)
 		return;
 	kill(pid, refresh_cache ? SIGHUP : SIGUSR1);
 }
+#endif
 
 static void poke_daemon(struct index_state *istate,
 			const struct stat *st, int refresh_cache)
