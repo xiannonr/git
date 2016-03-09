@@ -718,6 +718,8 @@ static int read_and_refresh_cache(struct replay_opts *opts)
 struct todo_item {
 	enum todo_command command;
 	struct commit *commit;
+	const char *arg;
+	int arg_len;
 	size_t offset_in_buf;
 };
 
@@ -753,6 +755,8 @@ static int parse_insn_line(struct todo_item *item,
 	if (bol == eol || *bol == '\r' || *bol == comment_line_char) {
 		item->command = TODO_NOOP;
 		item->commit = NULL;
+		item->arg = bol;
+		item->arg_len = eol - bol;
 		return 0;
 	}
 
@@ -766,6 +770,8 @@ static int parse_insn_line(struct todo_item *item,
 
 	if (item->command == TODO_NOOP) {
 		item->commit = NULL;
+		item->arg = bol;
+		item->arg_len = eol - bol;
 		return 0;
 	}
 
@@ -780,6 +786,9 @@ static int parse_insn_line(struct todo_item *item,
 	*end_of_object_name = '\0';
 	status = get_sha1(bol, commit_sha1);
 	*end_of_object_name = saved;
+
+	item->arg = end_of_object_name + strspn(end_of_object_name, " \t");
+	item->arg_len = (int)(eol - item->arg);
 
 	if (status < 0)
 		return -1;
