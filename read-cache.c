@@ -1613,14 +1613,46 @@ static void do_poke(struct strbuf *sb, int refresh_cache)
 	PostMessage(hwnd, refresh_cache ? WM_USER : WM_USER + 1, 0, 0);
 }
 #else
+
+static volatile int done_sleeping;
+
+static void mark_done_sleeping(int sig)
+{
+	done_sleeping = 1;
+}
+
+/*
+ * Send a message to the index-helper to let it know that we're going
+ * to read the index.  If refresh_cache is true, then the index-helper
+ * should re-read the index; otherwise, it should just stay alive.
+ *
+ * If the index-helper supports watchman, it will refresh the index
+ * before it hands it over.  Wait up to one second for a response
+ * indicating that the index has been successfully refreshed.
+ *
+ */
 static void do_poke(struct strbuf *sb, int refresh_cache)
 {
-	char	*start = sb->buf;
+	int	 wait  = sb->buf[0] == 'W';
+	char	*start = wait ? sb->buf + 1 : sb->buf;
 	char	*end   = NULL;
 	pid_t	 pid   = strtoul(start, &end, 10);
+	int	 ret;
+	int	 count = 0;
+
+	done_sleeping = 0;
 	if (!end || end != sb->buf + sb->len)
 		return;
-	kill(pid, refresh_cache ? SIGHUP : SIGUSR1);
+	if (!refresh_cache && wait)
+		signal(SIGHUP, mark_done_sleeping);
+	ret = kill(pid, refresh_cache ? SIGHUP : SIGUSR1);
+	if (!refresh_cache && wait) {
+		if (!ret)
+			while (!done_sleeping && count++ < 1000)
+				sleep_millisec(1);
+
+		sigaction(SIGHUP, NULL, NULL);
+	}
 }
 #endif
 
