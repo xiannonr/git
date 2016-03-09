@@ -152,6 +152,17 @@ static void refresh(int sig)
 
 #ifdef HAVE_SHM
 
+static void touch_pid_file(void)
+{
+	/*
+	 * If we fail to update the times on index-helper.pid, we've
+	 * probably had the repo deleted out from under us or otherwise
+	 * lost access; might as well give up.
+	 */
+	if (utimes(git_path("index-helper.pid"), NULL))
+		exit(0);
+}
+
 #ifdef USE_WATCHMAN
 static void share_watchman(struct index_state *istate,
 			   struct shm *is, pid_t pid)
@@ -211,9 +222,10 @@ static void prepare_index(int sig, siginfo_t *si, void *context)
 
 #endif
 
-static void loop(const char *pid_file, int idle_in_seconds)
+static void loop(const char *pid_file, int idle_in_minutes)
 {
 	struct sigaction sa;
+	int timeout_count = 0;
 
 	sigchain_pop(SIGHUP);	/* pushed by sigchain_push_common */
 	sigchain_push(SIGHUP, refresh);
@@ -225,19 +237,25 @@ static void loop(const char *pid_file, int idle_in_seconds)
 	sigaction(SIGUSR1, &sa, NULL);
 
 	refresh(0);
-	while (sleep(idle_in_seconds))
-		; /* do nothing, all is handled by signal handlers already */
+	while (timeout_count < idle_in_minutes) {
+		if (sleep(60) == EINTR)
+			timeout_count = 0;
+		else
+			timeout_count ++;
+		touch_pid_file();
+	}
 }
 
 #elif defined(GIT_WINDOWS_NATIVE)
 
-static void loop(const char *pid_file, int idle_in_seconds)
+static void loop(const char *pid_file, int idle_in_minutes)
 {
 	HWND hwnd;
 	UINT_PTR timer = 0;
 	MSG msg;
 	HINSTANCE hinst = GetModuleHandle(NULL);
 	WNDCLASS wc;
+	int timeout_count = 0;
 
 	/*
 	 * Emulate UNIX signals by sending WM_USER+x to a
@@ -258,11 +276,18 @@ static void loop(const char *pid_file, int idle_in_seconds)
 
 	refresh(0);
 	while (1) {
-		timer = SetTimer(hwnd, timer, idle_in_seconds * 1000, NULL);
+		timer = SetTimer(hwnd, timer, 60 * 1000, NULL);
 		if (!timer)
 			die(_("no timer!"));
-		if (!GetMessage(&msg, hwnd, 0, 0) || msg.message == WM_TIMER)
+		if (!GetMessage(&msg, hwnd, 0, 0))
 			break;
+		if (msg.message == WM_TIMER) {
+			timeout_count ++;
+			if (timeout_count == idle_in_minutes)
+				break;
+		}
+		timeout_count = 0;
+		touch_pid_file();
 		switch (msg.message) {
 		case WM_USER:
 			refresh(0);
@@ -287,6 +312,44 @@ static const char * const usage_text[] = {
 	N_("git index-helper [options]"),
 	NULL
 };
+
+static int already_running(void)
+{
+	char contents[20] = {0};
+	char *end;
+	int fd, dead, i = 0;
+	time_t now;
+	pid_t pid;
+	struct stat st;
+
+	fd = open(git_path("index-helper.pid"), O_RDONLY);
+	if (fd < 0)
+		return 0;
+
+	if (fstat(fd, &st) < 0)
+		return 0;
+
+	now = time(&now);
+
+	/*
+	 * We touch the pid file every minute, so if a pid file hasn't
+	 * been updated in two minutes, it's out-of-date.
+	 */
+	if (st.st_mtime + 120 < now)
+		return 0;
+
+	read_in_full(fd, &contents, sizeof(contents));
+
+	while (!isdigit(contents[i]) && contents[i])
+		i++;
+	pid = strtoll(contents + i, &end, 10);
+	if (contents == end)
+		return 0;
+	dead = kill(pid, 0);
+	if (!dead)
+		return pid;
+	return 0;
+}
 
 static const char *write_pid(void)
 {
@@ -314,6 +377,8 @@ int main(int argc, char **argv)
 {
 	const char *prefix;
 	int idle_in_minutes = 10, detach = 0;
+	int ignore_existing = 0;
+	int kill_existing = 0;
 	const char *pid_file;
 	struct option options[] = {
 		OPT_INTEGER(0, "exit-after", &idle_in_minutes,
@@ -321,6 +386,8 @@ int main(int argc, char **argv)
 		OPT_BOOL(0, "strict", &to_verify,
 			 "verify shared memory after creating"),
 		OPT_BOOL(0, "detach", &detach, "detach the process"),
+		OPT_BOOL(0, "ignore-existing", &ignore_existing, "run even if another index-helper seems to be running for this repo"),
+		OPT_BOOL(0, "kill", &kill_existing, "kill any running index-helper for this repo"),
 		OPT_END()
 	};
 
@@ -334,6 +401,20 @@ int main(int argc, char **argv)
 	if (parse_options(argc, (const char **)argv, prefix,
 			  options, usage_text, 0))
 		die(_("too many arguments"));
+
+	if (ignore_existing && kill_existing)
+		die(_("--ignore-existing and --kill don't make sense together"));
+
+	if (!ignore_existing) {
+		pid_t pid = already_running();
+		if (pid) {
+			if (kill_existing)
+				exit(kill(pid, SIGKILL));
+			else if (!detach)
+				warning("index-helper is apparently already running with pid %d", (int)pid);
+			exit(0);
+		}
+	}
 
 	write_pid();
 
@@ -351,6 +432,6 @@ int main(int argc, char **argv)
 
 	if (!idle_in_minutes)
 		idle_in_minutes = 0xffffffff / 60;
-	loop(pid_file, idle_in_minutes * 60);
+	loop(pid_file, idle_in_minutes);
 	return 0;
 }
