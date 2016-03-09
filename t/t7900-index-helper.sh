@@ -20,4 +20,14 @@ test_expect_success 'index-helper creates usable pid file and can be killed' '
 	! kill -0 $pid
 '
 
+test_expect_success 'index-helper autorun works' '
+	rm -f .git/index-helper.pid &&
+	git status &&
+	test_path_is_missing .git/index-helper.pid &&
+	test_config indexhelper.autorun true &&
+	git status &&
+	test_path_is_file .git/index-helper.pid &&
+	git index-helper --kill
+'
+
 test_done

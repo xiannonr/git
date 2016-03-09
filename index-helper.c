@@ -379,6 +379,7 @@ int main(int argc, char **argv)
 	int idle_in_minutes = 10, detach = 0;
 	int ignore_existing = 0;
 	int kill_existing = 0;
+	int nongit = 0, autorun = 0;
 	const char *pid_file;
 	struct option options[] = {
 		OPT_INTEGER(0, "exit-after", &idle_in_minutes,
@@ -388,6 +389,7 @@ int main(int argc, char **argv)
 		OPT_BOOL(0, "detach", &detach, "detach the process"),
 		OPT_BOOL(0, "ignore-existing", &ignore_existing, "run even if another index-helper seems to be running for this repo"),
 		OPT_BOOL(0, "kill", &kill_existing, "kill any running index-helper for this repo"),
+		OPT_BOOL(0, "auto", &autorun, "this is an automatic run of git index-helper, so certain errors can be solved by silently exiting"),
 		OPT_END()
 	};
 
@@ -397,10 +399,17 @@ int main(int argc, char **argv)
 	if (argc == 2 && !strcmp(argv[1], "-h"))
 		usage_with_options(usage_text, options);
 
-	prefix = setup_git_directory();
+	prefix = setup_git_directory_gently(&nongit);
 	if (parse_options(argc, (const char **)argv, prefix,
 			  options, usage_text, 0))
 		die(_("too many arguments"));
+
+	if (nongit) {
+		if (autorun)
+			exit(0);
+		else
+			die("Not a git repository");
+	}
 
 	if (ignore_existing && kill_existing)
 		die(_("--ignore-existing and --kill don't make sense together"));
