@@ -288,12 +288,33 @@ static const char * const usage_text[] = {
 	NULL
 };
 
+static const char *write_pid(void)
+{
+	static struct strbuf sb = STRBUF_INIT;
+	static struct lock_file lock;
+	int fd;
+
+	strbuf_reset(&sb);
+	fd = hold_lock_file_for_update(&lock,
+				       git_path("index-helper.pid"),
+				       LOCK_DIE_ON_ERROR);
+#ifdef GIT_WINDOWS_NATIVE
+	strbuf_addstr(&sb, "HWND");
+#elif defined(USE_WATCHMAN)
+	strbuf_addch(&sb, 'W');	/* see poke_daemon() */
+#endif
+	strbuf_addf(&sb, "%" PRIuMAX, (uintmax_t) getpid());
+	write_in_full(fd, sb.buf, sb.len);
+	commit_lock_file(&lock);
+
+	return sb.buf;
+}
+
 int main(int argc, char **argv)
 {
-	static struct lock_file lock;
-	struct strbuf sb = STRBUF_INIT;
 	const char *prefix;
-	int fd, idle_in_minutes = 10, detach = 0;
+	int idle_in_minutes = 10, detach = 0;
+	const char *pid_file;
 	struct option options[] = {
 		OPT_INTEGER(0, "exit-after", &idle_in_minutes,
 			    N_("exit if not used after some minutes")),
@@ -314,17 +335,7 @@ int main(int argc, char **argv)
 			  options, usage_text, 0))
 		die(_("too many arguments"));
 
-	fd = hold_lock_file_for_update(&lock,
-				       git_path("index-helper.pid"),
-				       LOCK_DIE_ON_ERROR);
-#ifdef GIT_WINDOWS_NATIVE
-	strbuf_addstr(&sb, "HWND");
-#elif defined(USE_WATCHMAN)
-	strbuf_addch(&sb, 'W');	/* see poke_daemon() */
-#endif
-	strbuf_addf(&sb, "%" PRIuMAX, (uintmax_t) getpid());
-	write_in_full(fd, sb.buf, sb.len);
-	commit_lock_file(&lock);
+	write_pid();
 
 	atexit(cleanup);
 	sigchain_push_common(cleanup_on_signal);
@@ -332,9 +343,14 @@ int main(int argc, char **argv)
 	if (detach && daemonize(&daemonized))
 		die_errno("unable to detach");
 
+	/*
+	 * Now that we're daemonized, we need to rewrite the PID file
+	 * because we have a new PID.
+	 */
+	pid_file = write_pid();
+
 	if (!idle_in_minutes)
 		idle_in_minutes = 0xffffffff / 60;
-	loop(sb.buf, idle_in_minutes * 60);
-	strbuf_release(&sb);
+	loop(pid_file, idle_in_minutes * 60);
 	return 0;
 }
