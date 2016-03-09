@@ -1,6 +1,7 @@
 #include "cache.h"
 #include "watchman-support.h"
 #include "strbuf.h"
+#include "dir.h"
 #include <watchman.h>
 
 static struct watchman_query *make_query(const char *last_update)
@@ -60,8 +61,24 @@ static void update_index(struct index_state *istate,
 			continue;
 
 		pos = index_name_pos(istate, wm->name, strlen(wm->name));
-		if (pos < 0)
+		if (pos < 0) {
+			if (istate->untracked) {
+				char *name = xstrdup(wm->name);
+				char *dname = dirname(name);
+
+				/*
+				 * dirname() returns '.' for the root,
+				 * but we call it ''.
+				 */
+				if (dname[0] == '.' && dname[1] == 0)
+					string_list_append(&istate->untracked->invalid_untracked, "");
+				else
+					string_list_append(&istate->untracked->invalid_untracked,
+							   dname);
+				free(name);
+			}
 			continue;
+		}
 		/* FIXME: ignore staged entries and gitlinks too? */
 
 		istate->cache[pos]->ce_flags |= CE_WATCHMAN_DIRTY;
@@ -71,6 +88,8 @@ done:
 	free(istate->last_update);
 	istate->last_update    = xstrdup(result->clock);
 	istate->cache_changed |= WATCHMAN_CHANGED;
+	if (istate->untracked)
+		string_list_remove_duplicates(&istate->untracked->invalid_untracked, 0);
 }
 
 int check_watchman(struct index_state *istate)

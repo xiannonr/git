@@ -1237,7 +1237,7 @@ int refresh_index(struct index_state *istate, unsigned int flags,
 		if (!new) {
 			const char *fmt;
 
-			if (really && cache_errno == EINVAL) {
+			if (really || cache_errno == EINVAL) {
 				/* If we are doing --really-refresh that
 				 * means the index is not valid anymore.
 				 */
@@ -1377,11 +1377,82 @@ static int verify_hdr(const struct cache_header *hdr, unsigned long size)
 	return 0;
 }
 
+static struct untracked_cache_dir *find_untracked_cache_dir(
+	struct untracked_cache *uc, struct untracked_cache_dir *ucd,
+	const char *name)
+{
+	int component_len;
+	const char *end;
+	struct untracked_cache_dir *dir;
+
+	if (!*name)
+		return ucd;
+
+	end = strchr(name, '/');
+	if (end)
+		component_len = end - name;
+	else
+		component_len = strlen(name);
+
+	dir = lookup_untracked(uc, ucd, name, component_len);
+	if (dir)
+		return find_untracked_cache_dir(uc, dir, name + component_len + 1);
+
+	return NULL;
+}
+
 static void mark_no_watchman(size_t pos, void *data)
 {
 	struct index_state *istate = data;
+	struct cache_entry *ce = istate->cache[pos];
+	struct strbuf sb = STRBUF_INIT;
+	char *c;
+	struct untracked_cache_dir *dir;
+
 	assert(pos < istate->cache_nr);
-	istate->cache[pos]->ce_flags |= CE_WATCHMAN_DIRTY;
+	ce->ce_flags |= CE_WATCHMAN_DIRTY;
+
+	if (!istate->untracked || !istate->untracked->root)
+		return;
+
+	strbuf_add(&sb, ce->name, ce_namelen(ce));
+
+	for (c = sb.buf + sb.len - 1; c > sb.buf; c--) {
+		if (*c == '/') {
+			strbuf_setlen(&sb, c - sb.buf);
+			break;
+		}
+	}
+
+	if (c == sb.buf) {
+		strbuf_setlen(&sb, 0);
+	}
+
+	dir = find_untracked_cache_dir(istate->untracked,
+				       istate->untracked->root, sb.buf);
+	if (dir) {
+		fprintf(stderr, "from '%s', dir '%s', invalidated '%s'\n",
+			ce->name, sb.buf, dir->name);
+		dir->valid = 0;
+	} else {
+		fprintf(stderr, "from '%s', dir '%s', not found\n",
+			ce->name, sb.buf);
+	}
+
+	strbuf_release(&sb);
+}
+
+static int mark_untracked_invalid(struct string_list_item *item, void *uc)
+{
+	struct untracked_cache *untracked = uc;
+	struct untracked_cache_dir *dir;
+
+	dir = find_untracked_cache_dir(untracked, untracked->root,
+				       item->string);
+	if (dir)
+		dir->valid = 0;
+
+	return 0;
 }
 
 static int read_watchman_ext(struct index_state *istate, const void *data,
@@ -1389,19 +1460,56 @@ static int read_watchman_ext(struct index_state *istate, const void *data,
 {
 	struct ewah_bitmap *bitmap;
 	int ret, len;
+	uint32_t bitmap_size;
+	uint32_t untracked_nr;
+	const char *untracked;
 
 	if (memchr(data, 0, sz) == NULL)
 		return error("invalid extension");
+
 	len = strlen(data) + 1;
+	memcpy(&bitmap_size, (const char *)data + len, 4);
+	memcpy(&untracked_nr, (const char *)data + len + 4, 4);
+	untracked_nr = ntohl(untracked_nr);
+	bitmap_size = ntohl(bitmap_size);
+
 	bitmap = ewah_new();
-	ret = ewah_read_mmap(bitmap, (const char *)data + len, sz - len);
-	if (ret != sz - len) {
+	ret = ewah_read_mmap(bitmap, (const char *)data + len + 8, bitmap_size);
+	if (ret != bitmap_size) {
 		ewah_free(bitmap);
 		return error("failed to parse ewah bitmap reading watchman index extension");
 	}
 	istate->last_update = xstrdup(data);
 	ewah_each_bit(bitmap, mark_no_watchman, istate);
 	ewah_free(bitmap);
+
+	if (istate->untracked && istate->untracked->root) {
+		int i;
+
+		istate->untracked->use_watchman = 1;
+		untracked = data + len + 8 + bitmap_size;
+		for (i = 0; i < untracked_nr; ++i) {
+			int len = strlen(untracked);
+			string_list_append(&istate->untracked->invalid_untracked,
+					   untracked);
+			untracked += len + 1;
+		}
+
+		for_each_string_list(&istate->untracked->invalid_untracked,
+			 mark_untracked_invalid, istate->untracked);
+
+		string_list_clear(&istate->untracked->invalid_untracked, 0);
+		istate->cache_changed |= WATCHMAN_CHANGED;
+	}
+	return 0;
+}
+
+int untracked_entry_append(struct string_list_item *item, void *sbvoid)
+{
+	struct strbuf *sb = sbvoid;
+
+	strbuf_addstr(sb, item->string);
+	strbuf_addch(sb, 0);
 	return 0;
 }
 
@@ -1409,14 +1517,38 @@ void write_watchman_ext(struct strbuf *sb, struct index_state* istate)
 {
 	struct ewah_bitmap *bitmap;
 	int i;
+	int ewah_start;
+	int ewah_size = 0;
+	int fixup = 0;
 
 	strbuf_add(sb, istate->last_update, strlen(istate->last_update) + 1);
+	fixup = sb->len;
+	strbuf_add(sb, &ewah_size, 4); /* we'll fix this up later */
+	if (istate->untracked) {
+		uint32_t nr = istate->untracked->invalid_untracked.nr;
+		nr = htonl(nr);
+		strbuf_add(sb, &nr, 4);
+	} else {
+		/* zero */
+		strbuf_add(sb, &ewah_size, 4);
+	}
+
+	ewah_start = sb->len;
 	bitmap = ewah_new();
 	for (i = 0; i < istate->cache_nr; i++)
 		if (istate->cache[i]->ce_flags & CE_WATCHMAN_DIRTY)
 			ewah_set(bitmap, i);
 	ewah_serialize_strbuf(bitmap, sb);
 	ewah_free(bitmap);
+
+	/* fix up size field */
+	ewah_size = sb->len - ewah_start;
+	ewah_size = htonl(ewah_size);
+	memcpy(sb->buf + fixup, &ewah_size, 4);
+
+	if (istate->untracked)
+		for_each_string_list(&istate->untracked->invalid_untracked,
+				     untracked_entry_append, sb);
 }
 
 static int read_index_extension(struct index_state *istate,
@@ -1956,7 +2088,7 @@ int unmerged_index(const struct index_state *istate)
 	return 0;
 }
 
-#define WRITE_BUFFER_SIZE 8192
+#define WRITE_BUFFER_SIZE 8192*16
 static unsigned char write_buffer[WRITE_BUFFER_SIZE];
 static unsigned long write_buffer_len;
 
