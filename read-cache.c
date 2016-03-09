@@ -2591,3 +2591,11 @@ void report_index_stats(struct trace_key *key)
 			 "index stats: file writes       = %10u\n",
 			 nr_read_index, nr_read_shm_index, nr_write_index);
 }
+
+void move_index_extensions(struct index_state *dst, struct index_state *src)
+{
+	dst->untracked = src->untracked;
+	src->untracked = NULL;
+	dst->last_update = src->last_update;
+	src->last_update = NULL;
+}
