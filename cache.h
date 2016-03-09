@@ -1835,5 +1835,6 @@ void sleep_millisec(int millisec);
 void safe_create_dir(const char *dir, int share);
 
 void report_pack_stats(struct trace_key *key);
+void report_index_stats(struct trace_key *key);
 
 #endif /* CACHE_H */
