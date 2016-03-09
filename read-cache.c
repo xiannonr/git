@@ -1405,7 +1405,7 @@ static int read_watchman_ext(struct index_state *istate, const void *data,
 	return 0;
 }
 
-static void write_watchman_ext(struct strbuf *sb, struct index_state* istate)
+void write_watchman_ext(struct strbuf *sb, struct index_state* istate)
 {
 	struct ewah_bitmap *bitmap;
 	int i;
@@ -1722,6 +1722,39 @@ static int try_shm(struct index_state *istate)
 	return 0;
 }
 
+static void refresh_by_watchman(struct index_state *istate)
+{
+	void *shm = NULL;
+	int length;
+	int i;
+
+	length = git_shm_map(O_RDONLY, 0700, -1, &shm,
+			     PROT_READ, MAP_SHARED,
+			     "git-watchman-%s-%" PRIuMAX,
+			     sha1_to_hex(istate->sha1),
+			     (uintmax_t)getpid());
+
+	if (length <= 20 ||
+	    hashcmp(istate->sha1, (unsigned char *)shm + length - 20) ||
+	    /*
+	     * No need to clear CE_WATCHMAN_DIRTY set by 'WAMA' on
+	     * disk. Watchman can only set more, not clear any, so
+	     * this is OR mask.
+	     */
+	    read_watchman_ext(istate, shm, length - 20))
+		goto done;
+
+	for (i = 0; i < istate->cache_nr; i++) {
+		struct cache_entry *ce = istate->cache[i];
+		if (ce_stage(ce) || (ce->ce_flags & CE_WATCHMAN_DIRTY))
+			continue;
+		ce_mark_uptodate(ce);
+	}
+done:
+	if (shm)
+		munmap(shm, length);
+}
+
 /* remember to discard_cache() before reading a different cache! */
 int do_read_index(struct index_state *istate, const char *path, int must_exist)
 {
@@ -1842,7 +1875,7 @@ int read_index_from(struct index_state *istate, const char *path)
 	split_index = istate->split_index;
 	if (!split_index || is_null_sha1(split_index->base_sha1)) {
 		post_read_index_from(istate);
-		return ret;
+		goto done;
 	}
 
 	if (split_index->base)
@@ -1863,6 +1896,10 @@ int read_index_from(struct index_state *istate, const char *path)
 		    sha1_to_hex(split_index->base->sha1));
 	merge_base_index(istate);
 	post_read_index_from(istate);
+
+done:
+	if (ret > 0 && istate->from_shm && istate->last_update)
+		refresh_by_watchman(istate);
 	return ret;
 }
 
@@ -2164,7 +2201,7 @@ out:
 	return 0;
 }
 
-static int verify_index(const struct index_state *istate)
+int verify_index(const struct index_state *istate)
 {
 	return verify_index_from(istate, get_index_file());
 }
