@@ -797,7 +797,6 @@ static int update_squash_messages(enum todo_command command,
 	return 0;
 }
 
-
 static int do_pick_commit(enum todo_command command, struct commit *commit,
 		struct replay_opts *opts, int final_fixup)
 {
@@ -1583,6 +1582,8 @@ static int pick_commits(struct todo_list *todo_list, struct replay_opts *opts)
 			if (res && is_fixup(item->command))
 				return error_failed_squash(item->commit, opts,
 					item->arg_len, item->arg);
+			else if (res && IS_REBASE_I())
+				return res | make_patch(item->commit, opts);
 		}
 		else if (item->command == TODO_EXEC) {
 			char *end_of_arg = (char *)(item->arg + item->arg_len);
