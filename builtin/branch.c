@@ -20,6 +20,7 @@
 #include "utf8.h"
 #include "wt-status.h"
 #include "ref-filter.h"
+#include "run-command.h"
 
 static const char * const builtin_branch_usage[] = {
 	N_("git branch [<options>] [-r | -a] [--merged | --no-merged]"),
@@ -605,7 +606,7 @@ int cmd_branch(int argc, const char **argv, const char *prefix)
 {
 	int delete = 0, rename = 0, force = 0, list = 0;
 	int reflog = 0, edit_description = 0;
-	int quiet = 0, unset_upstream = 0;
+	int quiet = 0, unset_upstream = 0, new_worktree = 0;
 	const char *new_upstream = NULL;
 	enum branch_track track;
 	struct ref_filter filter;
@@ -622,6 +623,7 @@ int cmd_branch(int argc, const char **argv, const char *prefix)
 			BRANCH_TRACK_OVERRIDE),
 		OPT_STRING('u', "set-upstream-to", &new_upstream, "upstream", "change the upstream info"),
 		OPT_BOOL(0, "unset-upstream", &unset_upstream, "Unset the upstream info"),
+		OPT_BIT('w', "worktree", &new_worktree, N_("add worktree for the new branch"), 1),
 		OPT__COLOR(&branch_use_color, N_("use colored output")),
 		OPT_SET_INT('r', "remotes",     &filter.kind, N_("act on remote-tracking branches"),
 			FILTER_REFS_REMOTES),
@@ -677,6 +679,13 @@ int cmd_branch(int argc, const char **argv, const char *prefix)
 
 	if (!delete && !rename && !edit_description && !new_upstream && !unset_upstream && argc == 0)
 		list = 1;
+
+	if (new_worktree) {
+		if (delete || rename || new_upstream || unset_upstream)
+			die("--worktree requires creating a new branch");
+		if (new_worktree && (argc < 1 || argc > 2))
+			die(_("--worktree needs a branch/worktree name"));
+	}
 
 	if (filter.with_commit || filter.merge != REF_FILTER_MERGED_NONE || filter.points_at.nr)
 		list = 1;
@@ -797,7 +806,7 @@ int cmd_branch(int argc, const char **argv, const char *prefix)
 		strbuf_release(&buf);
 	} else if (argc > 0 && argc <= 2) {
 		struct branch *branch = branch_get(argv[0]);
-		int branch_existed = 0, remote_tracking = 0;
+		int branch_existed = 0, remote_tracking = 0, res = 0;
 		struct strbuf buf = STRBUF_INIT;
 
 		if (!strcmp(argv[0], "HEAD"))
@@ -820,6 +829,17 @@ int cmd_branch(int argc, const char **argv, const char *prefix)
 		create_branch(head, argv[0], (argc == 2) ? argv[1] : head,
 			      force, reflog, 0, quiet, track);
 
+		if (new_worktree) {
+			const char *child_argv[] = {
+				"worktree", "add", NULL, NULL, NULL
+			};
+			child_argv[2] = child_argv[3] = argv[0];
+			if ((res = run_command_v_opt(child_argv, RUN_GIT_CMD)))
+				error(_("Could not create worktree %s"), argv[0]);
+			else
+				fprintf(stderr, _("New worktree set up at %s\n"), argv[0]);
+		}
+
 		/*
 		 * We only show the instructions if the user gave us
 		 * one branch which doesn't exist locally, but is the
@@ -828,10 +848,13 @@ int cmd_branch(int argc, const char **argv, const char *prefix)
 		if (argc == 1 && track == BRANCH_TRACK_OVERRIDE &&
 		    !branch_existed && remote_tracking) {
 			fprintf(stderr, _("\nIf you wanted to make '%s' track '%s', do this:\n\n"), head, branch->name);
+			if (new_worktree)
+				fprintf(stderr, _("    # remove worktree %s/\n"), branch->name);
 			fprintf(stderr, _("    git branch -d %s\n"), branch->name);
 			fprintf(stderr, _("    git branch --set-upstream-to %s\n"), branch->name);
 		}
 
+		return res;
 	} else
 		usage_with_options(builtin_branch_usage, options);
 
