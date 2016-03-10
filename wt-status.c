@@ -1736,7 +1736,7 @@ void wt_porcelain_print(struct wt_status *s)
 /**
  * Returns 1 if there are unstaged changes, 0 otherwise.
  */
-static int has_unstaged_changes()
+int has_unstaged_changes()
 {
 	struct rev_info rev_info;
 	int result;
@@ -1752,7 +1752,7 @@ static int has_unstaged_changes()
 /**
  * Returns 1 if there are uncommitted changes, 0 otherwise.
  */
-static int has_uncommitted_changes()
+int has_uncommitted_changes()
 {
 	struct rev_info rev_info;
 	int result;
