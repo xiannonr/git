@@ -194,6 +194,7 @@ static int create_default_files(const char *template_path)
 	 */
 	copy_templates(template_path);
 
+	git_config_clear();
 	git_config(git_default_config, NULL);
 	is_bare_repository_cfg = init_is_bare_repository;
 
@@ -526,6 +527,12 @@ int cmd_init_db(int argc, const char **argv, const char *prefix)
 
 	if (init_shared_repository != -1)
 		shared_repository = init_shared_repository;
+
+	/*
+	 * We need the settings *before* trying to determine the current
+	 * Git directory, e.g. to support core.symlinks properly.
+	 */
+	git_config(git_default_config, NULL);
 
 	/*
 	 * GIT_WORK_TREE makes sense only in conjunction with GIT_DIR
