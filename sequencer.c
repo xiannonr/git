@@ -926,6 +926,7 @@ static int do_pick_commit(enum todo_command command, struct commit *commit,
 	else
 		parent = commit->parents->item;
 
+/* TODO: why does 36 fail when we replace !is_fixup... with command == PICK? */
 	if (opts->allow_ff && !is_fixup(command) && command != TODO_REWORD &&
 	    ((parent && !hashcmp(parent->object.oid.hash, head)) ||
 	     (!parent && unborn)))
