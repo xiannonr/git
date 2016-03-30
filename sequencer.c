@@ -108,6 +108,8 @@ static GIT_PATH_FUNC(head_name, "rebase-merge/head-name")
 static GIT_PATH_FUNC(onto, "rebase-merge/onto")
 static GIT_PATH_FUNC(orig_head, "rebase-merge/orig-head")
 static GIT_PATH_FUNC(git_path_rebase_verbose, "rebase-merge/verbose") /* TODO: turn into opt */
+static GIT_PATH_FUNC(git_path_strategy, "rebase-merge/strategy")
+static GIT_PATH_FUNC(git_path_strategy_opts, "rebase-merge/strategy_opts")
 
 #define IS_REBASE_I() (opts->action == REPLAY_INTERACTIVE_REBASE)
 
@@ -1273,6 +1275,28 @@ static int populate_opts_cb(const char *key, const char *value, void *data)
 
 static int read_populate_opts(struct replay_opts *opts)
 {
+	if (IS_REBASE_I()) {
+		struct strbuf buf = STRBUF_INIT;
+		if (file_exists(git_path_strategy())) {
+			if (strbuf_read_file(&buf, git_path_strategy(),
+					0) > 0) {
+				strbuf_rtrim(&buf);
+				opts->strategy = strbuf_detach(&buf, NULL);
+			}
+			if (strbuf_read_file(&buf, git_path_strategy_opts(),
+					0) > 0) {
+				strbuf_trim(&buf);
+				opts->xopts_nr = split_cmdline(buf.buf,
+					&opts->xopts);
+				{ int i; for (i = 0; i < opts->xopts_nr; i++) skip_prefix(opts->xopts[i], "--", &opts->xopts[i]); }
+				if (opts->xopts_nr)
+					strbuf_detach(&buf, NULL);
+				else
+					strbuf_release(&buf);
+			}
+		}
+		return 0;
+	}
 	if (!file_exists(git_path_opts_file()))
 		return 0;
 	if (git_config_from_file(populate_opts_cb, git_path_opts_file(), opts) < 0)
