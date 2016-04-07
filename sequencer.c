@@ -395,6 +395,7 @@ static int do_recursive_merge(struct commit *base, struct commit *next,
 	read_cache();
 
 	init_merge_options(&o);
+	o.gently = 1;
 	o.ancestor = base ? base_label : "(empty tree)";
 	o.branch1 = "HEAD";
 	o.branch2 = next ? next_label : "(empty tree)";
