@@ -44,6 +44,16 @@ static GIT_PATH_FUNC(git_path_rebase_todo, "rebase-merge/git-rebase-todo")
  */
 static GIT_PATH_FUNC(git_path_rebase_done, "rebase-merge/done")
 /*
+ * The file to keep track of how many commands were already processed (e.g.
+ * for the prompt).
+ */
+static GIT_PATH_FUNC(msgnum, "rebase-merge/msgnum");
+/*
+ * The file to keep track of how many commands are to be processed in total
+ * (e.g. for the prompt).
+ */
+static GIT_PATH_FUNC(msgtotal, "rebase-merge/end");
+/*
  * The commit message that is planned to be used for any changes that
  * need to be committed following a user interaction.
  */
@@ -1258,6 +1268,7 @@ static int read_populate_todo(struct todo_list *todo_list,
 
 	if (IS_REBASE_I()) {
 		struct todo_list done = TODO_LIST_INIT;
+		FILE *f = fopen(msgtotal(), "w");
 
 		if (strbuf_read_file(&done.buf,
 					git_path_rebase_done(), 0) > 0 &&
@@ -1265,11 +1276,15 @@ static int read_populate_todo(struct todo_list *todo_list,
 			todo_list->done_nr = count_commands(&done);
 		else
 			todo_list->done_nr = 0;
+		todo_list_release(&done);
 
 		todo_list->total_nr = todo_list->done_nr
 			+ count_commands(todo_list);
 
-		todo_list_release(&done);
+		if (f) {
+			fprintf(f, "%d\n", todo_list->total_nr);
+			fclose(f);
+		}
 	}
 
 	return 0;
@@ -1760,11 +1775,20 @@ static int pick_commits(struct todo_list *todo_list, struct replay_opts *opts)
 		if (save_todo(todo_list, opts))
 			return -1;
 		if (IS_REBASE_I()) {
-			if (item->command != TODO_COMMENT)
+			if (item->command != TODO_COMMENT) {
+				FILE *f = fopen(msgnum(), "w");
+
+				todo_list->done_nr++;
+
+				if (f) {
+					fprintf(f, "%d\n", todo_list->done_nr);
+					fclose(f);
+				}
 				fprintf(stderr, "Rebasing (%d/%d)%s",
-					++(todo_list->done_nr),
+					todo_list->done_nr,
 					todo_list->total_nr,
 					file_exists(git_path_rebase_verbose()) ? "\n" : "\r");
+			}
 			unlink(git_path_rebase_msg());
 			unlink(author_script());
 			unlink(stopped_sha());
