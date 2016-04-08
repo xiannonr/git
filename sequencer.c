@@ -110,6 +110,7 @@ static GIT_PATH_FUNC(orig_head, "rebase-merge/orig-head")
 static GIT_PATH_FUNC(git_path_rebase_verbose, "rebase-merge/verbose") /* TODO: turn into opt */
 static GIT_PATH_FUNC(git_path_strategy, "rebase-merge/strategy")
 static GIT_PATH_FUNC(git_path_strategy_opts, "rebase-merge/strategy_opts")
+static GIT_PATH_FUNC(autostash, "rebase-merge/autostash")
 
 #define IS_REBASE_I() (opts->action == REPLAY_INTERACTIVE_REBASE)
 
@@ -1682,6 +1683,47 @@ static enum todo_command peek_command(struct todo_list *todo_list, int offset)
 	return -1;
 }
 
+static int apply_autostash(struct replay_opts *opts)
+{
+	struct strbuf stash_sha1 = STRBUF_INIT;
+	struct child_process child = CHILD_PROCESS_INIT;
+	int ret = 0;
+
+	if (strbuf_read_file(&stash_sha1, autostash(), 0) <= 0) {
+		strbuf_release(&stash_sha1);
+		return 0;
+	}
+	strbuf_trim(&stash_sha1);
+
+	child.git_cmd = 1;
+	argv_array_push(&child.args, "stash");
+	argv_array_push(&child.args, "apply");
+	argv_array_push(&child.args, stash_sha1.buf);
+	if (!run_command(&child))
+		printf(_("Applied autostash."));
+	else {
+		struct child_process store = CHILD_PROCESS_INIT;
+
+		store.git_cmd = 1;
+		argv_array_push(&store.args, "stash");
+		argv_array_push(&store.args, "store");
+		argv_array_push(&store.args, "-m");
+		argv_array_push(&store.args, "autostash");
+		argv_array_push(&store.args, "-q");
+		argv_array_push(&store.args, stash_sha1.buf);
+		if (run_command(&store))
+			ret = error(_("Cannot store %s"), stash_sha1.buf);
+		else
+			printf(_("Applying autostash resulted in conflicts.\n"
+				"Your changes are safe in the stash.\n"
+				"You can run \"git stash pop\" or"
+				" \"git stash drop\" at any time.\n"));
+	}
+
+	strbuf_release(&stash_sha1);
+	return ret;
+}
+
 static const char *reflog_message(struct replay_opts *opts,
 	const char *sub_action, const char *fmt, ...)
 {
@@ -1840,6 +1882,7 @@ static int pick_commits(struct todo_list *todo_list, struct replay_opts *opts)
 			/* we don't care if this copying failed */
 			run_command(&child);
 		}
+		apply_autostash(opts);
 
 		strbuf_release(&buf);
 		strbuf_release(&head_ref);
