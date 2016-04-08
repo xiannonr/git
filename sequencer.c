@@ -681,7 +681,8 @@ enum todo_command {
 	TODO_SQUASH,
 	TODO_EXEC,
 	TODO_NOOP,
-	TODO_DROP
+	TODO_DROP,
+	TODO_COMMENT
 };
 
 static struct {
@@ -696,12 +697,13 @@ static struct {
 	{ 's', "squash" },
 	{ 'x', "exec" },
 	{ 0,   "noop" },
-	{ 'd', "drop" }
+	{ 'd', "drop" },
+	{ 0,   NULL }
 };
 
 static const char *command_to_string(const enum todo_command command)
 {
-	if (command >= 0 && command < ARRAY_SIZE(todo_command_info))
+	if (command >= 0 && command < TODO_COMMENT)
 		return todo_command_info[command].str;
 	die("Unknown command: %d", command);
 }
@@ -1136,14 +1138,14 @@ static int parse_insn_line(struct todo_item *item,
 	int i, saved, status, padding;
 
 	if (bol == eol || *bol == '\r' || *bol == comment_line_char) {
-		item->command = TODO_NOOP;
+		item->command = TODO_COMMENT;
 		item->commit = NULL;
 		item->arg = bol;
 		item->arg_len = eol - bol;
 		return 0;
 	}
 
-	for (i = 0; i < ARRAY_SIZE(todo_command_info); i++)
+	for (i = 0; i < TODO_COMMENT; i++)
 		if (skip_prefix(bol, todo_command_info[i].str, &bol)) {
 			item->command = i;
 			break;
@@ -1153,7 +1155,7 @@ static int parse_insn_line(struct todo_item *item,
 			item->command = i;
 			break;
 		}
-	if (i >= ARRAY_SIZE(todo_command_info))
+	if (i >= TODO_COMMENT)
 		return error("Invalid command: %.*s", (int)(eol - bol), bol);
 
 	if (item->command == TODO_NOOP) {
