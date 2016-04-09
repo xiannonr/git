@@ -1622,6 +1622,26 @@ static enum todo_command peek_command(struct todo_list *todo_list, int offset)
 	return -1;
 }
 
+static const char *reflog_message(struct replay_opts *opts,
+	const char *sub_action, const char *fmt, ...)
+{
+	va_list ap;
+	static struct strbuf buf = STRBUF_INIT;
+
+	va_start(ap, fmt);
+	strbuf_reset(&buf);
+	strbuf_addstr(&buf, action_name(opts));
+	if (sub_action)
+		strbuf_addf(&buf, " (%s)", sub_action);
+	if (fmt) {
+		strbuf_addstr(&buf, ": ");
+		strbuf_vaddf(&buf, fmt, ap);
+	}
+	va_end(ap);
+
+	return buf.buf;
+}
+
 static int pick_commits(struct todo_list *todo_list, struct replay_opts *opts)
 {
 	int res = 0;
@@ -1696,6 +1716,7 @@ static int pick_commits(struct todo_list *todo_list, struct replay_opts *opts)
 
 		if (strbuf_read_file(&head_ref, head_name(), 64) > 0 &&
 				starts_with(head_ref.buf, "refs/")) {
+			const char *msg;
 			unsigned char head[20], orig[20];
 
 			strbuf_rtrim(&head_ref);
@@ -1704,18 +1725,16 @@ static int pick_commits(struct todo_list *todo_list, struct replay_opts *opts)
 			if (strbuf_read_file(&buf, orig_head(), 41) <= 0 ||
 					get_sha1_hex(buf.buf, orig))
 				return error("Could not read orig-head");
-			strbuf_addf(&buf, "rebase -i (finish): %s onto ",
-				head_ref.buf);
 			strbuf_read_file(&buf, onto(), 64);
-			if (update_ref(buf.buf, head_ref.buf, head, orig,
+			msg = reflog_message(opts, "finish", "%s onto %s",
+				head_ref.buf, buf.buf);
+			if (update_ref(msg, head_ref.buf, head, orig,
 					REF_NODEREF, UPDATE_REFS_MSG_ON_ERR))
 				return error("Could not update %s",
 					head_ref.buf);
-			strbuf_reset(&buf);
-			strbuf_addf(&buf,
-				"rebase -i (finish): returning to %s",
+			msg = reflog_message(opts, "finish", "returning to %s",
 				head_ref.buf);
-			if (create_symref("HEAD", head_ref.buf, buf.buf))
+			if (create_symref("HEAD", head_ref.buf, msg))
 				return error("Could not update HEAD to %s",
 					head_ref.buf);
 			strbuf_reset(&buf);
