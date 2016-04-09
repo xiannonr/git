@@ -579,7 +579,7 @@ int sequencer_commit(const char *defmsg, struct replay_opts *opts,
 	if (!edit || IS_REBASE_I()) {
 		argv_array_push(&array, "-F");
 		argv_array_push(&array, defmsg);
-		if (!opts->signoff &&
+		if (!edit && !opts->signoff &&
 		    !opts->record_origin &&
 		    git_config_get_value("commit.cleanup", &value))
 			argv_array_push(&array, "--cleanup=verbatim");
