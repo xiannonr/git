@@ -1507,7 +1507,7 @@ static int do_exec(const char *command_line)
 	status = run_command_v_opt(child_argv, RUN_USING_SHELL);
 
 	discard_cache(); /* force re-reading of the cache */
-	dirty = require_clean_work_tree("rebase", NULL, 1);
+	dirty = require_clean_work_tree("rebase", NULL, 1, 1);
 
 	if (status) {
 		warning("Execution failed: %s\n%s"
