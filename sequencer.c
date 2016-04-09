@@ -807,7 +807,7 @@ static int do_pick_commit(enum todo_command command, struct commit *commit,
 	const char *base_label, *next_label;
 	struct commit_message msg = { NULL, NULL, NULL, NULL };
 	struct strbuf msgbuf = STRBUF_INIT;
-	int res, unborn = 0, amend = 0, allow;
+	int res = 0, unborn = 0, amend = 0, allow, fast_forward = 0;
 
 	if (opts->no_commit) {
 		/*
@@ -945,14 +945,14 @@ static int do_pick_commit(enum todo_command command, struct commit *commit,
 		write_author_script(msg.message);
 
 	if (!opts->strategy || !strcmp(opts->strategy, "recursive") || command == TODO_REVERT) {
-		res = do_recursive_merge(base, next, base_label, next_label,
+		res |= do_recursive_merge(base, next, base_label, next_label,
 					 head, &msgbuf, opts);
 		res |= write_message(&msgbuf, git_path_merge_msg());
 	} else {
 		struct commit_list *common = NULL;
 		struct commit_list *remotes = NULL;
 
-		res = write_message(&msgbuf, git_path_merge_msg());
+		res |= write_message(&msgbuf, git_path_merge_msg());
 
 		commit_list_insert(base, &common);
 		commit_list_insert(next, &remotes);
@@ -987,11 +987,11 @@ static int do_pick_commit(enum todo_command command, struct commit *commit,
 
 	allow = allow_empty(opts, commit);
 	if (allow < 0) {
-		res = allow;
+		res |= allow;
 		goto leave;
 	}
 	if (!opts->no_commit)
-		res = sequencer_commit(msg_file, opts, allow, edit, amend);
+		res |= sequencer_commit(msg_file, opts, allow, edit, amend);
 
 	if (!res && final_fixup) {
 		unlink(fixup_msg());
