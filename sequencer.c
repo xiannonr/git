@@ -568,10 +568,14 @@ int sequencer_commit(const char *defmsg, struct replay_opts *opts,
 {
 	char **env = NULL;
 	struct argv_array array;
-	int rc;
+	int opt = RUN_GIT_CMD, rc;
 	const char *value;
 
 	if (IS_REBASE_I()) {
+		if (edit <= 0) {
+			opt |= RUN_COMMAND_STDOUT_TO_STDERR;
+			opt |= RUN_HIDE_STDERR_ON_SUCCESS;
+		}
 		if (!defmsg)
 			defmsg = git_path_rebase_msg();
 
@@ -617,7 +621,7 @@ int sequencer_commit(const char *defmsg, struct replay_opts *opts,
 	if (opts->allow_empty_message)
 		argv_array_push(&array, "--allow-empty-message");
 
-	rc = run_command_v_opt_cd_env(array.argv, RUN_GIT_CMD, NULL,
+	rc = run_command_v_opt_cd_env(array.argv, opt, NULL,
 			(const char *const *)env);
 	argv_array_clear(&array);
 	free(env);
