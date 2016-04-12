@@ -62,6 +62,12 @@ static GIT_PATH_FUNC(git_path_rebase_amend, "rebase-merge/amend")
  * the long commit name of the corresponding patch.
  */
 static GIT_PATH_FUNC(stopped_sha, "rebase-merge/stopped-sha")
+/*
+ * The following files are written by git-rebase just after parsing the
+ * command-line (and are only consumed, not modified, by the sequencer).
+ */
+static GIT_PATH_FUNC(orig_head, "rebase-merge/orig-head")
+static GIT_PATH_FUNC(git_path_rebase_verbose, "rebase-merge/verbose") /* TODO: turn into opt */
 
 #define IS_REBASE_I() (opts->action == REPLAY_INTERACTIVE_REBASE)
 
@@ -1301,9 +1307,26 @@ static int pick_commits(struct todo_list *todo_list, struct replay_opts *opts)
 	}
 
 	if (IS_REBASE_I()) {
+		struct strbuf buf = STRBUF_INIT;
+
 		/* Stopped in the middle, as planned? */
 		if (todo_list->current < todo_list->nr)
 			return 0;
+
+		if (file_exists(git_path_rebase_verbose())) {
+			const char *argv[] = {
+				"diff-tree", "--stat", NULL, NULL
+			};
+
+			if (strbuf_read_file(&buf, orig_head(), 41) <= 0)
+				return error("Could not read %s", orig_head());
+			strbuf_rtrim(&buf);
+			strbuf_addstr(&buf, "..HEAD");
+			argv[2] = buf.buf;
+			run_command_v_opt(argv, RUN_GIT_CMD);
+			strbuf_reset(&buf);
+		}
+		strbuf_release(&buf);
 	}
 
 	/*
