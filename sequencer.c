@@ -856,9 +856,9 @@ static int do_pick_commit(enum todo_command command, struct commit *commit,
 	if (opts->allow_ff && !is_fixup(command) &&
 	    ((parent && !hashcmp(parent->object.oid.hash, head)) ||
 	     (!parent && unborn)))
-		return fast_forward_to(commit->object.oid.hash, head, unborn, opts);
+		fast_forward = 1;
 
-	if (parent && parse_commit(parent) < 0)
+	else if (parent && parse_commit(parent) < 0)
 		/* TRANSLATORS: The first %s will be "revert" or
 		   "cherry-pick", the second %s a SHA1 */
 		return error(_("%s: cannot parse parent commit %s"),
@@ -876,7 +876,9 @@ static int do_pick_commit(enum todo_command command, struct commit *commit,
 	 * reverse of it if we are revert.
 	 */
 
-	if (command == TODO_REVERT) {
+	if (fast_forward)
+		; /* do nothing */
+	else if (command == TODO_REVERT) {
 		base = commit;
 		base_label = msg.label;
 		next = parent;
@@ -944,7 +946,10 @@ static int do_pick_commit(enum todo_command command, struct commit *commit,
 	if (IS_REBASE_I())
 		write_author_script(msg.message);
 
-	if (!opts->strategy || !strcmp(opts->strategy, "recursive") || command == TODO_REVERT) {
+	if (fast_forward)
+		res |= fast_forward_to(commit->object.oid.hash, head, unborn,
+			opts);
+	else if (!opts->strategy || !strcmp(opts->strategy, "recursive") || command == TODO_REVERT) {
 		res |= do_recursive_merge(base, next, base_label, next_label,
 					 head, &msgbuf, opts);
 		res |= write_message(&msgbuf, git_path_merge_msg());
@@ -968,14 +973,14 @@ static int do_pick_commit(enum todo_command command, struct commit *commit,
 	 * However, if the merge did not even start, then we don't want to
 	 * write it at all.
 	 */
-	if (command == TODO_PICK && !opts->no_commit && (res == 0 || res == 1))
+	if (!fast_forward && command == TODO_PICK && !opts->no_commit && (res == 0 || res == 1))
 		update_ref(NULL, "CHERRY_PICK_HEAD", commit->object.oid.hash, NULL,
 			   REF_NODEREF, UPDATE_REFS_DIE_ON_ERR);
-	if (command == TODO_REVERT && ((opts->no_commit && res == 0) || res == 1))
+	if (!fast_forward && command == TODO_REVERT && ((opts->no_commit && res == 0) || res == 1))
 		update_ref(NULL, "REVERT_HEAD", commit->object.oid.hash, NULL,
 			   REF_NODEREF, UPDATE_REFS_DIE_ON_ERR);
 
-	if (res) {
+	if (!fast_forward && res) {
 		error(command == TODO_REVERT
 		      ? _("could not revert %s... %s")
 		      : _("could not apply %s... %s"),
@@ -985,12 +990,11 @@ static int do_pick_commit(enum todo_command command, struct commit *commit,
 		goto leave;
 	}
 
-	allow = allow_empty(opts, commit);
-	if (allow < 0) {
+	if (!fast_forward && (allow = allow_empty(opts, commit)) < 0) {
 		res |= allow;
 		goto leave;
 	}
-	if (!opts->no_commit)
+	if (!opts->no_commit && (!fast_forward || edit || amend))
 		res |= sequencer_commit(msg_file, opts, allow, edit, amend);
 
 	if (!res && final_fixup) {
