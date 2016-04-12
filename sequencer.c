@@ -607,12 +607,14 @@ int sequencer_commit(const char *defmsg, struct replay_opts *opts,
 	if (!edit || IS_REBASE_I()) {
 		argv_array_push(&array, "-F");
 		argv_array_push(&array, defmsg);
-		if (!edit && !opts->signoff &&
+		if (edit < 0)
+			argv_array_push(&array, "--cleanup=strip");
+		else if (!edit && !opts->signoff &&
 		    !opts->record_origin &&
 		    git_config_get_value("commit.cleanup", &value))
 			argv_array_push(&array, "--cleanup=verbatim");
 	}
-	if (edit && IS_REBASE_I())
+	if (edit > 0 && IS_REBASE_I())
 		argv_array_push(&array, "-e");
 
 	if (allow_empty)
@@ -1002,8 +1004,10 @@ static int do_pick_commit(enum todo_command command, struct commit *commit,
 		amend = 1;
 		if (!final_fixup)
 			msg_file = squash_msg();
-		else if (file_exists(fixup_msg()))
+		else if (file_exists(fixup_msg())) {
+			edit = -1;
 			msg_file = fixup_msg();
+		}
 		else {
 			const char *dest = git_path("SQUASH_MSG");
 			unlink(dest);
