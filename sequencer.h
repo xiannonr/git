@@ -10,16 +10,8 @@ enum replay_action {
 	REPLAY_PICK
 };
 
-enum replay_subcommand {
-	REPLAY_NONE,
-	REPLAY_REMOVE_STATE,
-	REPLAY_CONTINUE,
-	REPLAY_ROLLBACK
-};
-
 struct replay_opts {
 	enum replay_action action;
-	enum replay_subcommand subcommand;
 
 	/* Boolean options */
 	int edit;
@@ -48,11 +40,14 @@ struct replay_opts {
 	void **owned;
 	int owned_nr, owned_alloc;
 };
-#define REPLAY_OPTS_INIT { -1, -1 }
+#define REPLAY_OPTS_INIT { -1 }
 
 void *sequencer_entrust(struct replay_opts *opts, void *set_me_free_after_use);
 
 int sequencer_pick_revisions(struct replay_opts *opts);
+int sequencer_continue(struct replay_opts *opts);
+int sequencer_rollback(struct replay_opts *opts);
+int sequencer_remove_state(struct replay_opts *opts);
 
 extern const char sign_off_header[];
 
