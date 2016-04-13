@@ -46,6 +46,8 @@ int sequencer_remove_state(struct replay_opts *opts);
 
 int sequencer_commit(const char *defmsg, struct replay_opts *opts,
 			  int allow_empty, int edit, int amend);
+int sequencer_make_script(int keep_empty, FILE *out,
+		int argc, const char **argv);
 
 extern const char sign_off_header[];
 
