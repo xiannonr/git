@@ -455,7 +455,26 @@ static int allow_empty(struct replay_opts *opts, struct commit *commit)
 		return 1;
 }
 
-static int do_pick_commit(struct commit *commit, struct replay_opts *opts)
+enum todo_command {
+	TODO_PICK,
+	TODO_REVERT
+};
+
+static const char *todo_command_strings[] = {
+	"pick",
+	"revert"
+};
+
+static const char *command_to_string(const enum todo_command command)
+{
+	if (command >= 0 && command < ARRAY_SIZE(todo_command_strings))
+		return todo_command_strings[command];
+	die("Unknown command: %d", command);
+}
+
+
+static int do_pick_commit(enum todo_command command, struct commit *commit,
+		struct replay_opts *opts)
 {
 	unsigned char head[20];
 	struct commit *base, *next, *parent;
@@ -517,7 +536,8 @@ static int do_pick_commit(struct commit *commit, struct replay_opts *opts)
 		/* TRANSLATORS: The first %s will be "revert" or
 		   "cherry-pick", the second %s a SHA1 */
 		return error(_("%s: cannot parse parent commit %s"),
-			action_name(opts), oid_to_hex(&parent->object.oid));
+			command_to_string(command),
+			oid_to_hex(&parent->object.oid));
 
 	if (get_message(commit, &msg) != 0)
 		return error(_("Cannot get commit message for %s"),
@@ -530,7 +550,7 @@ static int do_pick_commit(struct commit *commit, struct replay_opts *opts)
 	 * reverse of it if we are revert.
 	 */
 
-	if (opts->action == REPLAY_REVERT) {
+	if (command == TODO_REVERT) {
 		base = commit;
 		base_label = msg.label;
 		next = parent;
@@ -545,7 +565,8 @@ static int do_pick_commit(struct commit *commit, struct replay_opts *opts)
 			strbuf_addstr(&msgbuf, oid_to_hex(&parent->object.oid));
 		}
 		strbuf_addstr(&msgbuf, ".\n");
-	} else {
+	}
+	else {
 		const char *p;
 
 		base = parent;
@@ -573,7 +594,7 @@ static int do_pick_commit(struct commit *commit, struct replay_opts *opts)
 		}
 	}
 
-	if (!opts->strategy || !strcmp(opts->strategy, "recursive") || opts->action == REPLAY_REVERT) {
+	if (!opts->strategy || !strcmp(opts->strategy, "recursive") || command == TODO_REVERT) {
 		res = do_recursive_merge(base, next, base_label, next_label,
 					 head, &msgbuf, opts);
 		res |= write_message(&msgbuf, git_path_merge_msg());
@@ -597,15 +618,15 @@ static int do_pick_commit(struct commit *commit, struct replay_opts *opts)
 	 * However, if the merge did not even start, then we don't want to
 	 * write it at all.
 	 */
-	if (opts->action == REPLAY_PICK && !opts->no_commit && (res == 0 || res == 1))
+	if (command == TODO_PICK && !opts->no_commit && (res == 0 || res == 1))
 		update_ref(NULL, "CHERRY_PICK_HEAD", commit->object.oid.hash, NULL,
 			   REF_NODEREF, UPDATE_REFS_DIE_ON_ERR);
-	if (opts->action == REPLAY_REVERT && ((opts->no_commit && res == 0) || res == 1))
+	if (command == TODO_REVERT && ((opts->no_commit && res == 0) || res == 1))
 		update_ref(NULL, "REVERT_HEAD", commit->object.oid.hash, NULL,
 			   REF_NODEREF, UPDATE_REFS_DIE_ON_ERR);
 
 	if (res) {
-		error(opts->action == REPLAY_REVERT
+		error(command == TODO_REVERT
 		      ? _("could not revert %s... %s")
 		      : _("could not apply %s... %s"),
 		      find_unique_abbrev(commit->object.oid.hash, DEFAULT_ABBREV),
@@ -663,112 +684,107 @@ static int read_and_refresh_cache(struct replay_opts *opts)
 	return 0;
 }
 
-static int format_todo(struct strbuf *buf, struct commit_list *todo_list,
-		struct replay_opts *opts)
-{
-	struct commit_list *cur = NULL;
-	const char *sha1_abbrev = NULL;
-	const char *action_str = opts->action == REPLAY_REVERT ? "revert" : "pick";
-	const char *subject;
-	int subject_len;
+struct todo_item {
+	enum todo_command command;
+	struct commit *commit;
+	size_t offset_in_buf;
+};
 
-	for (cur = todo_list; cur; cur = cur->next) {
-		const char *commit_buffer = get_commit_buffer(cur->item, NULL);
-		sha1_abbrev = find_unique_abbrev(cur->item->object.oid.hash, DEFAULT_ABBREV);
-		subject_len = find_commit_subject(commit_buffer, &subject);
-		strbuf_addf(buf, "%s %s %.*s\n", action_str, sha1_abbrev,
-			subject_len, subject);
-		unuse_commit_buffer(cur->item, commit_buffer);
-	}
-	return 0;
+struct todo_list {
+	struct strbuf buf;
+	struct todo_item *items;
+	int nr, alloc, current;
+};
+
+#define TODO_LIST_INIT { STRBUF_INIT, NULL, 0, 0, 0 }
+
+static void todo_list_release(struct todo_list *todo_list)
+{
+	strbuf_release(&todo_list->buf);
+	free(todo_list->items);
+	todo_list->items = NULL;
+	todo_list->nr = todo_list->alloc = 0;
 }
 
-static struct commit *parse_insn_line(char *bol, char *eol, struct replay_opts *opts)
+struct todo_item *append_todo(struct todo_list *todo_list)
+{
+	ALLOC_GROW(todo_list->items, todo_list->nr + 1, todo_list->alloc);
+	return todo_list->items + todo_list->nr++;
+}
+
+static int parse_insn_line(struct todo_item *item,
+	const char *bol, char *eol, struct replay_opts *opts)
 {
 	unsigned char commit_sha1[20];
-	enum replay_action action;
 	char *end_of_object_name;
-	int saved, status, padding;
+	int i, saved, status, padding;
 
-	if (starts_with(bol, "pick")) {
-		action = REPLAY_PICK;
-		bol += strlen("pick");
-	} else if (starts_with(bol, "revert")) {
-		action = REPLAY_REVERT;
-		bol += strlen("revert");
-	} else
-		return NULL;
+	for (i = 0; i < ARRAY_SIZE(todo_command_strings); i++)
+		if (skip_prefix(bol, todo_command_strings[i], &bol)) {
+			item->command = i;
+			break;
+		}
+	if (i >= ARRAY_SIZE(todo_command_strings))
+		return error("Invalid command: %.*s", (int)(eol - bol), bol);
 
 	/* Eat up extra spaces/ tabs before object name */
 	padding = strspn(bol, " \t");
 	if (!padding)
-		return NULL;
+		return -1;
 	bol += padding;
 
-	end_of_object_name = bol + strcspn(bol, " \t\n");
+	end_of_object_name = (char *) bol + strcspn(bol, " \t\n");
 	saved = *end_of_object_name;
 	*end_of_object_name = '\0';
 	status = get_sha1(bol, commit_sha1);
 	*end_of_object_name = saved;
 
-	/*
-	 * Verify that the action matches up with the one in
-	 * opts; we don't support arbitrary instructions
-	 */
-	if (action != opts->action) {
-		const char *action_str;
-		action_str = action == REPLAY_REVERT ? "revert" : "cherry-pick";
-		error(_("Cannot %s during a %s"), action_str, action_name(opts));
-		return NULL;
-	}
-
 	if (status < 0)
-		return NULL;
+		return -1;
 
-	return lookup_commit_reference(commit_sha1);
+	item->commit = lookup_commit_reference(commit_sha1);
+	return !item->commit;
 }
 
-static int parse_insn_buffer(char *buf, struct commit_list **todo_list,
+static int parse_insn_buffer(char *buf, struct todo_list *todo_list,
 			struct replay_opts *opts)
 {
-	struct commit_list **next = todo_list;
-	struct commit *commit;
+	struct todo_item *item;
 	char *p = buf;
 	int i;
 
 	for (i = 1; *p; i++) {
 		char *eol = strchrnul(p, '\n');
-		commit = parse_insn_line(p, eol, opts);
-		if (!commit)
+
+		item = append_todo(todo_list);
+		item->offset_in_buf = p - todo_list->buf.buf;
+		if (parse_insn_line(item, p, eol, opts))
 			return error(_("Could not parse line %d."), i);
-		next = commit_list_append(commit, next);
 		p = *eol ? eol + 1 : eol;
 	}
-	if (!*todo_list)
+	if (!todo_list->nr)
 		return error(_("No commits parsed."));
 	return 0;
 }
 
-static int read_populate_todo(struct commit_list **todo_list,
+static int read_populate_todo(struct todo_list *todo_list,
 			struct replay_opts *opts)
 {
 	const char *todo_file = get_todo_path(opts);
-	struct strbuf buf = STRBUF_INIT;
 	int fd, res;
 
+	strbuf_reset(&todo_list->buf);
 	fd = open(todo_file, O_RDONLY);
 	if (fd < 0)
 		return error(_("Could not open %s (%s)"),
 			todo_file, strerror(errno));
-	if (strbuf_read(&buf, fd, 0) < 0) {
+	if (strbuf_read(&todo_list->buf, fd, 0) < 0) {
 		close(fd);
-		strbuf_release(&buf);
 		return error(_("Could not read %s."), todo_file);
 	}
 	close(fd);
 
-	res = parse_insn_buffer(buf.buf, todo_list, opts);
-	strbuf_release(&buf);
+	res = parse_insn_buffer(todo_list->buf.buf, todo_list, opts);
 	if (res)
 		return error(_("Unusable instruction sheet: %s"), todo_file);
 	return 0;
@@ -819,18 +835,33 @@ static int read_populate_opts(struct replay_opts *opts)
 	return 0;
 }
 
-static int walk_revs_populate_todo(struct commit_list **todo_list,
+static int walk_revs_populate_todo(struct todo_list *todo_list,
 				struct replay_opts *opts)
 {
+	enum todo_command command = opts->action == REPLAY_PICK ?
+		TODO_PICK : TODO_REVERT;
 	struct commit *commit;
-	struct commit_list **next;
 
 	if (prepare_revs(opts))
 		return -1;
 
-	next = todo_list;
-	while ((commit = get_revision(opts->revs)))
-		next = commit_list_append(commit, next);
+	while ((commit = get_revision(opts->revs))) {
+		struct todo_item *item = append_todo(todo_list);
+		const char *commit_buffer = get_commit_buffer(commit, NULL);
+		const char *subject;
+		int subject_len;
+
+		item->command = command;
+		item->commit = commit;
+		item->offset_in_buf = todo_list->buf.len;
+		subject_len = find_commit_subject(commit_buffer, &subject);
+		strbuf_addf(&todo_list->buf, "%s %s %.*s\n",
+			opts->action == REPLAY_PICK ?  "pick" : "revert",
+			find_unique_abbrev(commit->object.oid.hash,
+				DEFAULT_ABBREV),
+			subject_len, subject);
+		unuse_commit_buffer(commit, commit_buffer);
+	}
 	return 0;
 }
 
@@ -927,25 +958,21 @@ fail:
 	return -1;
 }
 
-static int save_todo(struct commit_list *todo_list, struct replay_opts *opts)
+static int save_todo(struct todo_list *todo_list, struct replay_opts *opts)
 {
 	static struct lock_file todo_lock;
-	struct strbuf buf = STRBUF_INIT;
-	int fd;
+	const char *todo_path = get_todo_path(opts);
+	int next = todo_list->current, offset, fd;
 
-	fd = hold_lock_file_for_update(&todo_lock, git_path_todo_file(), LOCK_DIE_ON_ERROR);
-	if (format_todo(&buf, todo_list, opts) < 0)
-		return error(_("Could not format %s."), git_path_todo_file());
-	if (write_in_full(fd, buf.buf, buf.len) < 0) {
-		strbuf_release(&buf);
+	fd = hold_lock_file_for_update(&todo_lock, todo_path, LOCK_DIE_ON_ERROR);
+	offset = next < todo_list->nr ?
+		todo_list->items[next].offset_in_buf : todo_list->buf.len;
+	if (write_in_full(fd, todo_list->buf.buf + offset,
+			todo_list->buf.len - offset) < 0)
 		return error(_("Could not write to %s (%s)"),
-			git_path_todo_file(), strerror(errno));
-	}
-	if (commit_lock_file(&todo_lock) < 0) {
-		strbuf_release(&buf);
-		return error(_("Error wrapping up %s."), git_path_todo_file());
-	}
-	strbuf_release(&buf);
+			todo_path, strerror(errno));
+	if (commit_lock_file(&todo_lock) < 0)
+		return error(_("Error wrapping up %s."), todo_path);
 	return 0;
 }
 
@@ -984,9 +1011,8 @@ static int save_opts(struct replay_opts *opts)
 	return res;
 }
 
-static int pick_commits(struct commit_list *todo_list, struct replay_opts *opts)
+static int pick_commits(struct todo_list *todo_list, struct replay_opts *opts)
 {
-	struct commit_list *cur;
 	int res;
 
 	setenv(GIT_REFLOG_ACTION, action_name(opts), 0);
@@ -996,10 +1022,12 @@ static int pick_commits(struct commit_list *todo_list, struct replay_opts *opts)
 	if (read_and_refresh_cache(opts))
 		return -1;
 
-	for (cur = todo_list; cur; cur = cur->next) {
-		if (save_todo(cur, opts))
+	while (todo_list->current < todo_list->nr) {
+		struct todo_item *item = todo_list->items + todo_list->current;
+		if (save_todo(todo_list, opts))
 			return -1;
-		res = do_pick_commit(cur->item, opts);
+		res = do_pick_commit(item->command, item->commit, opts);
+		todo_list->current++;
 		if (res)
 			return res;
 	}
@@ -1024,7 +1052,8 @@ static int continue_single_pick(void)
 
 static int sequencer_continue(struct replay_opts *opts)
 {
-	struct commit_list *todo_list = NULL;
+	struct todo_list todo_list = TODO_LIST_INIT;
+	int res;
 
 	if (!file_exists(get_todo_path(opts)))
 		return continue_single_pick();
@@ -1041,21 +1070,25 @@ static int sequencer_continue(struct replay_opts *opts)
 	}
 	if (index_differs_from("HEAD", 0))
 		return error_dirty_index(opts);
-	todo_list = todo_list->next;
-	return pick_commits(todo_list, opts);
+	if (opts->action <= REPLAY_REVERT)
+		todo_list.current++;
+	res = pick_commits(&todo_list, opts);
+	todo_list_release(&todo_list);
+	return res;
 }
 
 static int single_pick(struct commit *cmit, struct replay_opts *opts)
 {
 	setenv(GIT_REFLOG_ACTION, action_name(opts), 0);
-	return do_pick_commit(cmit, opts);
+	return do_pick_commit(opts->action == REPLAY_PICK ?
+		TODO_PICK : TODO_REVERT, cmit, opts);
 }
 
 int sequencer_pick_revisions(struct replay_opts *opts)
 {
-	struct commit_list *todo_list = NULL;
+	struct todo_list todo_list = TODO_LIST_INIT;
 	unsigned char sha1[20];
-	int i;
+	int i, res;
 
 	if (opts->subcommand == REPLAY_NONE)
 		assert(opts->revs);
@@ -1132,7 +1165,9 @@ int sequencer_pick_revisions(struct replay_opts *opts)
 	if (save_head(sha1_to_hex(sha1)) ||
 			save_opts(opts))
 		return -1;
-	return pick_commits(todo_list, opts);
+	res = pick_commits(&todo_list, opts);
+	todo_list_release(&todo_list);
+	return res;
 }
 
 void append_signoff(struct strbuf *msgbuf, int ignore_footer, unsigned flag)
