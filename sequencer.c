@@ -621,20 +621,23 @@ enum todo_command {
 	TODO_NOOP
 };
 
-static const char *todo_command_strings[] = {
-	"pick",
-	"revert",
-	"edit",
-	"fixup",
-	"squash",
-	"exec",
-	"noop"
+static struct {
+	char c;
+	const char *str;
+} todo_command_info[] = {
+	{ 'p', "pick" },
+	{ 0,   "revert" },
+	{ 'e', "edit" },
+	{ 'f', "fixup" },
+	{ 's', "squash" },
+	{ 'x', "exec" },
+	{ 0,   "noop" }
 };
 
 static const char *command_to_string(const enum todo_command command)
 {
-	if (command >= 0 && command < ARRAY_SIZE(todo_command_strings))
-		return todo_command_strings[command];
+	if (command >= 0 && command < ARRAY_SIZE(todo_command_info))
+		return todo_command_info[command].str;
 	die("Unknown command: %d", command);
 }
 
@@ -1030,12 +1033,17 @@ static int parse_insn_line(struct todo_item *item,
 		return 0;
 	}
 
-	for (i = 0; i < ARRAY_SIZE(todo_command_strings); i++)
-		if (skip_prefix(bol, todo_command_strings[i], &bol)) {
+	for (i = 0; i < ARRAY_SIZE(todo_command_info); i++)
+		if (skip_prefix(bol, todo_command_info[i].str, &bol)) {
 			item->command = i;
 			break;
 		}
-	if (i >= ARRAY_SIZE(todo_command_strings))
+		else if (bol[1] == ' ' && *bol == todo_command_info[i].c) {
+			bol++;
+			item->command = i;
+			break;
+		}
+	if (i >= ARRAY_SIZE(todo_command_info))
 		return error("Invalid command: %.*s", (int)(eol - bol), bol);
 
 	if (item->command == TODO_NOOP) {
