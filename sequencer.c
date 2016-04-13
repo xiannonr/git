@@ -482,12 +482,14 @@ static int allow_empty(struct replay_opts *opts, struct commit *commit)
 
 enum todo_command {
 	TODO_PICK,
-	TODO_REVERT
+	TODO_REVERT,
+	TODO_NOOP
 };
 
 static const char *todo_command_strings[] = {
 	"pick",
-	"revert"
+	"revert",
+	"noop"
 };
 
 static const char *command_to_string(const enum todo_command command)
@@ -744,6 +746,12 @@ static int parse_insn_line(struct todo_item *item,
 	char *end_of_object_name;
 	int i, saved, status, padding;
 
+	if (bol == eol || *bol == '\r' || *bol == comment_line_char) {
+		item->command = TODO_NOOP;
+		item->commit = NULL;
+		return 0;
+	}
+
 	for (i = 0; i < ARRAY_SIZE(todo_command_strings); i++)
 		if (skip_prefix(bol, todo_command_strings[i], &bol)) {
 			item->command = i;
@@ -751,6 +759,11 @@ static int parse_insn_line(struct todo_item *item,
 		}
 	if (i >= ARRAY_SIZE(todo_command_strings))
 		return error("Invalid command: %.*s", (int)(eol - bol), bol);
+
+	if (item->command == TODO_NOOP) {
+		item->commit = NULL;
+		return 0;
+	}
 
 	/* Eat up extra spaces/ tabs before object name */
 	padding = strspn(bol, " \t");
@@ -1056,7 +1069,12 @@ static int pick_commits(struct todo_list *todo_list, struct replay_opts *opts)
 		struct todo_item *item = todo_list->items + todo_list->current;
 		if (save_todo(todo_list, opts))
 			return -1;
-		res = do_pick_commit(item->command, item->commit, opts);
+		if (item->command <= TODO_REVERT)
+			res = do_pick_commit(item->command, item->commit,
+					opts);
+		else if (item->command != TODO_NOOP)
+			return error("Unknown command %d", item->command);
+
 		todo_list->current++;
 		if (res)
 			return res;
