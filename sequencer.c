@@ -1480,10 +1480,10 @@ static int is_final_fixup(struct todo_list *todo_list)
 		return 0;
 
 	while (++i < todo_list->nr)
-		if (todo_list->items[i].command == TODO_NOOP)
-			continue;
-		else if (is_fixup(todo_list->items[i].command))
+		if (is_fixup(todo_list->items[i].command))
 			return 0;
+		else if (todo_list->items[i].command < TODO_NOOP)
+			break;
 	return 1;
 }
 
