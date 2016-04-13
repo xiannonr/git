@@ -1153,7 +1153,8 @@ static int parse_insn_buffer(char *buf, struct todo_list *todo_list,
 			fixup_okay = 1;
 		p = *eol ? eol + 1 : eol;
 	}
-	if (!todo_list->nr)
+	if (!todo_list->nr && (opts->action != REPLAY_INTERACTIVE_REBASE ||
+			!file_exists(git_path_rebase_done())))
 		return error(_("No commits parsed."));
 	return 0;
 }
