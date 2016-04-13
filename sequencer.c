@@ -1152,7 +1152,7 @@ struct todo_item *append_todo(struct todo_list *todo_list)
 }
 
 static int parse_insn_line(struct todo_item *item,
-	const char *bol, char *eol, struct replay_opts *opts)
+	const char *bol, char *eol)
 {
 	unsigned char commit_sha1[20];
 	char *end_of_object_name;
@@ -1226,7 +1226,7 @@ static int parse_insn_buffer(char *buf, struct todo_list *todo_list,
 
 		item = append_todo(todo_list);
 		item->offset_in_buf = p - todo_list->buf.buf;
-		if (parse_insn_line(item, p, eol, opts))
+		if (parse_insn_line(item, p, eol))
 			return error(_("Could not parse line %d."), i);
 		if (fixup_okay)
 			; /* do nothing */
@@ -2204,5 +2204,58 @@ int sequencer_make_script(int keep_empty, FILE *out,
 		fputs(buf.buf, out);
 	}
 	strbuf_release(&buf);
+	return 0;
+}
+
+
+int transform_todo_ids(int shorten_sha1s)
+{
+	const char *todo_file = git_path_rebase_todo();
+	struct todo_list todo_list = TODO_LIST_INIT;
+	struct replay_opts opts;
+	int fd, res, i;
+	FILE *out;
+
+	strbuf_reset(&todo_list.buf);
+	fd = open(todo_file, O_RDONLY);
+	if (fd < 0)
+		return error(_("Could not open %s (%s)"),
+			todo_file, strerror(errno));
+	if (strbuf_read(&todo_list.buf, fd, 0) < 0) {
+		close(fd);
+		return error(_("Could not read %s."), todo_file);
+	}
+	close(fd);
+
+	memset(&opts, 0, sizeof(opts));
+	opts.action = REPLAY_INTERACTIVE_REBASE;
+	res = parse_insn_buffer(todo_list.buf.buf, &todo_list, &opts);
+	if (res)
+		return error(_("Unusable instruction sheet: %s"), todo_file);
+
+	out = fopen(todo_file, "w");
+	if (!out)
+		return error(_("Unable to open '%s' for writing"), todo_file);
+	for (i = 0; i < todo_list.nr; i++) {
+		struct todo_item *item = todo_list.items + i;
+		int bol = item->offset_in_buf;
+		const char *p = todo_list.buf.buf + bol;
+		int eol = i + 1 < todo_list.nr ?
+			todo_list.items[i + 1].offset_in_buf :
+			todo_list.buf.len;
+
+		if (item->command >= TODO_EXEC && item->command != TODO_DROP)
+			fwrite(p, eol - bol, 1, out);
+		else {
+			int eoc = strcspn(todo_list.buf.buf + bol, " \t");
+			const char *sha1 = shorten_sha1s ?
+				short_commit_name(item->commit) :
+				oid_to_hex(&item->commit->object.oid);
+
+			fprintf(out, "%.*s %s %.*s\n",
+				eoc, p, sha1, item->arg_len, item->arg);
+		}
+	}
+	fclose(out);
 	return 0;
 }
