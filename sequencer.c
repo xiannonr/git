@@ -1515,6 +1515,7 @@ static int pick_commits(struct todo_list *todo_list, struct replay_opts *opts)
 			unlink(author_script());
 			unlink(stopped_sha());
 			unlink(git_path_rebase_amend());
+			unlink(stopped_sha());
 		}
 		if (item->command <= TODO_SQUASH) {
 			res = do_pick_commit(item->command, item->commit,
