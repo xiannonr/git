@@ -96,6 +96,8 @@ static GIT_PATH_FUNC(stopped_sha, "rebase-merge/stopped-sha")
  * The following files are written by git-rebase just after parsing the
  * command-line (and are only consumed, not modified, by the sequencer).
  */
+static GIT_PATH_FUNC(head_name, "rebase-merge/head-name")
+static GIT_PATH_FUNC(onto, "rebase-merge/onto")
 static GIT_PATH_FUNC(orig_head, "rebase-merge/orig-head")
 static GIT_PATH_FUNC(git_path_rebase_verbose, "rebase-merge/verbose") /* TODO: turn into opt */
 
@@ -1615,11 +1617,38 @@ static int pick_commits(struct todo_list *todo_list, struct replay_opts *opts)
 	}
 
 	if (IS_REBASE_I()) {
-		struct strbuf buf = STRBUF_INIT;
+		struct strbuf head_ref = STRBUF_INIT, buf = STRBUF_INIT;
 
 		/* Stopped in the middle, as planned? */
 		if (todo_list->current < todo_list->nr)
 			return 0;
+
+		if (strbuf_read_file(&head_ref, head_name(), 64) > 0 &&
+				starts_with(head_ref.buf, "refs/")) {
+			unsigned char head[20], orig[20];
+
+			strbuf_rtrim(&head_ref);
+			if (get_sha1("HEAD", head))
+				return error("Cannot read HEAD");
+			if (strbuf_read_file(&buf, orig_head(), 41) <= 0 ||
+					get_sha1_hex(buf.buf, orig))
+				return error("Could not read orig-head");
+			strbuf_addf(&buf, "rebase -i (finish): %s onto ",
+				head_ref.buf);
+			strbuf_read_file(&buf, onto(), 64);
+			if (update_ref(buf.buf, head_ref.buf, head, orig,
+					REF_NODEREF, UPDATE_REFS_MSG_ON_ERR))
+				return error("Could not update %s",
+					head_ref.buf);
+			strbuf_reset(&buf);
+			strbuf_addf(&buf,
+				"rebase -i (finish): returning to %s",
+				head_ref.buf);
+			if (create_symref("HEAD", head_ref.buf, buf.buf))
+				return error("Could not update HEAD to %s",
+					head_ref.buf);
+			strbuf_reset(&buf);
+		}
 
 		if (file_exists(git_path_rebase_verbose())) {
 			const char *argv[] = {
@@ -1635,6 +1664,7 @@ static int pick_commits(struct todo_list *todo_list, struct replay_opts *opts)
 			strbuf_reset(&buf);
 		}
 		strbuf_release(&buf);
+		strbuf_release(&head_ref);
 	}
 
 	/*
