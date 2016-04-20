@@ -409,6 +409,7 @@ int cmd_gc(int argc, const char **argv, const char *prefix)
 
 	if (gc_before_repack())
 		return -1;
+	close_all_packs();
 
 	if (!repository_format_precious_objects) {
 		if (run_command_v_opt(repack.argv, RUN_GIT_CMD))

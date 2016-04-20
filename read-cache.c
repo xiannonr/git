@@ -1726,6 +1726,12 @@ static void post_read_index_from(struct index_state *istate)
 	tweak_untracked_cache(istate);
 }
 
+#ifdef NO_UNIX_SOCKETS
+static int try_shm(struct index_state *istate)
+{
+	return -1;
+}
+#else
 static int want_auto_index_helper(void)
 {
 	int want = -1;
@@ -1908,6 +1914,7 @@ fail:
 	poke_daemon(istate, &st, 1);
 	return -1;
 }
+#endif
 
 static void refresh_by_watchman(struct index_state *istate)
 {
@@ -2623,9 +2630,11 @@ static int do_write_locked_index(struct index_state *istate, struct lock_file *l
 	if (flags & COMMIT_LOCK) {
 		struct stat st;
 		ret = commit_locked_index(lock);
+#ifndef NO_UNIX_SOCKETS
 		if (!ret && is_main_index(istate) &&
 		    !stat(git_path("index-helper.sock"), &st))
 			poke_daemon(istate, &st, 1);
+#endif
 		return ret;
 	} else if (flags & CLOSE_LOCK)
 		return close_lock_file(lock);

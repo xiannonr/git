@@ -1333,7 +1333,9 @@ ifdef NO_INET_PTON
 	LIB_OBJS += compat/inet_pton.o
 	BASIC_CFLAGS += -DNO_INET_PTON
 endif
-ifndef NO_UNIX_SOCKETS
+ifdef NO_UNIX_SOCKETS
+	BASIC_CFLAGS += -DNO_UNIX_SOCKETS
+else
 	LIB_OBJS += unix-socket.o
 	PROGRAM_OBJS += credential-cache.o
 	PROGRAM_OBJS += credential-cache--daemon.o
@@ -1437,7 +1439,9 @@ ifdef HAVE_DEV_TTY
 endif
 
 ifndef NO_MMAP
+ifndef NO_UNIX_SOCKETS
 	PROGRAM_OBJS += index-helper.o
+endif
 endif
 
 ifdef DIR_HAS_BSD_GROUP_SEMANTICS
