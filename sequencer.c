@@ -1228,8 +1228,12 @@ static int parse_insn_buffer(char *buf, struct todo_list *todo_list,
 
 		item = append_todo(todo_list);
 		item->offset_in_buf = p - todo_list->buf.buf;
-		if (parse_insn_line(item, p, eol))
+		if (parse_insn_line(item, p, eol)) {
+			if (IS_REBASE_I())
+				return error("Please fix this using "
+						"'git rebase --edit-todo'.");
 			return error(_("Could not parse line %d."), i);
+		}
 		if (fixup_okay)
 			; /* do nothing */
 		else if (is_fixup(item->command))
