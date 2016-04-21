@@ -1324,8 +1324,8 @@ static int parse_insn_buffer(char *buf, struct todo_list *todo_list)
 		item = append_todo(todo_list);
 		item->offset_in_buf = p - todo_list->buf.buf;
 		if (parse_insn_line(item, p, eol)) {
-			error("Invalid line: %.*s", (int)(eol - p), p);
-			res |= error(_("Could not parse line %d."), i);
+			res |= error("Invalid line %d: %.*s",
+				i, (int)(eol - p), p);
 			item->command = TODO_NOOP;
 		}
 		if (fixup_okay)
@@ -1368,8 +1368,12 @@ static int read_populate_todo(struct todo_list *todo_list,
 	close(fd);
 
 	res = parse_insn_buffer(todo_list->buf.buf, todo_list);
-	if (res)
+	if (res) {
+		if (is_rebase_i(opts))
+			return error("Please fix this using "
+				"'git rebase --edit-todo'.");
 		return error(_("Unusable instruction sheet: %s"), todo_file);
+	}
 	if (!todo_list->nr &&
 	    (!is_rebase_i(opts) || !file_exists(rebase_path_done())))
 		return error(_("No commits parsed."));
