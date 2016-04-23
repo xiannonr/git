@@ -267,5 +267,13 @@ test_expect_success 'git client does not send an empty Accept-Language' '
 	! grep "^Accept-Language:" stderr
 '
 
+test_expect_success 'extra HTTP headers are sent' '
+	GIT_CURL_VERBOSE=1 \
+	git -c http.extraheader="Hello: World" \
+		ls-remote "$HTTPD_URL/dumb/repo.git" >out 2>err &&
+	test_i18ngrep "Hello: World" err >hello.txt &&
+	test_line_count = 2 hello.txt
+'
+
 stop_httpd
 test_done
