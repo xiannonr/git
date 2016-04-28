@@ -355,9 +355,6 @@ all::
 #
 # Define HAVE_CLOCK_MONOTONIC if your platform has CLOCK_MONOTONIC in librt.
 #
-# Define NO_HMAC_CTX_CLEANUP if your OpenSSL is version 0.9.6b or earlier to
-# cleanup the HMAC context with the older HMAC_cleanup function.
-#
 # Define USE_PARENS_AROUND_GETTEXT_N to "yes" if your compiler happily
 # compiles the following initialization:
 #
@@ -1137,9 +1134,6 @@ ifndef NO_OPENSSL
 	endif
 	ifdef NEEDS_CRYPTO_WITH_SSL
 		OPENSSL_LIBSSL += -lcrypto
-	endif
-	ifdef NO_HMAC_CTX_CLEANUP
-		BASIC_CFLAGS += -DNO_HMAC_CTX_CLEANUP
 	endif
 else
 	BASIC_CFLAGS += -DNO_OPENSSL
@@ -2274,10 +2268,10 @@ sparse: $(SP_OBJ)
 check: common-cmds.h
 	@if sparse; \
 	then \
-		echo 2>&1 "Use 'make sparse' instead"; \
+		echo >&2 "Use 'make sparse' instead"; \
 		$(MAKE) --no-print-directory sparse; \
 	else \
-		echo 2>&1 "Did you mean 'make test'?"; \
+		echo >&2 "Did you mean 'make test'?"; \
 		exit 1; \
 	fi
 

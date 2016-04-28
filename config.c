@@ -108,7 +108,7 @@ static int handle_path_include(const char *path, struct config_include_data *inc
 
 	expanded = expand_user_path(path);
 	if (!expanded)
-		return error("Could not expand include path '%s'", path);
+		return error("could not expand include path '%s'", path);
 	path = expanded;
 
 	/*
@@ -162,7 +162,7 @@ void git_config_push_parameter(const char *text)
 {
 	struct strbuf env = STRBUF_INIT;
 	const char *old = getenv(CONFIG_DATA_ENVIRONMENT);
-	if (old) {
+	if (old && *old) {
 		strbuf_addstr(&env, old);
 		strbuf_addch(&env, ' ');
 	}
@@ -969,7 +969,7 @@ static int git_default_branch_config(const char *var, const char *value)
 		else if (!strcmp(value, "always"))
 			autorebase = AUTOREBASE_ALWAYS;
 		else
-			return error("Malformed value for %s", var);
+			return error("malformed value for %s", var);
 		return 0;
 	}
 
@@ -995,7 +995,7 @@ static int git_default_push_config(const char *var, const char *value)
 		else if (!strcmp(value, "current"))
 			push_default = PUSH_DEFAULT_CURRENT;
 		else {
-			error("Malformed value for %s: %s", var, value);
+			error("malformed value for %s: %s", var, value);
 			return error("Must be one of nothing, matching, simple, "
 				     "upstream or current.");
 		}
@@ -1216,11 +1216,12 @@ static inline void config_from_file_gently(config_fn_t fn, const char *filename,
 	(*found)++;
 }
 
-int git_config_early(config_fn_t fn, void *data, const char *repo_config)
+static int do_git_config_sequence(config_fn_t fn, void *data)
 {
 	int ret = 0, found = 0;
 	char *xdg_config = xdg_config_home("config");
 	char *user_config = expand_user_path("~/.gitconfig");
+	char *repo_config = git_pathdup("config");
 
 	if (git_config_system()) {
 		config_from_file_gently(fn, git_program_data_config(), data,
@@ -1249,6 +1250,7 @@ int git_config_early(config_fn_t fn, void *data, const char *repo_config)
 
 	free(xdg_config);
 	free(user_config);
+	free(repo_config);
 	return ret == 0 ? found : ret;
 }
 
@@ -1256,8 +1258,6 @@ int git_config_with_options(config_fn_t fn, void *data,
 			    struct git_config_source *config_source,
 			    int respect_includes)
 {
-	char *repo_config = NULL;
-	int ret;
 	struct config_include_data inc = CONFIG_INCLUDE_INIT;
 
 	if (respect_includes) {
@@ -1278,11 +1278,7 @@ int git_config_with_options(config_fn_t fn, void *data,
 	else if (config_source && config_source->blob)
 		return git_config_from_blob_ref(fn, config_source->blob, data);
 
-	repo_config = git_pathdup("config");
-	ret = git_config_early(fn, data, repo_config);
-	if (repo_config)
-		free(repo_config);
-	return ret;
+	return do_git_config_sequence(fn, data);
 }
 
 static void git_config_raw(config_fn_t fn, void *data)
@@ -2254,9 +2250,13 @@ void git_config_set_multivar_in_file(const char *config_filename,
 				     const char *key, const char *value,
 				     const char *value_regex, int multi_replace)
 {
-	if (git_config_set_multivar_in_file_gently(config_filename, key, value,
-						   value_regex, multi_replace) < 0)
-		die(_("Could not set '%s' to '%s'"), key, value);
+	if (!git_config_set_multivar_in_file_gently(config_filename, key, value,
+						    value_regex, multi_replace))
+		return;
+	if (value)
+		die(_("could not set '%s' to '%s'"), key, value);
+	else
+		die(_("could not unset '%s'"), key);
 }
 
 int git_config_set_multivar_gently(const char *key, const char *value,
@@ -2434,7 +2434,7 @@ int git_config_rename_section(const char *old_name, const char *new_name)
 #undef config_error_nonbool
 int config_error_nonbool(const char *var)
 {
-	return error("Missing value for '%s'", var);
+	return error("missing value for '%s'", var);
 }
 
 int parse_config_key(const char *var,

@@ -978,9 +978,7 @@ char *mingw_getcwd(char *pointer, int len)
 		return NULL;
 	if (xwcstoutf(pointer, wpointer, len) < 0)
 		return NULL;
-	for (i = 0; pointer[i]; i++)
-		if (pointer[i] == '\\')
-			pointer[i] = '/';
+	convert_slashes(pointer);
 	return pointer;
 }
 
@@ -2572,9 +2570,7 @@ static void setup_windows_environment()
 		 * executable (by not mistaking the dir separators
 		 * for escape characters).
 		 */
-		for (; *tmp; tmp++)
-			if (*tmp == '\\')
-				*tmp = '/';
+		convert_slashes(tmp);
 	}
 
 	/* simulate TERM to enable auto-color (see color.c) */
