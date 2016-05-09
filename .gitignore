@@ -196,6 +196,7 @@
 /test-match-trees
 /test-mergesort
 /test-mktemp
+/test-mock-branch
 /test-parse-options
 /test-path-utils
 /test-prio-queue
