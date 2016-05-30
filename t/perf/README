@@ -28,6 +28,10 @@ the tests on the current git repository.
     7810.3: grep --cached, cheap regex       3.07(3.02+0.25)
     7810.4: grep --cached, expensive regex   9.39(30.57+0.24)
 
+The times are in the format T(U+S), where T is the total time spent
+(best out of $GIT_PERF_REPEAT_COUNT), U is the part of that time spent
+in user space and S the part spent in system space.
+
 You can compare multiple repositories and even git revisions with the
 'run' script:
 
