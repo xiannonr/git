@@ -1,0 +1,159 @@
+<link href="c3/c3.min.css" rel="stylesheet" type="text/css">
+
+<!-- Load d3.js and c3.js -->
+<script src="c3/d3.min.js" charset="utf-8"></script>
+<script src="c3/c3.min.js"></script>
+<div id="chart"></div>
+<script>
+var log2 = !false;
+var x = [ 50, 150, 300, 500, 1500, 3000 ];
+var y = [  5, 8, 12, 17, 48, 100 ];
+x = [ 150, 300, 500, 1500 ];
+y = [ 8, 12, 17, 48 ];
+x = [ 50, 150, 300, 500, 1000, 1500, 3000, 5000 ];
+y = [ 5, 8, 12, 17, 31, 45, 93, 142 ];
+/*
+ * Given a symmetric matrix M and a vector b, find a with M * a = b.
+ * This function uses the Gaussian method, and modifies both M and b rather
+ * heavily.
+ */
+var solveLinearEquation = function(M, b) {
+	for (var i = 0; i < M.length - 1; i++) {
+		var pivot = i;
+		for (var j = i + 1; j < M.length; j++)
+			if (Math.abs(M[pivot][i]) < Math.abs(M[j][i]))
+				pivot = j;
+		if (pivot != i) {
+			var row = M[pivot];
+			M[pivot] = M[i];
+			M[i] = row;
+			row = b[pivot];
+			b[pivot] = b[i];
+			b[i] = row;
+		}
+		if (M[i][i] == 0)
+			throw "Need a full-rank matrix";
+		for (var j = i + 1; j < M.length; j++) {
+			var factor = M[j][i] / M[i][i];
+			b[j] -= factor * b[i];
+			/* skipping: M[j][i] -= factor * M[i][i] */
+			for (var k = i + 1; k < M.length; k++)
+				M[j][k] -= factor * M[i][k];
+		}
+	}
+	for (var i = M.length - 1; i >= 0; i--) {
+		b[i] /= M[i][i]; /* skipping: M[i][i] = 1; */
+		for (var j = 0; j < i; j++)
+			b[j] -= M[j][i] * b[i]; /* skipping: M[j][i] = 0; */
+	}
+	return b;
+};
+var extrapolateFunction = function(x, y) {
+	/*
+	 * Least Squares Fit:
+	 *
+	 * Given a series (x_i, y_i), find factors a_j for a linear combination
+	 * F(x) = Sum_j a_j * f_j(x) such that G = Sum_i (F(x_i) - y_i)^2 is
+	 * minimal.
+	 *
+	 * A necessary (and as it turns out, usually sufficient) condition is
+	 * that the derivative dG / da_j = 0 for all j. This derivative
+	 * evaluates to 2 * Sum_i (F(x_i) - y_i) * f_j(x_i). Hence we simply
+	 * build the linear equation M * a = b where
+	 *
+	 * a is the vector (a_j), b is the vector (Sum_i y_i * f_j(x_i)) and
+	 * m is a matrix with the entries m_(k,l) = Sum_i f_k(x_i) * f_l(x_i).
+	 *
+	 * In this instance, we choose f_j(x) as 1, x, x^2 and x * log x, for
+	 * j = 0, 1, 2, and 3, respectively.
+	 */
+
+	var yf0, yf1, yf2, yf3;
+	var f00, f01, f02, f03, f11, f12, f13, f22, f23, f33;
+	yf0 = yf1 = yf2 = yf3 = 0;
+	f00 = x.length;
+	f01 = f02 = f03 = f12 = f13 = f22 = f23 = f33 = 0;
+
+	x.map(function(xi, i) {
+		var yi = y[i];
+		var f2 = xi * xi;
+		var f3 = xi * Math.log(xi);
+
+		yf0 += yi;
+		yf1 += yi * xi;
+		yf2 += yi * f2;
+		yf3 += yi * f3;
+
+		f01 += xi;
+		f02 += f2;
+		f03 += f3;
+		f12 += xi * f2;
+		f13 += xi * f3;
+		f22 += f2 * f2;
+		f23 += f2 * f3;
+		f33 += f3 * f3;
+	});
+	f11 = f02; /* x * x == x^2 */
+
+	var b = [ yf0, yf1, yf2, yf3 ];
+	var M = [
+		[ f00, f01, f02, f03 ],
+		[ f01, f11, f12, f13 ],
+		[ f02, f12, f22, f23 ],
+		[ f03, f13, f23, f33 ]];
+var only_linear = !true;
+var only_n_log_n = !true;
+var no_quadratic = true;
+if (only_linear) {
+b = [ yf0, yf1 ];
+M = [[f00, f01], [f01, f11]];
+} else if (only_n_log_n) {
+b = [ yf0, yf3 ];
+M = [[f00, f03], [f03, f33]];
+} else if (no_quadratic) {
+b = [ yf0, yf1, yf3 ];
+M = [[f00, f01, f03], [f01, f11, f13], [f03, f13, f33]];
+}
+	b = solveLinearEquation(M, b);
+console.log(b);
+if (only_linear) {
+return function(x) { return b[0] + b[1] * x; };
+} else if (only_n_log_n) {
+return function(x) { return b[0] + b[1] * x * Math.log(x); };
+} else if (no_quadratic) {
+return function(x) { return b[0] + b[1] * x + b[2] * x * Math.log(x); };
+}
+	return function(x) {
+		return b[0] + b[1] * x + b[2] * x * x + b[3] * x * Math.log(x);
+	};
+};
+var extrapolate = extrapolateFunction(x, y);
+console.log(extrapolate(3000));
+console.log(extrapolate(1500000));
+var fittedY = x.map(extrapolate);
+var diffY = fittedY.map(function(x, i) { return x - y[i]; });
+var chart = c3.generate({
+    bindto: '#chart',
+    data: {
+        x: 'x',
+        columns: [
+            ['x'].concat(x).map(function(v, i) {
+		if (!i) return v;
+		if (log2) v = Math.log(v);
+		return v;
+	    }),
+//	    ['diff'].concat(diffY),
+            ['fitted'].concat(fittedY).map(function(v, i) {
+		if (!i) return v;
+		if (log2) v = Math.log(v);
+		return v;
+	    }),
+            ['data2'].concat(y).map(function(v, i) {
+		if (!i) return v;
+		if (log2) v = Math.log(v);
+		return v;
+	    })
+        ]
+    }
+});
+</script>
