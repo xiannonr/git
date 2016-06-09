@@ -43,8 +43,14 @@ struct replay_opts {
 
 	/* Only used by REPLAY_NONE */
 	struct rev_info *revs;
+
+	/* malloc()ed data entrusted to the sequencer */
+	void **owned;
+	int owned_nr, owned_alloc;
 };
-#define REPLAY_OPTS_INIT { -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, 0, 0, NULL }
+#define REPLAY_OPTS_INIT { -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, NULL, 0, 0, NULL, NULL, 0, 0 }
+
+void *sequencer_entrust(struct replay_opts *opts, void *set_me_free_after_use);
 
 int sequencer_pick_revisions(struct replay_opts *opts);
 

@@ -114,9 +114,22 @@ static int has_conforming_footer(struct strbuf *sb, struct strbuf *sob,
 	return 1;
 }
 
+void *sequencer_entrust(struct replay_opts *opts, void *set_me_free_after_use)
+{
+	ALLOC_GROW(opts->owned, opts->owned_nr + 1, opts->owned_alloc);
+	opts->owned[opts->owned_nr++] = set_me_free_after_use;
+
+	return set_me_free_after_use;
+}
+
 static void remove_sequencer_state(const struct replay_opts *opts)
 {
 	struct strbuf dir = STRBUF_INIT;
+	int i;
+
+	for (i = 0; i < opts->owned_nr; i++)
+		free(opts->owned[i]);
+	free(opts->owned);
 
 	strbuf_addf(&dir, "%s", get_dir(opts));
 	remove_dir_recursively(&dir, 0);
