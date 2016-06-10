@@ -385,7 +385,7 @@ GIT-VERSION-FILE: FORCE
 
 # CFLAGS and LDFLAGS are for the users to override from the command line.
 
-CFLAGS = -g -Wall
+CFLAGS = -g -O2 -Wall
 DEVELOPER_CFLAGS = -Werror \
 	-Wdeclaration-after-statement \
 	-Wno-format-zero-length \
@@ -2241,6 +2241,10 @@ test_bindir_programs := $(patsubst %,bin-wrappers/%,$(BINDIR_PROGRAMS_NEED_X) $(
 
 all:: $(TEST_PROGRAMS) $(test_bindir_programs)
 all:: $(NO_INSTALL)
+
+p3404::
+	git rev-parse --verify 2a5ce7cf0da8c4d97dd58f5cbc6092b394648356^ || git fetch --unshallow origin
+	(cd t/perf && GIT_PERF_REPEAT_COUNT=10 ./run . cf4c2cfe52be5bd973a4838f73a35d3959ce2f43 p3404-rebase-interactive.sh)
 
 bin-wrappers/%: wrap-for-bin.sh
 	@mkdir -p bin-wrappers

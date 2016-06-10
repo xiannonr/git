@@ -1,15 +1,3 @@
-# GIT_USE_REBASE_HELPER can be set to:
-#
-# - true	do not use the shell version of rebase -i (except for corner
-#		cases
-# - false	do not use the rebase--helper (i.e. use the shell version)
-# - cross-validate
-#		use both the shell version and the rebase--helper, then
-#		compare
-
-test ! -z "$GIT_USE_REBASE_HELPER" ||
-GIT_USE_REBASE_HELPER=cross-validate
-
 # This shell script fragment is sourced by git-rebase to implement
 # its interactive mode.  "git rebase --interactive" makes it easy
 # to fix up commits in the middle of a series and rearrange commits.
@@ -704,35 +692,6 @@ Commit or stash your changes, and then run
 	fi &&
 		warn "$(eval_gettext "Successfully rebased and updated \$head_name.")"
 
-	# Run the same shebang using rebase--helper
-	if test cross-validate = "$GIT_USE_REBASE_HELPER" &&
-		test -d "$GIT_DIR"/saved-rebase-merge
-	then
-		rm -rf "$GIT_DIR"/shell-rebase-merge
-
-		echo "Cross-validating with rebase--helper" >&2
-		mv "$GIT_DIR"/rebase-merge "$GIT_DIR"/shell-rebase-merge &&
-		cp -R "$GIT_DIR"/saved-rebase-merge "$GIT_DIR"/rebase-merge &&
-		echo 1 >"$GIT_DIR"/saved-rebase-merge/cross-validating &&
-		git rev-parse HEAD >"$GIT_DIR"/saved-rebase-merge/shell-head &&
-		output git checkout \
-			$(cat "$GIT_DIR"/saved-rebase-merge/start-head) &&
-		case "$(cat "$GIT_DIR"/rebase-merge/head-name)" in
-		refs/*) git update-ref -m "re-run rebase" \
-				$(cat "$GIT_DIR"/rebase-merge/head-name) \
-				$(cat "$GIT_DIR"/rebase-merge/orig-head)
-			;;
-		esac &&
-		git rebase--helper ${force_rebase:+--no-ff} --continue ||
-		die "Builtin rebase--helper failed"
-		if test -f "$todo"
-		then
-			exit
-		else
-			check_rebase__helper
-		fi
-	fi
-
 	return 1 # not failure; just to break the do_rest loop
 }
 
@@ -768,115 +727,11 @@ transform_todo_ids () {
 }
 
 expand_todo_ids() {
-	cp "$todo" "$todo".transform
-	transform_todo_ids
-	mv "$todo" "$todo".transformed
-	cp "$todo".transform "$todo"
 	git rebase--helper --expand-sha1s
-	if ! git diff --no-index -w -- "$todo" "$todo.transformed"
-	then
-		die "rebase--helper failed to expand todo IDs"
-	fi
 }
 
 collapse_todo_ids() {
-	cp "$todo" "$todo".transform
-	transform_todo_ids --short
-	mv "$todo" "$todo".transformed
-	cp "$todo".transform "$todo"
 	git rebase--helper --shorten-sha1s
-	if ! git diff --no-index -w -- "$todo" "$todo.transformed"
-	then
-		die "rebase--helper failed to collapse todo IDs"
-	fi
-}
-
-# Rearrange the todo list that has both "pick sha1 msg" and
-# "pick sha1 fixup!/squash! msg" appears in it so that the latter
-# comes immediately after the former, and change "pick" to
-# "fixup"/"squash".
-#
-# Note that if the config has specified a custom instruction format
-# each log message will be re-retrieved in order to normalize the
-# autosquash arrangement
-rearrange_squash () {
-	format=$(git config --get rebase.instructionFormat)
-	# extract fixup!/squash! lines and resolve any referenced sha1's
-	while read -r pick sha1 message
-	do
-		test -z "${format}" || message=$(git log -n 1 --format="%s" ${sha1})
-		case "$message" in
-		"squash! "*|"fixup! "*)
-			action="${message%%!*}"
-			rest=$message
-			prefix=
-			# skip all squash! or fixup! (but save for later)
-			while :
-			do
-				case "$rest" in
-				"squash! "*|"fixup! "*)
-					prefix="$prefix${rest%%!*},"
-					rest="${rest#*! }"
-					;;
-				*)
-					break
-					;;
-				esac
-			done
-			printf '%s %s %s %s\n' "$sha1" "$action" "$prefix" "$rest"
-			# if it's a single word, try to resolve to a full sha1 and
-			# emit a second copy. This allows us to match on both message
-			# and on sha1 prefix
-			if test "${rest#* }" = "$rest"; then
-				fullsha="$(git rev-parse -q --verify "$rest" 2>/dev/null)"
-				if test -n "$fullsha"; then
-					# prefix the action to uniquely identify this line as
-					# intended for full sha1 match
-					echo "$sha1 +$action $prefix $fullsha"
-				fi
-			fi
-		esac
-	done >"$1.sq" <"$1"
-	test -s "$1.sq" || return 0
-
-	used=
-	while read -r pick sha1 message
-	do
-		case " $used" in
-		*" $sha1 "*) continue ;;
-		esac
-		printf '%s\n' "$pick $sha1 $message"
-		test -z "${format}" || message=$(git log -n 1 --format="%s" ${sha1})
-		used="$used$sha1 "
-		while read -r squash action msg_prefix msg_content
-		do
-			case " $used" in
-			*" $squash "*) continue ;;
-			esac
-			emit=0
-			case "$action" in
-			+*)
-				action="${action#+}"
-				# full sha1 prefix test
-				case "$msg_content" in "$sha1"*) emit=1;; esac ;;
-			*)
-				# message prefix test
-				case "$message" in "$msg_content"*) emit=1;; esac ;;
-			esac
-			if test $emit = 1; then
-				if test -n "${format}"
-				then
-					msg_content=$(git log -n 1 --format="${format}" ${squash})
-				else
-					msg_content="$(echo "$msg_prefix" | sed "s/,/! /g")$msg_content"
-				fi
-				printf '%s\n' "$action $squash $msg_content"
-				used="$used$squash "
-			fi
-		done <"$1.sq"
-	done >"$1.rearranged" <"$1"
-	cat "$1.rearranged" >"$1"
-	rm -f "$1.sq" "$1.rearranged"
 }
 
 # Add commands after a pick or after a squash/fixup serie
@@ -914,25 +769,6 @@ get_missing_commit_check_level () {
 	printf '%s' "$check_level" | tr 'A-Z' 'a-z'
 }
 
-check_rebase__helper () {
-	test -f "$GIT_DIR"/saved-rebase-merge/cross-validating ||
-	return 0
-	echo "Cross-validating rebase--helper's result" >&2
-	rm -rf "$GIT_DIR"/before-rebase-merge
-	mv "$GIT_DIR"/saved-rebase-merge "$GIT_DIR"/before-rebase-merge
-	start_head=$(cat "$GIT_DIR"/before-rebase-merge/start-head)
-	shell_head=$(cat "$GIT_DIR"/before-rebase-merge/shell-head)
-	git rev-parse HEAD >"$GIT_DIR"/before-rebase-merge/builtin-head
-	git log --raw --author-date-order $start_head..$shell_head |
-	sed -e '/^Merge:/{N;N;s/^\(Merge: \).*\(\n.*\nDate: \).*/\1...\2.../}' \
-		-e 's/^commit .*$/commit/' >"$GIT_DIR"/before-rebase-merge/shell_log
-	git log --raw --author-date-order $start_head.. |
-	sed -e '/^Merge:/{N;N;s/^\(Merge: \).*\(\n.*\nDate: \).*/\1...\2.../}' \
-		-e  's/^commit .*$/commit/' >"$GIT_DIR"/before-rebase-merge/builtin_log
-	cmp "$GIT_DIR"/before-rebase-merge/shell_log "$GIT_DIR"/before-rebase-merge/builtin_log ||
-	die "Builtin rebase--helper produced different result, call git diff --no-index \"$GIT_DIR/before-rebase-merge/shell_log\" \"$GIT_DIR/before-rebase-merge/builtin_log\""
-}
-
 # The whole contents of this file is run by dot-sourcing it from
 # inside a shell function.  It used to be that "return"s we see
 # below were not inside any function, and expected to return
@@ -946,21 +782,10 @@ git_rebase__interactive () {
 
 case "$action" in
 continue)
-	if test -f "$GIT_DIR"/saved-rebase-merge/cross-validating
-	then
-		git rebase--helper ${force_rebase:+--no-ff} --continue &&
-		if test ! -f "$todo"
-		then
-			check_rebase__helper
-		fi
-		exit
-	fi
-
-	if test -f "$GIT_DIR"/rebase-merge/use-builtin
+	if test ! -d "$rewritten"
 	then
 		exec git rebase--helper ${force_rebase:+--no-ff} --continue
 	fi
-
 	# do we have anything to commit?
 	if git diff-index --cached --quiet HEAD --
 	then
@@ -1020,21 +845,10 @@ first and then run 'git rebase --continue' again.")"
 skip)
 	git rerere clear
 
-	if test -f "$GIT_DIR"/saved-rebase-merge/cross-validating
-	then
-		git rebase--helper ${force_rebase:+--no-ff} --continue &&
-		if test ! -f "$todo"
-		then
-			check_rebase__helper
-		fi
-		exit
-	fi
-
-	if test -f "$GIT_DIR"/rebase-merge/use-builtin
+	if test ! -d "$rewritten"
 	then
 		exec git rebase--helper ${force_rebase:+--no-ff} --continue
 	fi
-
 	do_rest
 	return 0
 	;;
@@ -1112,25 +926,27 @@ else
 	revisions=$onto...$orig_head
 	shortrevisions=$shorthead
 fi
-format=$(git config --get rebase.instructionFormat)
-# the 'rev-list .. | sed' requires %m to parse; the instruction requires %H to parse
-git rev-list $merges_option --format="%m%H ${format:-%s}" \
-	--reverse --left-right --topo-order \
-	$revisions ${restrict_revision+^$restrict_revision} | \
-	sed -n "s/^>//p" |
-while read -r sha1 rest
-do
-	if test -z "$keep_empty" && is_empty_commit $sha1 && ! is_merge_commit $sha1
-	then
-		comment_out="$comment_char "
-	else
-		comment_out=
-	fi
+if test t != "$preserve_merges"
+then
+	git rebase--helper --make-script ${keep_empty:+--keep-empty} \
+		$revisions ${restrict_revision+^$restrict_revision} > "$todo"
+else
+	format=$(git config --get rebase.instructionFormat)
+	# the 'rev-list .. | sed' requires %m to parse; the instruction requires %H to parse
+	git rev-list $merges_option --format="%m%H ${format:-%s}" \
+		--reverse --left-right --topo-order \
+		$revisions ${restrict_revision+^$restrict_revision} | \
+		sed -n "s/^>//p" |
+	while read -r sha1 rest
+	do
 
-	if test t != "$preserve_merges"
-	then
-		printf '%s\n' "${comment_out}pick $sha1 $rest" >>"$todo"
-	else
+		if test -z "$keep_empty" && is_empty_commit $sha1 && ! is_merge_commit $sha1
+		then
+			comment_out="$comment_char "
+		else
+			comment_out=
+		fi
+
 		if test -z "$rebase_root"
 		then
 			preserve=t
@@ -1149,23 +965,7 @@ do
 			touch "$rewritten"/$sha1
 			printf '%s\n' "${comment_out}pick $sha1 $rest" >>"$todo"
 		fi
-	fi
-done
-if test -z "$rebase_root" && test ! -d "$rewritten"
-then
-	git rebase--helper --make-script  ${keep_empty:+--keep-empty} \
-		$revisions ${restrict_revision+^$restrict_revision} \
-		>"$todo".helped
-	if test ! -s "$todo".helped
-	then
-		test ! -f "$todo" || die "$todo.helped should be empty"
-	elif ! cmp "$todo" "$todo".helped
-	then
-		echo git rebase--helper --make-script \
-			${keep_empty:+--keep-empty} $revisions \
-			${restrict_revision+^$restrict_revision} >"$todo".gen
-		die "make-script generated something incompatible"
-	fi
+	done
 fi
 
 # Watch for commits that been dropped by --cherry-pick
@@ -1196,16 +996,7 @@ then
 fi
 
 test -s "$todo" || echo noop >> "$todo"
-if test -n "$autosquash"
-then
-	cp "$todo" "$todo.shell-rearrange" &&
-	git rebase--helper --rearrange-squash &&
-	rearrange_squash "$todo.shell-rearrange" &&
-	cmp "$todo" "$todo.shell-rearrange" || {
-		git diff --no-index -- "$todo" "$todo.shell-rearrange"
-		exit 1
-	}
-fi
+test -z "$autosquash" || git rebase--helper --rearrange-squash || exit
 test -n "$cmd" && add_exec_commands "$todo"
 
 todocount=$(git stripspace --strip-comments <"$todo" | wc -l)
@@ -1254,20 +1045,10 @@ onto="$(git rebase--helper --skip-unnecessary-picks)" ||
 die "Could not skip unnecessary pick commands"
 
 checkout_onto
-if test true = "$GIT_USE_REBASE_HELPER" && test -z "$rebase_root" &&
-	test ! -d "$rewritten"
+if test -z "$rebase_root" && test ! -d "$rewritten"
 then
 	require_clean_work_tree "rebase"
-	echo 1 >"$GIT_DIR"/rebase-merge/use-builtin
 	exec git rebase--helper ${force_rebase:+--no-ff} --continue
-elif test cross-validate = "$GIT_USE_REBASE_HELPER"
-then
-	rm -rf "$GIT_DIR"/saved-rebase-merge
-	if test -z "$rebase_root" && test ! -d "$rewritten"
-	then
-		cp -R "$GIT_DIR"/rebase-merge "$GIT_DIR"/saved-rebase-merge
-		git rev-parse HEAD >"$GIT_DIR"/saved-rebase-merge/start-head
-	fi
 fi
 do_rest
 

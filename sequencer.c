@@ -2682,7 +2682,6 @@ int rearrange_squash(void)
 	struct hashmap subject2item;
 	int res = 0, rearranged = 0, *next, *tail, fd, i;
 	char **subjects;
-char **subject_repl;
 
 	/* TODO: refactor. We do this a lot */
 	fd = open(todo_file, O_RDONLY);
@@ -2703,7 +2702,6 @@ char **subject_repl;
 	ALLOC_ARRAY(next, todo_list.nr);
 	ALLOC_ARRAY(tail, todo_list.nr);
 	ALLOC_ARRAY(subjects, todo_list.nr);
-ALLOC_ARRAY(subject_repl, todo_list.nr);
 	for (i = 0; i < todo_list.nr; i++) {
 		struct strbuf buf = STRBUF_INIT;
 		struct todo_item *item = todo_list.items + i;
@@ -2711,7 +2709,6 @@ ALLOC_ARRAY(subject_repl, todo_list.nr);
 		int i2 = -1;
 		struct subject2item_entry *entry;
 
-subject_repl[i] = NULL;
 		next[i] = tail[i] = -1;
 		if (item->command >= TODO_EXEC) {
 			subjects[i] = NULL;
@@ -2744,13 +2741,8 @@ subject_repl[i] = NULL;
 			else if (!strchr(p, ' ') &&
 			    (commit2 = lookup_commit_reference_by_name(p)) &&
 			    commit2->util)
-{
-struct strbuf buf = STRBUF_INIT;
-strbuf_addf(&buf, "%.*s%s", (int)(p - subject), subject, oid_to_hex(&commit2->object.oid));
-subject_repl[i] = strbuf_detach(&buf, NULL);
 				i2 = (struct todo_item *)commit2->util
 					- todo_list.items;
-}
 			else {
 				/* copy can be a prefix of the commit subject */
 				for (i2 = 0; i2 < i; i2++)
@@ -2810,13 +2802,6 @@ subject_repl[i] = strbuf_detach(&buf, NULL);
 					bol += strcspn(bol, " \t");
 				}
 
-if (!format && subject_repl[cur]) {
-	const char *p = todo_list.items[cur].arg;
-	strbuf_add(&buf, bol, p - bol);
-	strbuf_addstr(&buf, subject_repl[cur]);
-	strbuf_addch(&buf, '\n');
-}
-else
 				strbuf_add(&buf, bol, eol - bol);
 
 				cur = next[cur];

@@ -141,7 +141,6 @@ test_fail_interactive_rebase () {
 }
 
 test_expect_success 'git rebase -i (unchanged)' '
-(GIT_USE_REBASE_HELPER=true && export GIT_USE_REBASE_HELPER &&
 	git reset --hard D &&
 	clear_hook_input &&
 	test_fail_interactive_rebase "1 2" --onto A B &&
@@ -153,11 +152,10 @@ test_expect_success 'git rebase -i (unchanged)' '
 	$(git rev-parse C) $(git rev-parse HEAD^)
 	$(git rev-parse D) $(git rev-parse HEAD)
 	EOF
-	verify_hook_input)
+	verify_hook_input
 '
 
 test_expect_success 'git rebase -i (skip)' '
-(GIT_USE_REBASE_HELPER=true && export GIT_USE_REBASE_HELPER &&
 	git reset --hard D &&
 	clear_hook_input &&
 	test_fail_interactive_rebase "2" --onto A B &&
@@ -168,11 +166,10 @@ test_expect_success 'git rebase -i (skip)' '
 	cat >expected.data <<-EOF &&
 	$(git rev-parse D) $(git rev-parse HEAD)
 	EOF
-	verify_hook_input)
+	verify_hook_input
 '
 
 test_expect_success 'git rebase -i (squash)' '
-(GIT_USE_REBASE_HELPER=true && export GIT_USE_REBASE_HELPER &&
 	git reset --hard D &&
 	clear_hook_input &&
 	test_fail_interactive_rebase "1 squash 2" --onto A B &&
@@ -184,7 +181,7 @@ test_expect_success 'git rebase -i (squash)' '
 	$(git rev-parse C) $(git rev-parse HEAD)
 	$(git rev-parse D) $(git rev-parse HEAD)
 	EOF
-	verify_hook_input)
+	verify_hook_input
 '
 
 test_expect_success 'git rebase -i (fixup without conflict)' '
@@ -200,7 +197,6 @@ test_expect_success 'git rebase -i (fixup without conflict)' '
 '
 
 test_expect_success 'git rebase -i (double edit)' '
-(GIT_USE_REBASE_HELPER=true && export GIT_USE_REBASE_HELPER &&
 	git reset --hard D &&
 	clear_hook_input &&
 	FAKE_LINES="edit 1 edit 2" git rebase -i B &&
@@ -213,11 +209,10 @@ test_expect_success 'git rebase -i (double edit)' '
 	$(git rev-parse C) $(git rev-parse HEAD^)
 	$(git rev-parse D) $(git rev-parse HEAD)
 	EOF
-	verify_hook_input)
+	verify_hook_input
 '
 
 test_expect_success 'git rebase -i (exec)' '
-(GIT_USE_REBASE_HELPER=true && export GIT_USE_REBASE_HELPER &&
 	git reset --hard D &&
 	clear_hook_input &&
 	FAKE_LINES="edit 1 exec_false 2" git rebase -i B &&
@@ -231,7 +226,7 @@ test_expect_success 'git rebase -i (exec)' '
 	$(git rev-parse C) $(git rev-parse HEAD^)
 	$(git rev-parse D) $(git rev-parse HEAD)
 	EOF
-	verify_hook_input)
+	verify_hook_input
 '
 
 test_done
