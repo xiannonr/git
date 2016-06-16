@@ -278,7 +278,7 @@ set_backup_editor () {
 	test_set_editor "$PWD/backup-editor.sh"
 }
 
-test_expect_success 'autosquash with multiple empty patches' '
+test_expect_failure 'autosquash with multiple empty patches' '
 	test_tick &&
 	git commit --allow-empty -m "empty" &&
 	test_tick &&
@@ -296,6 +296,7 @@ test_expect_success 'autosquash with multiple empty patches' '
 '
 
 test_expect_success 'extra spaces after fixup!' '
+	if test -d .git/rebase-merge; then git rebase --abort; fi &&
 	base=$(git rev-parse HEAD) &&
 	test_commit to-fixup &&
 	git commit --allow-empty -m "fixup!  to-fixup" &&
