@@ -35,6 +35,13 @@ all: $(DEFAULT_TEST_TARGET)
 test: pre-clean $(TEST_LINT)
 	$(MAKE) aggregate-results-and-cleanup
 
+failed:
+	@failed=$$(cd '$(TEST_RESULTS_DIRECTORY_SQ)' && \
+		grep -l '^failed [1-9]' $$(ls -t *.counts | \
+			sed 'G;h;/^\(t[^.]*\)-[0-9]*\..*\n\1-[0-9]*\./d;P;d') | \
+		sed -n 's/-[0-9]*\.counts$$/.sh/p') && \
+	test -z "$$failed" || $(MAKE) $$failed
+
 prove: pre-clean $(TEST_LINT)
 	@echo "*** prove ***"; $(PROVE) --exec '$(SHELL_PATH_SQ)' $(GIT_PROVE_OPTS) $(T) :: $(GIT_TEST_OPTS)
 	$(MAKE) clean-except-prove-cache
