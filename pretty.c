@@ -516,7 +516,7 @@ static int is_empty_line(const char *line, int *len_p)
 	return !len;
 }
 
-static const char *skip_empty_lines(const char *msg)
+const char *skip_empty_lines(const char *msg)
 {
 	for (;;) {
 		int linelen = get_one_line(msg);
