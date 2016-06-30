@@ -9,8 +9,8 @@ test_expect_success 'setup' '
 	git worktree add source &&
 	git worktree list --porcelain | grep "^worktree" >actual &&
 	cat <<-EOF >expected &&
-	worktree $TRASH_DIRECTORY
-	worktree $TRASH_DIRECTORY/source
+	worktree $(pwd)
+	worktree $(pwd)/source
 	EOF
 	test_cmp expected actual
 '
