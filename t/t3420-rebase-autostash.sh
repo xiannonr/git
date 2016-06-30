@@ -91,6 +91,7 @@ testrebase() {
 		git reset --hard &&
 		git checkout -b rebased-feature-branch feature-branch &&
 		test_when_finished git branch -D rebased-feature-branch &&
+(GIT_USE_REBASE_HELPER=true && export GIT_USE_REBASE_HELPER &&
 		echo dirty >>file3 &&
 		test_must_fail git rebase$type related-onto-branch &&
 		test_path_is_file $dotest/autostash &&
@@ -100,7 +101,7 @@ testrebase() {
 		git rebase --continue &&
 		test_path_is_missing $dotest/autostash &&
 		grep dirty file3 &&
-		git checkout feature-branch
+		git checkout feature-branch)
 	'
 
 	test_expect_success "rebase$type: --skip" '
@@ -108,6 +109,7 @@ testrebase() {
 		git reset --hard &&
 		git checkout -b rebased-feature-branch feature-branch &&
 		test_when_finished git branch -D rebased-feature-branch &&
+(GIT_USE_REBASE_HELPER=true && export GIT_USE_REBASE_HELPER &&
 		echo dirty >>file3 &&
 		test_must_fail git rebase$type related-onto-branch &&
 		test_path_is_file $dotest/autostash &&
@@ -115,7 +117,7 @@ testrebase() {
 		git rebase --skip &&
 		test_path_is_missing $dotest/autostash &&
 		grep dirty file3 &&
-		git checkout feature-branch
+		git checkout feature-branch)
 	'
 
 	test_expect_success "rebase$type: --abort" '
