@@ -818,7 +818,7 @@ static int upload_pack_config(const char *var, const char *value, void *unused)
 
 int cmd_main(int argc, const char **argv)
 {
-	char *dir;
+	const char *dir;
 	int i;
 	int strict = 0;
 
@@ -829,7 +829,7 @@ int cmd_main(int argc, const char **argv)
 	check_replace_refs = 0;
 
 	for (i = 1; i < argc; i++) {
-		char *arg = argv[i];
+		const char *arg = argv[i];
 
 		if (arg[0] != '-')
 			break;
