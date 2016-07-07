@@ -179,8 +179,9 @@ static struct fsentry *fsentry_create_list(const struct fsentry *dir,
 	*dir_not_found = 0;
 
 	/* convert name to UTF-16 and check length */
-	if ((wlen = xutftowcs_path_ex(pattern, dir->name, MAX_LONG_PATH,
-			dir->len, MAX_PATH - 2, core_long_paths)) < 0)
+	if ((wlen = xutftowcs_path_ex(pattern, dir->len ? dir->name : ".",
+			MAX_LONG_PATH, dir->len ? dir->len : 1, MAX_PATH - 2,
+			core_long_paths)) < 0)
 		return NULL;
 
 	/*
