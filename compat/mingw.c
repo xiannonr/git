@@ -241,7 +241,7 @@ enum hide_dotfiles_type {
 static enum hide_dotfiles_type hide_dotfiles = HIDE_DOTFILES_DOTGITONLY;
 static char *unset_environment_variables;
 int core_fscache;
-int core_long_paths;
+int core_long_paths = 2;
 
 int mingw_core_config(const char *var, const char *value, void *cb)
 {
@@ -3123,7 +3123,7 @@ int handle_long_path(wchar_t *path, int len, int max_path, int expand)
 	 * max_path limit. This should cover > 99 % of cases with minimal
 	 * performance impact (git almost always uses relative paths).
 	 */
-	if ((len < 2 || (!is_dir_sep(path[0]) && path[1] != ':')) &&
+	if (!expand && (len < 2 || (!is_dir_sep(path[0]) && path[1] != ':')) &&
 	    (current_directory_len + len < max_path))
 		return len;
 
@@ -3147,7 +3147,7 @@ int handle_long_path(wchar_t *path, int len, int max_path, int expand)
 	 * return absolute path if it fits within max_path (even if
 	 * "cwd + path" doesn't due to '..' components)
 	 */
-	if (result < max_path) {
+	if (!expand && result < max_path) {
 		wcscpy(path, buf);
 		return result;
 	}
