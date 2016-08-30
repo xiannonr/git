@@ -41,7 +41,7 @@ static GIT_PATH_FUNC(rebase_path_author_script, "rebase-merge/author-script")
 static GIT_PATH_FUNC(rebase_path_gpg_sign_opt, "rebase-merge/gpg_sign_opt")
 
 /* We will introduce the 'interactive rebase' mode later */
-static inline int is_rebase_i(struct replay_opts *opts)
+static inline int is_rebase_i(const struct replay_opts *opts)
 {
 	return 0;
 }
