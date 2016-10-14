@@ -913,7 +913,7 @@ test_expect_success 'git bisect reset cleans bisection state properly' '
 
 test_expect_success 'check whether bisection cleanup is not done with bad merges' '
 	git bisect start $HASH7 $SIDE_HASH7 &&
-	test_expect_failure git bisect bad >out 2>out &&
+	test_must_fail git bisect bad >out 2>out &&
 	test_i18ngrep "The merge base" out &&
 	test -e .git/BISECT_START
 '
