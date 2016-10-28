@@ -50,7 +50,7 @@ static struct git_attr *(git_attr_hash[HASHSIZE]);
 
 #ifndef NO_PTHREADS
 
-static pthread_mutex_t attr_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t attr_mutex;
 #define attr_lock()		pthread_mutex_lock(&attr_mutex)
 #define attr_unlock()		pthread_mutex_unlock(&attr_mutex)
 void attr_start(void) { pthread_mutex_init(&attr_mutex, NULL); }

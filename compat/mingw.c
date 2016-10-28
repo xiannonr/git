@@ -5,7 +5,6 @@
 #include "../strbuf.h"
 #include "../run-command.h"
 #include "../cache.h"
-#include "../attr.h"
 
 #define HCAST(type, handle) ((type)(intptr_t)handle)
 
@@ -2232,9 +2231,6 @@ void mingw_startup(void)
 
 	/* initialize critical section for waitpid pinfo_t list */
 	InitializeCriticalSection(&pinfo_cs);
-
-	/* initialize critical sections in the attr code */
-	attr_start();
 
 	/* set up default file mode and file modes for stdin/out/err */
 	_fmode = _O_BINARY;
