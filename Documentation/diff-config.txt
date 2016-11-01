@@ -171,7 +171,6 @@ diff.tool::
 
 include::mergetools-diff.txt[]
 
-diff.indentHeuristic::
 diff.compactionHeuristic::
 	Set one of these options to `true` to enable one of two
 	experimental heuristics that shift diff hunk boundaries to
