@@ -565,7 +565,9 @@ static int token_matches_item(const char *tok, struct arg_item *item, int tok_le
 /*
  * If the given line is of the form
  * "<token><optional whitespace><separator>..." or "<separator>...", return the
- * location of the separator. Otherwise, return -1.
+ * location of the separator. Otherwise, return -1.  The optional whitespace
+ * is allowed there primarily to allow things like "Bug #43" where <token> is
+ * "Bug" and <separator> is "#".
  *
  * The separator-starts-line case (in which this function returns 0) is
  * distinguished from the non-well-formed-line case (in which this function
