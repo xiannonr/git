@@ -263,10 +263,30 @@ EOM
   </ItemGroup>
 EOM
     }
+    my $targetsImport = '';
+    my $targetsErrors = '';
+    open F2, "<$git_dir/compat/vcbuild/packages.config";
+    while (<F2>) {
+      if (/<package id="([^"]+)" version="([^"]+)"/) {
+        next if ($1 =~  /^(zlib$|openssl(?!.*(x64|x86)$))/);
+        my $targetsFile = "..\\compat\\vcbuild\\GEN.PKGS\\$1.$2\\build\\native\\$1.targets";
+        $targetsImport .= "\n    <Import Project=\"$targetsFile\" Condition=\"Exists('$targetsFile')\" />";
+        $targetsErrors .= "\n    <Error Condition=\"!Exists('$targetsFile')\" Text=\"\$([System.String]::Format('\$(ErrorText)', '$targetsFile'))\" />";
+      }
+    }
+    close F2;
     print F << "EOM";
+  <ItemGroup>
+    <None Include="..\\compat\\vcbuild\\packages.config" />
+  </ItemGroup>
   <Import Project="\$(VCTargetsPath)\\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
+  <ImportGroup Label="ExtensionTargets">$targetsImport
   </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>$targetsErrors
+  </Target>
 </Project>
 EOM
     close F;
