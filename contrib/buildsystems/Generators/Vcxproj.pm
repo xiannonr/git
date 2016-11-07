@@ -121,7 +121,7 @@ sub createProject {
     $cflags =~ s/</&lt;/g;
     $cflags =~ s/>/&gt;/g;
 
-    my $libs;
+    my $libs = '';
     if (!$static_library) {
       $libs = join(";", sort(grep /^(?!libgit\.lib|xdiff\/lib\.lib)/, @{$$build_structure{"$prefix${name}_LIBS"}}));
     }
@@ -193,6 +193,7 @@ sub createProject {
     <ClCompile>
       <AdditionalOptions>$cflags %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>$includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <EnableParallelCodeGeneration />
       <MinimalRebuild>true</MinimalRebuild>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
       <PrecompiledHeader />
