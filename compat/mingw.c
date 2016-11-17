@@ -228,6 +228,17 @@ static int retry_ask_yes_no(int *tries, const char *format, ...)
 	return result;
 }
 
+/* Windows only */
+enum hide_dotfiles_type {
+	HIDE_DOTFILES_FALSE = 0,
+	HIDE_DOTFILES_TRUE,
+	HIDE_DOTFILES_DOTGITONLY
+};
+
+static enum hide_dotfiles_type hide_dotfiles = HIDE_DOTFILES_DOTGITONLY;
+int core_fscache;
+int core_long_paths;
+
 int mingw_core_config(const char *var, const char *value)
 {
 	if (!strcmp(var, "core.hidedotfiles")) {
