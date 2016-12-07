@@ -1133,7 +1133,7 @@ int cmd_grep(int argc, const char **argv, const char *prefix)
 	}
 
 	if (show_in_pager == default_pager)
-		show_in_pager = git_pager(1);
+		show_in_pager = git_pager(1, 1);
 	if (show_in_pager) {
 		opt.color = 0;
 		opt.name_only = 1;
@@ -1268,7 +1268,7 @@ int cmd_grep(int argc, const char **argv, const char *prefix)
 		die(_("option not supported with --recurse-submodules."));
 
 	if (!show_in_pager && !opt.status_only)
-		setup_pager();
+		setup_pager(1);
 
 	if (!use_index && (untracked || cached))
 		die(_("--cached or --untracked cannot be used with --no-index."));
