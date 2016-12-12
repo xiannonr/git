@@ -850,12 +850,11 @@ char *mingw_getcwd(char *pointer, int len)
  * See http://msdn2.microsoft.com/en-us/library/17w5ykft(vs.71).aspx
  * (Parsing C++ Command-Line Arguments)
  */
-static const char *quote_arg(const char *arg)
+static void strbuf_add_quoted(struct strbuf *sb, const char *arg)
 {
 	/* count chars to quote */
 	int len = 0, n = 0;
 	int force_quotes = 0;
-	char *q, *d;
 	const char *p = arg;
 	if (!*p) force_quotes = 1;
 	while (*p) {
@@ -877,32 +876,31 @@ static const char *quote_arg(const char *arg)
 		len++;
 		p++;
 	}
-	if (!force_quotes && n == 0)
-		return arg;
+	if (!force_quotes && n == 0) {
+		strbuf_addstr(sb, arg);
+		return;
+	}
 
 	/* insert \ where necessary */
-	d = q = xmalloc(st_add3(len, n, 3));
-	*d++ = '"';
+	strbuf_addch(sb, '"');
 	while (*arg) {
 		if (*arg == '"')
-			*d++ = '\\';
+			strbuf_addch(sb, '\\');
 		else if (*arg == '\\') {
 			int count = 0;
 			while (*arg == '\\') {
 				count++;
-				*d++ = *arg++;
+				strbuf_addch(sb, *arg++);
 			}
 			if (*arg == '"') {
 				while (count-- > 0)
-					*d++ = '\\';
-				*d++ = '\\';
+					strbuf_addch(sb, '\\');
+				strbuf_addch(sb, '\\');
 			}
 		}
-		*d++ = *arg++;
+		strbuf_addch(sb, *arg++);
 	}
-	*d++ = '"';
-	*d++ = 0;
-	return q;
+	strbuf_addch(sb, '"');
 }
 
 static const char *parse_interpreter(const char *cmd)
@@ -1125,19 +1123,12 @@ static pid_t mingw_spawnve_fd(const char *cmd, const char **argv, char **deltaen
 
 	/* concatenate argv, quoting args as we go */
 	strbuf_init(&args, 0);
-	if (prepend_cmd) {
-		char *quoted = (char *)quote_arg(cmd);
-		strbuf_addstr(&args, quoted);
-		if (quoted != cmd)
-			free(quoted);
-	}
+	if (prepend_cmd)
+		strbuf_add_quoted(&args, cmd);
 	for (; *argv; argv++) {
-		char *quoted = (char *)quote_arg(*argv);
 		if (*args.buf)
 			strbuf_addch(&args, ' ');
-		strbuf_addstr(&args, quoted);
-		if (quoted != *argv)
-			free(quoted);
+		strbuf_add_quoted(&args, *argv);
 	}
 
 	ALLOC_ARRAY(wargs, st_add(st_mult(2, args.len), 1));
