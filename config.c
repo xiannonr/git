@@ -2314,7 +2314,7 @@ int git_config_rename_section_in_file(const char *config_filename,
 
 	if (new_name && !section_name_is_ok(new_name)) {
 		ret = error("invalid section name: %s", new_name);
-		goto out;
+		goto out_no_rollback;
 	}
 
 	if (!config_filename)
@@ -2397,6 +2397,7 @@ commit_and_out:
 				  config_filename);
 out:
 	rollback_lock_file(lock);
+out_no_rollback:
 	free(filename_buf);
 	return ret;
 }
