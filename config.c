@@ -2396,6 +2396,7 @@ commit_and_out:
 		ret = error_errno("could not write config file %s",
 				  config_filename);
 out:
+	rollback_lock_file(lock);
 	free(filename_buf);
 	return ret;
 }
