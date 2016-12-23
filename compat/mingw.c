@@ -1353,9 +1353,11 @@ static wchar_t *make_environment_block(char **deltaenv)
 	for (j = 0; j < nr_wenv; j++) {
 		const wchar_t *v_j = my_wenviron[j];
 		wchar_t *v_j_eq = wcschr(v_j, L'=');
+		int len_j_eq, len_j;
+
 		if (!v_j_eq)
 			continue; /* should not happen */
-		int len_j_eq = v_j_eq + 1 - v_j; /* length(v_j) including '=' */
+		len_j_eq = v_j_eq + 1 - v_j; /* length(v_j) including '=' */
 
 		/* lookup v_j in list of to-delete vars */
 		for (k_del = 0; k_del < nr_delta_del; k_del++) {
@@ -1370,7 +1372,7 @@ static wchar_t *make_environment_block(char **deltaenv)
 		}
 
 		/* item is unique, add it to results. */
-		int len_j = wcslen(v_j);
+		len_j = wcslen(v_j);
 		memcpy(w_ins, v_j, len_j * sizeof(wchar_t));
 		w_ins += len_j + 1;
 
@@ -2623,6 +2625,11 @@ typedef struct _REPARSE_DATA_BUFFER {
 		} GenericReparseBuffer;
 	} DUMMYUNIONNAME;
 } REPARSE_DATA_BUFFER, *PREPARSE_DATA_BUFFER;
+
+#if defined(_MSC_VER) && _MSC_VER < 1900
+#define SymbolicLinkReparseBuffer DUMMYUNIONNAME.SymbolicLinkReparseBuffer
+#define MountPointReparseBuffer DUMMYUNIONNAME.MountPointReparseBuffer
+#endif
 #endif
 
 int readlink(const char *path, char *buf, size_t bufsiz)
@@ -3037,7 +3044,7 @@ int msc_startup(int argc, wchar_t **w_argv, wchar_t **w_env)
 	char **my_utf8_argv = NULL, **save = NULL;
 	char *buffer = NULL;
 	int maxlen;
-	int k, x;
+	int k, exit_status;
 
 #ifdef _DEBUG
 	_CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_DEBUG);
@@ -3092,7 +3099,7 @@ int msc_startup(int argc, wchar_t **w_argv, wchar_t **w_env)
 	current_directory_len = GetCurrentDirectoryW(0, NULL);
 
 	/* invoke the real main() using our utf8 version of argv. */
-	int exit_status = msc_main(argc, my_utf8_argv);
+	exit_status = msc_main(argc, my_utf8_argv);
 
 	for (k = 0; k < argc; k++)
 		free(save[k]);

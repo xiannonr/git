@@ -537,15 +537,16 @@ static void detect_msys_tty(int fd)
 	BYTE buffer[1024];
 	POBJECT_NAME_INFORMATION nameinfo = (POBJECT_NAME_INFORMATION) buffer;
 	PWSTR name;
+	HANDLE h;
 
 	/* check if fd is a pipe */
-	HANDLE h = (HANDLE) _get_osfhandle(fd);
+	h = (HANDLE) _get_osfhandle(fd);
 	if (GetFileType(h) != FILE_TYPE_PIPE)
 		return;
 
 	/* get pipe name */
-	if (!NT_SUCCESS(NtQueryObject(h, ObjectNameInformation,
-			buffer, sizeof(buffer) - 2, &result)))
+	if (NtQueryObject(h, ObjectNameInformation,
+			buffer, sizeof(buffer) - 2, &result) < 0)
 		return;
 	name = nameinfo->Name.Buffer;
 	name[nameinfo->Name.Length / sizeof(*name)] = 0;

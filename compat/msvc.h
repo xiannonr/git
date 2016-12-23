@@ -18,6 +18,7 @@
 #define ftruncate    _chsize
 #define strtoull     _strtoui64
 #define strtoll      _strtoi64
+#define snprintf     _snprintf
 
 static __inline int strcasecmp (const char *s1, const char *s2)
 {

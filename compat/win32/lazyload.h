@@ -23,6 +23,10 @@ struct proc_addr {
  */
 #define INIT_PROC_ADDR(function) (function = get_proc_addr(&proc_addr_##function))
 
+#ifdef _MSC_VER
+#define inline __inline
+#endif
+
 static inline void *get_proc_addr(struct proc_addr *proc)
 {
 	/* only do this once */
