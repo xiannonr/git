@@ -110,7 +110,8 @@ sub createLibProject {
     }
     my $defines = join(",", sort(@{$$build_structure{"LIBS_${libname}_DEFINES"}}));
     my $includes= join(";", sort(map("&quot;$rel_dir\\$_&quot;", @{$$build_structure{"LIBS_${libname}_INCLUDES"}})));
-    my $cflags  = join(" ", sort(@{$$build_structure{"LIBS_${libname}_CFLAGS"}}));
+    my $cflags  = join(" ", sort(map { s/^-[GLMOZ].*//; s/.* .*/"$&"/; $_; } @{$$build_structure{"LIBS_${libname}_CFLAGS"}}));
+print STDERR "clfags: $cflags\n";
     $cflags =~ s/\"/&quot;/g;
     $cflags =~ s/</&lt;/g;
     $cflags =~ s/>/&gt;/g;
