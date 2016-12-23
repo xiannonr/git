@@ -35,7 +35,11 @@ sub available {
 
 sub generate {
     my ($gen, $git_dir, $out_dir, $rel_dir, %build_structure) = @_;
-    return eval("Generators::${gen}::generate(\$git_dir, \$out_dir, \$rel_dir, \%build_structure)") if grep(/^$gen$/, @AVAILABLE);
+    if (grep(/^$gen$/, @AVAILABLE)) {
+        my $generate;
+	$generate = eval("\\&Generators::${gen}::generate");
+	return $generate->($git_dir, $out_dir, $rel_dir, %build_structure);
+    }
     die "Generator \"${gen}\" is not available!\nAvailable generators are: @AVAILABLE\n";
 }
 
