@@ -95,12 +95,13 @@ refname::
 	The name of the ref (the part after $GIT_DIR/).
 	For a non-ambiguous short name of the ref append `:short`.
 	The option core.warnAmbiguousRefs is used to select the strict
-	abbreviation mode. If `lstrip=<N>` is appended, strips `<N>`
-	slash-separated path components from the front of the refname
-	(e.g., `%(refname:lstrip=2)` turns `refs/tags/foo` into `foo` and
+	abbreviation mode. If `lstrip=<N>` (`rstrip=<N>`) is appended, strips `<N>`
+	slash-separated path components from the front (back) of the refname
+	(e.g. `%(refname:lstrip=2)` turns `refs/tags/foo` into `foo` and
 	`%(refname:rstrip=2)` turns `refs/tags/foo` into `refs`).
-	if `<N>` is a negative number, then only `<N>` path components
-	are left behind. (e.g., `%(refname:lstrip=-2)` turns
+	If `<N>` is a negative number, strip as many path components as
+	necessary from the specified end to leave `-<N>` path components
+	(e.g. `%(refname:lstrip=-2)` turns
 	`refs/tags/foo` into `tags/foo` and `%(refname:rstrip=-1)`
 	turns `refs/tags/foo` into `refs`). When the ref does not
 	have enough components, the result becomes an empty string if
