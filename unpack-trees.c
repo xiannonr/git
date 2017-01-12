@@ -54,19 +54,24 @@ static const char *unpack_plumbing_errors[NB_UNPACK_TREES_ERROR_TYPES] = {
 
 static const char *super_prefixed(const char *path)
 {
+	/*
+	 * It is necessary and sufficient to have two static buffers
+	 * here, as the return value of this function is fed to
+	 * error() using the unpack_*_errors[] templates we see above.
+	 */
 	static struct strbuf buf[2] = {STRBUF_INIT, STRBUF_INIT};
 	static int super_prefix_len = -1;
-	static unsigned idx = 0;
+	static unsigned idx = ARRAY_SIZE(buf) - 1;
 
 	if (super_prefix_len < 0) {
-		if (!get_super_prefix())
+		const char *super_prefix = get_super_prefix();
+		if (!super_prefix) {
 			super_prefix_len = 0;
-		else {
+		} else {
 			int i;
-
-			super_prefix_len = strlen(get_super_prefix());
 			for (i = 0; i < ARRAY_SIZE(buf); i++)
-				strbuf_addstr(&buf[i], get_super_prefix());
+				strbuf_addstr(&buf[i], super_prefix);
+			super_prefix_len = buf[0].len;
 		}
 	}
 
