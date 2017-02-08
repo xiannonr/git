@@ -522,7 +522,7 @@ void parse_pathspec(struct pathspec *pathspec,
 	}
 
 	pathspec->nr = n;
-	ALLOC_ARRAY(pathspec->items, n+1);
+	ALLOC_ARRAY(pathspec->items, n + 1);
 	item = pathspec->items;
 	prefixlen = prefix ? strlen(prefix) : 0;
 
@@ -551,9 +551,8 @@ void parse_pathspec(struct pathspec *pathspec,
 	 * that matches everyting. We allocated an extra one for this.
 	 */
 	if (nr_exclude == n) {
-		if (!(flags & PATHSPEC_PREFER_CWD))
-			prefixlen = 0;
-		init_pathspec_item(item + n, 0, prefix, prefixlen, "");
+		int plen = (!(flags & PATHSPEC_PREFER_CWD)) ? 0 : prefixlen;
+		init_pathspec_item(item + n, 0, prefix, plen, "");
 		pathspec->nr++;
 	}
 
