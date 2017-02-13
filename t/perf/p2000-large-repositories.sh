@@ -18,19 +18,13 @@ test_expect_success 'setup' '
 	git fast-import
 '
 
-perf_results_dir="$TEST_OUTPUT_DIRECTORY/test-results"
-perf_results_base="$perf_results_dir/$(basename "$0" .sh)"
-for file_count in $sizes
-do
-	export file_count
-	test_expect_success 'initial checkout' 'git reset --hard y$file_count'
+export file_count
+test_expect_success 'initial checkout' 'git reset --hard y$file_count'
 
-	test_perf 'checkout files (x2)' '
-		git checkout --no-progress x$file_count &&
-		git checkout --no-progress y$file_count
-	'
-
-perl ../extrapolate.perl "$perf_results_base"
+test_perf 'checkout files (x2)' '
+	git checkout --no-progress x$file_count &&
+	git checkout --no-progress y$file_count
+'
 
 test_perf 'status' '
 	git status
