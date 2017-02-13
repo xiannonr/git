@@ -82,6 +82,14 @@ struct string_list_item *string_list_lookup(struct string_list *list, const char
  */
 void string_list_remove_duplicates(struct string_list *sorted_list, int free_util);
 
+/*
+ * Remove an item from a sorted list. This is an expensive operation, as it
+ * keeps the list sorted by moving the remaining items (linear time). If it
+ * is not immediately required to keep the list sorted, a better strategy
+ * may be to use the unsorted_string_list_delete_item() function a number of
+ * times before calling string_list_sort() to make it a sorted list again.
+ */
+void sorted_string_list_delete_item(struct string_list *list, int i, int free_util);
 
 /* Use these functions only on unsorted lists: */
 

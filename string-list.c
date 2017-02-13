@@ -266,6 +266,18 @@ void unsorted_string_list_delete_item(struct string_list *list, int i, int free_
 	list->nr--;
 }
 
+void sorted_string_list_delete_item(struct string_list *list, int i, int free_util)
+{
+	if (list->strdup_strings)
+		free(list->items[i].string);
+	if (free_util)
+		free(list->items[i].util);
+	list->nr--;
+	if (i < list->nr)
+		memmove(list->items + i, list->items + i + 1,
+			(list->nr - i) * sizeof(*list->items));
+}
+
 int string_list_split(struct string_list *list, const char *string,
 		      int delim, int maxsplit)
 {
