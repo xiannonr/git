@@ -318,6 +318,16 @@ static void random_commit_message(struct random_context *context,
 		random_paragraph(context, buf);
 }
 
+static void assert_sorted(struct string_list *list)
+{
+	int i;
+
+	for (i = 1; i < list->nr; i++)
+		if (strcmp(list->items[i - 1].string, list->items[i].string) >= 0)
+			die("Not sorted @%d/%d: %s, %s", i, list->nr,
+			    list->items[i - 1].string, list->items[i].string);
+}
+
 static void random_branch(struct random_context *context, int file_count_goal,
 			  const char *ref_name)
 {
@@ -331,6 +341,7 @@ static void random_branch(struct random_context *context, int file_count_goal,
 		struct string_list_item *item;
 		int i;
 
+assert_sorted(&state);
 		random_work(context, &state, &modified);
 		strbuf_reset(&msg);
 		random_commit_message(context, &msg);
