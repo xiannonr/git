@@ -49,4 +49,14 @@ test_expect_success 'return to full checkout of master' '
 	test "$(cat b)" = "modified"
 '
 
+test_expect_success 'cherry-pick in sparse checkout' '
+	echo "!/*" >.git/info/sparse-checkout &&
+	echo "/a" >>.git/info/sparse-checkout &&
+	git checkout -b only-a HEAD^ &&
+	git reset --hard &&
+	git cherry-pick master &&
+	test_path_is_missing b &&
+	git diff master
+'
+
 test_done
