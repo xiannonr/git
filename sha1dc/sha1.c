@@ -1806,3 +1806,24 @@ void git_SHA1DCUpdate(SHA1_CTX *ctx, const void *vdata, unsigned long len)
 	}
 	SHA1DCUpdate(ctx, data, len);
 }
+
+#ifdef SHA1_DC_AND_OPENSSL
+void (*SHA1_Init_func)(SHA_CTX_union *ctx) = (void *)SHA1DCInit;
+void (*SHA1_Update_func)(SHA_CTX_union *ctx, const void *pointer, size_t size) =
+	(void *)git_SHA1DCUpdate;
+int (*SHA1_Final_func)(unsigned char sha1[20], SHA_CTX_union *ctx) =
+	(void *)git_SHA1DCFinal;
+
+void toggle_sha1dc(int enable)
+{
+	if (enable) {
+		SHA1_Init_func = (void *)SHA1DCInit;
+		SHA1_Update_func = (void *)git_SHA1DCUpdate;
+		SHA1_Final_func = (void *)git_SHA1DCFinal;
+	} else {
+		SHA1_Init_func = (void *)SHA1_Init;
+		SHA1_Update_func = (void *)SHA1_Update;
+		SHA1_Final_func = (void *)SHA1_Final;
+	}
+}
+#endif

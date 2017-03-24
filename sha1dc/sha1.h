@@ -110,10 +110,26 @@ void git_SHA1DCFinal(unsigned char [20], SHA1_CTX *);
  */
 void git_SHA1DCUpdate(SHA1_CTX *ctx, const void *data, unsigned long len);
 
+#ifdef SHA1_DC_AND_OPENSSL
+extern void toggle_sha1dc(int enable);
+
+typedef union {
+	SHA1_CTX dc;
+	SHA_CTX openssl;
+} SHA_CTX_union;
+extern void (*SHA1_Init_func)(SHA_CTX_union *ctx);
+extern void (*SHA1_Update_func)(SHA_CTX_union *ctx, const void *data, size_t len);
+extern int (*SHA1_Final_func)(unsigned char sha1[20], SHA_CTX_union *ctx);
+#define platform_SHA_CTX SHA_CTX_union
+#define platform_SHA1_Init SHA1_Init_func
+#define platform_SHA1_Update SHA1_Update_func
+#define platform_SHA1_Final SHA1_Final_func
+#else
 #define platform_SHA_CTX SHA1_CTX
 #define platform_SHA1_Init SHA1DCInit
 #define platform_SHA1_Update git_SHA1DCUpdate
 #define platform_SHA1_Final git_SHA1DCFinal
+#endif
 
 #if defined(__cplusplus)
 }
