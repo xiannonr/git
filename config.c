@@ -1205,6 +1205,14 @@ static int git_default_core_config(const char *var, const char *value)
 		return 0;
 	}
 
+	if (!strcmp(var, "core.enablesha1dc")) {
+#ifdef DC_AND_OPENSSL_SHA1
+		toggle_sha1dc(git_config_bool(var, value));
+#else
+		warning("Ignoring core.enablesha1dc='%s'", value);
+#endif
+	}
+
 	/* Add other config variables here and to Documentation/config.txt. */
 	return 0;
 }
