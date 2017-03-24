@@ -8,6 +8,16 @@ int cmd_main(int ac, const char **av)
 	int binary = 0;
 	char *buffer;
 
+	if (ac > 1 && !strcmp(av[1], "--disable-sha1dc")) {
+#ifdef SHA1_DC_AND_OPENSSL
+		toggle_sha1dc(0);
+#else
+		die("Not compiled with DC_AND_OPENSSL_SHA1");
+#endif
+		ac--;
+		av++;
+	}
+
 	if (ac == 2) {
 		if (!strcmp(av[1], "-b"))
 			binary = 1;
