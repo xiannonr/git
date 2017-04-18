@@ -666,6 +666,7 @@ int mingw_access(const char *filename, int mode)
 
 /* cached length of current directory for handle_long_path */
 static int current_directory_len = 0;
+static wchar_t current_directory[MAX_LONG_PATH];
 
 int mingw_chdir(const char *dirname)
 {
@@ -693,7 +694,9 @@ int mingw_chdir(const char *dirname)
 	}
 
 	result = _wchdir(normalize_ntpath(wdirname));
-	current_directory_len = GetCurrentDirectoryW(0, NULL);
+	current_directory_len =
+		GetCurrentDirectoryW(ARRAY_SIZE(current_directory),
+				     current_directory);
 	return result;
 }
 
@@ -3178,7 +3181,9 @@ int msc_startup(int argc, wchar_t **w_argv, wchar_t **w_env)
 	winansi_init();
 
 	/* init length of current directory for handle_long_path */
-	current_directory_len = GetCurrentDirectoryW(0, NULL);
+	current_directory_len =
+		GetCurrentDirectoryW(ARRAY_SIZE(current_directory),
+				     current_directory);
 
 	/* invoke the real main() using our utf8 version of argv. */
 	exit_status = msc_main(argc, my_utf8_argv);
@@ -3269,7 +3274,9 @@ void mingw_startup(void)
 	winansi_init();
 
 	/* init length of current directory for handle_long_path */
-	current_directory_len = GetCurrentDirectoryW(0, NULL);
+	current_directory_len =
+		GetCurrentDirectoryW(ARRAY_SIZE(current_directory),
+				     current_directory);
 }
 
 #endif
