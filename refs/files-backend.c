@@ -3284,29 +3284,42 @@ static int files_reflog_iterator_advance(struct ref_iterator *ref_iterator)
 	struct dir_iterator *diter = iter->dir_iterator;
 	int ok;
 
-	while ((ok = dir_iterator_advance(diter)) == ITER_OK) {
-		int flags;
+	if (!iter->dir_iterator) {
+		/*
+		 * If our dir_iterator is NULL at this stage, it means we failed
+		 * to open the given path at dir_iterator_begin(), most likely due
+		 * to it not existing.
+		 *
+		 * In this case, we pretend it was an empty directory and just
+		 * iterate through nothing.
+		 */
+		ok = ITER_DONE;
+	} else {
+		while ((ok = dir_iterator_advance(diter)) == ITER_OK) {
+			int flags;
 
-		if (!S_ISREG(diter->st.st_mode))
-			continue;
-		if (diter->basename[0] == '.')
-			continue;
-		if (ends_with(diter->basename, ".lock"))
-			continue;
+			if (!S_ISREG(diter->st.st_mode))
+				continue;
+			if (diter->basename[0] == '.')
+				continue;
+			if (ends_with(diter->basename, ".lock"))
+				continue;
 
-		if (read_ref_full(diter->relative_path, 0,
-				  iter->oid.hash, &flags)) {
-			error("bad ref for %s", diter->path.buf);
-			continue;
+			if (read_ref_full(diter->relative_path, 0,
+					  iter->oid.hash, &flags)) {
+				error("bad ref for %s", diter->path.buf);
+				continue;
+			}
+
+			iter->base.refname = diter->relative_path;
+			iter->base.oid = &iter->oid;
+			iter->base.flags = flags;
+			return ITER_OK;
 		}
 
-		iter->base.refname = diter->relative_path;
-		iter->base.oid = &iter->oid;
-		iter->base.flags = flags;
-		return ITER_OK;
+		iter->dir_iterator = NULL;
 	}
 
-	iter->dir_iterator = NULL;
 	if (ref_iterator_abort(ref_iterator) == ITER_ERROR)
 		ok = ITER_ERROR;
 	return ok;
@@ -3346,7 +3359,7 @@ static struct ref_iterator *files_reflog_iterator_begin(struct ref_store *ref_st
 	files_downcast(ref_store, 0, "reflog_iterator_begin");
 
 	base_ref_iterator_init(ref_iterator, &files_reflog_iterator_vtable);
-	iter->dir_iterator = dir_iterator_begin(git_path("logs"));
+	iter->dir_iterator = dir_iterator_begin(git_path("logs"), 0);
 	return ref_iterator;
 }
 
