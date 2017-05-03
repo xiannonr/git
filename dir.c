@@ -745,8 +745,7 @@ static int add_excludes(const char *fname, const char *base, int baselen,
 
 	fd = open(fname, O_RDONLY);
 	if (fd < 0 || fstat(fd, &st) < 0) {
-		if (errno != ENOENT)
-			warn_on_inaccessible(fname);
+		warn_on_fopen_errors(fname);
 		if (0 <= fd)
 			close(fd);
 		if (!check_index ||
