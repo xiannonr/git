@@ -25,8 +25,8 @@ Further, with -B and -M together, these should turn into two renames.
 . "$TEST_DIRECTORY"/diff-lib.sh ;# test-lib chdir's into trash
 
 test_expect_success setup '
-	cat "$TEST_DIRECTORY"/diff-lib/README >file0 &&
-	cat "$TEST_DIRECTORY"/diff-lib/COPYING >file1 &&
+	tr -d "\015" <"$TEST_DIRECTORY"/diff-lib/README >file0 &&
+	tr -d "\015" <"$TEST_DIRECTORY"/diff-lib/COPYING >file1 &&
 	git update-index --add file0 file1 &&
 	git tag reference $(git write-tree)
 '
