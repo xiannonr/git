@@ -841,6 +841,37 @@ static void dissociate_from_references(void)
 	free(alternates);
 }
 
+static struct refspec *get_clone_refspecs(const char *base_refspec,
+					  unsigned int *count)
+{
+	char *key;
+	const struct string_list *config_fetch_patterns;
+	struct refspec *ret;
+
+	key = xstrfmt("remote.%s.fetch", option_origin);
+	config_fetch_patterns = git_config_get_value_multi(key);
+
+	if (!config_fetch_patterns) {
+		*count = 1;
+		ret = parse_fetch_refspec(1, &base_refspec);
+	} else {
+		const char **fetch_patterns;
+		struct string_list_item *fp;
+		unsigned int i = 1;
+
+		*count = 1 + config_fetch_patterns->nr;
+		ALLOC_ARRAY(fetch_patterns, *count);
+		fetch_patterns[0] = base_refspec;
+		for_each_string_list_item(fp, config_fetch_patterns)
+			fetch_patterns[i++] = fp->string;
+		ret = parse_fetch_refspec(*count, fetch_patterns);
+		free(fetch_patterns);
+	}
+
+	free(key);
+	return ret;
+}
+
 int cmd_clone(int argc, const char **argv, const char *prefix)
 {
 	int is_bundle = 0, is_local;
@@ -861,9 +892,7 @@ int cmd_clone(int argc, const char **argv, const char *prefix)
 	int err = 0, complete_refs_before_fetch = 1;
 
 	struct refspec *refspec;
-	unsigned int refspec_count = 1;
-	const char **fetch_patterns;
-	const struct string_list *config_fetch_patterns;
+	unsigned int refspec_count;
 
 	packet_trace_identity("clone");
 	argc = parse_options(argc, argv, prefix, builtin_clone_options,
@@ -982,7 +1011,6 @@ int cmd_clone(int argc, const char **argv, const char *prefix)
 		strbuf_addf(&branch_top, "refs/remotes/%s/", option_origin);
 	}
 
-	strbuf_addf(&value, "+%s*:%s*", src_ref_prefix, branch_top.buf);
 	strbuf_addf(&key, "remote.%s.url", option_origin);
 	git_config_set(key.buf, repo);
 	strbuf_reset(&key);
@@ -990,21 +1018,8 @@ int cmd_clone(int argc, const char **argv, const char *prefix)
 	if (option_reference.nr)
 		setup_reference();
 
-	strbuf_addf(&key, "remote.%s.fetch", option_origin);
-	config_fetch_patterns = git_config_get_value_multi(key.buf);
-	if (config_fetch_patterns)
-		refspec_count = 1 + config_fetch_patterns->nr;
-	fetch_patterns = xcalloc(refspec_count, sizeof(*fetch_patterns));
-	fetch_patterns[0] = value.buf;
-	if (config_fetch_patterns) {
-		struct string_list_item *fp;
-		unsigned int i = 1;
-		for_each_string_list_item(fp, config_fetch_patterns)
-			fetch_patterns[i++] = fp->string;
-	}
-	refspec = parse_fetch_refspec(refspec_count, fetch_patterns);
-
-	strbuf_reset(&key);
+	strbuf_addf(&value, "+%s*:%s*", src_ref_prefix, branch_top.buf);
+	refspec = get_clone_refspecs(value.buf, &refspec_count);
 	strbuf_reset(&value);
 
 	remote = remote_get(option_origin);
@@ -1129,7 +1144,6 @@ int cmd_clone(int argc, const char **argv, const char *prefix)
 	strbuf_release(&value);
 	junk_mode = JUNK_LEAVE_ALL;
 
-	free(fetch_patterns);
 	free(refspec);
 	return err;
 }
