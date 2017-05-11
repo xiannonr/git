@@ -116,8 +116,10 @@ test_perf_create_repo_from () {
 test_perf_fresh_repo () {
 	repo="${1:-$TRASH_DIRECTORY}"
 	"$MODERN_GIT" init -q "$repo" &&
-	cd "$repo" &&
-	test_perf_do_repo_symlink_config_
+	(
+		cd "$repo" &&
+		test_perf_do_repo_symlink_config_
+	)
 }
 
 test_perf_default_repo () {
