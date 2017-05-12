@@ -4,11 +4,11 @@ test_description='git grep in binary files'
 
 . ./test-lib.sh
 
-nul_match() {
+nul_match () {
 	status=$1
 	flags=$2
 	pattern=$3
-	pattern_human=$(echo $pattern | sed 's/Q/<NUL>/g')
+	pattern_human=$(echo "$pattern" | sed 's/Q/<NUL>/g')
 
 	if test $status = "1"
 	then
