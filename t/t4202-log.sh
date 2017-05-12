@@ -296,7 +296,7 @@ test_expect_success 'log with grep.patternType configuration and command line' '
 	test_cmp expect actual
 '
 
-test_expect_success 'log with various grep.patternType configurations & command-lines' '
+test_expect_success !MINGW 'log with various grep.patternType configurations & command-lines' '
 	git init pattern-type &&
 	(
 		cd pattern-type &&
