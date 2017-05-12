@@ -43,7 +43,7 @@ test_expect_success REGEX_LOCALE 'grep literal string, with -F' '
 test_expect_success REGEX_LOCALE 'grep string with regex, with -F' '
 	test_write_lines "TILRAUN: Halló Heimur [abc]!" >file3 &&
 	git add file3 &&
-	git grep --debug -i -F "TILRAUN: Halló Heimur [abc]!" file3
+	git grep -i -F "TILRAUN: Halló Heimur [abc]!" file3
 '
 
 test_expect_success REGEX_LOCALE 'pickaxe -i on non-ascii' '
