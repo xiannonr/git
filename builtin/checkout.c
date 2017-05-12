@@ -394,6 +394,7 @@ static int checkout_paths(const struct checkout_opts *opts,
 			pos = skip_same_name(ce, pos) - 1;
 		}
 	}
+	errs |= checkout_delayed_entries(&state);
 
 	if (opts->no_index)
 		; /* discard the in-core index */
