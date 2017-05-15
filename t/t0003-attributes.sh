@@ -323,4 +323,25 @@ test_expect_success 'bare repository: test info/attributes' '
 	)
 '
 
+test_expect_failure 'a file <commit>:.gitattributes is ignored' '
+	git init bogus-file &&
+	(
+		cd bogus-file &&
+		mkdir sub &&
+		test_commit sub/file &&
+		test_commit sub/file2 &&
+		commit=$(git rev-parse HEAD) &&
+		if test_have_prereq !MINGW
+		then
+			# Windows does not support colons in filenames
+			mkdir $commit:sub &&
+			echo "* -inva/id" >$commit:sub/.gitattributes
+		fi &&
+		git diff $commit:sub/file.t..$commit:sub/file2.t >out 2>err &&
+		! grep "is not a valid attribute name" err &&
+		# On Windows, there will be a warning because of the colon
+		! grep "warning: unable to access .$commit:sub" err
+	)
+'
+
 test_done
