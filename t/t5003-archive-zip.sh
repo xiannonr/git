@@ -77,7 +77,7 @@ test_expect_success \
     'mkdir a &&
      echo simple textfile >a/a &&
      mkdir a/bin &&
-     cp /bin/sh a/bin &&
+     cp "$GIT_BUILD_DIR/git$X" a/bin &&
      printf "text\r"	>a/text.cr &&
      printf "text\r\n"	>a/text.crlf &&
      printf "text\n"	>a/text.lf &&
