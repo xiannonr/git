@@ -1210,6 +1210,7 @@ test_lazy_prereq SANITY '
 '
 
 test FreeBSD != $uname_s || GIT_UNZIP=${GIT_UNZIP:-/usr/local/bin/unzip}
+case "$uname_s" in *BusyBox*) GIT_UNZIP=/usr/bin/unzip.exe;; esac
 GIT_UNZIP=${GIT_UNZIP:-unzip}
 test_lazy_prereq UNZIP '
 	"$GIT_UNZIP" -v
