@@ -1253,7 +1253,16 @@ run_with_limited_open_files () {
 	(ulimit -n 32 && "$@")
 }
 
-test_lazy_prereq ULIMIT_FILE_DESCRIPTORS 'run_with_limited_open_files true'
+test_lazy_prereq ULIMIT_FILE_DESCRIPTORS '
+	case $(uname -s) in
+	CYGWIN*|MINGW*)
+		false
+		;;
+	*)
+		run_with_limited_open_files true
+		;;
+	esac
+'
 
 test_expect_success ULIMIT_FILE_DESCRIPTORS 'large transaction creating branches does not burst open file limit' '
 (
