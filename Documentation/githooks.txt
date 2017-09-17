@@ -458,7 +458,7 @@ e-mails.
 
 [[fsmonitor-watchman]]
 fsmonitor-watchman
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~
 
 This hook is invoked when the configuration option core.fsmonitor is
 set to .git/hooks/fsmonitor-watchman.  It takes two arguments, a version
