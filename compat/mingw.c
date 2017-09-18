@@ -347,23 +347,59 @@ int mingw_open (const char *filename, int oflags, ...)
 	unsigned mode;
 	int fd;
 	wchar_t wfilename[MAX_PATH];
+	HANDLE handle;
+	DWORD dwDesiredAccess = 0, dwShareMode = FILE_SHARE_DELETE,
+	      dwCreationDisposition = OPEN_EXISTING,
+	      dwFlagsAndAttributes = FILE_ATTRIBUTE_NORMAL;
 
 	va_start(args, oflags);
 	mode = va_arg(args, int);
 	va_end(args);
+
+	if (!(mode & S_IWRITE))
+		dwFlagsAndAttributes = FILE_ATTRIBUTE_READONLY;
 
 	if (filename && !strcmp(filename, "/dev/null"))
 		filename = "nul";
 
 	if (xutftowcs_path(wfilename, filename) < 0)
 		return -1;
-	fd = _wopen(wfilename, oflags, mode);
 
-	if (fd < 0 && (oflags & O_ACCMODE) != O_RDONLY && errno == EACCES) {
-		DWORD attrs = GetFileAttributesW(wfilename);
-		if (attrs != INVALID_FILE_ATTRIBUTES && (attrs & FILE_ATTRIBUTE_DIRECTORY))
-			errno = EISDIR;
+	if ((oflags & O_RDWR) == O_RDWR) {
+		/* O_RDWR can be different from O_RDONLY | O_WRONLY */
+		dwDesiredAccess |= GENERIC_READ | GENERIC_WRITE;
+		dwShareMode |= FILE_SHARE_READ | FILE_SHARE_WRITE;
+	} else if ((oflags & O_WRONLY) == O_WRONLY) {
+		dwDesiredAccess |= GENERIC_WRITE;
+		dwShareMode |= FILE_SHARE_WRITE;
+	} else if ((oflags & O_RDONLY) == O_RDONLY) {
+		dwDesiredAccess |= GENERIC_READ;
+		dwShareMode |= FILE_SHARE_READ;
+	} else {
+		errno = EINVAL;
+		return -1;
 	}
+
+	switch (oflags & (O_CREAT | O_EXCL | O_TRUNC)) {
+	case O_CREAT | O_EXCL:
+	case O_CREAT | O_EXCL | O_TRUNC:
+		dwCreationDisposition = CREATE_NEW;
+		break;
+	case O_CREAT:
+		dwCreationDisposition = OPEN_ALWAYS;
+		break;
+	case O_TRUNC:
+		dwCreationDisposition = TRUNCATE_EXISTING;
+		break;
+	case 0:
+		break;
+	default:
+		errno = EINVAL;
+		return -1;
+	}
+
+	handle = CreateFileW(wfilename, dwDesiredAccess, dwShareMode, NULL,
+			     dwCreationDisposition, dwFlagsAndAttributes, 0);
 	if ((oflags & O_CREAT) && needs_hiding(filename)) {
 		/*
 		 * Internally, _wopen() uses the CreateFile() API which errors
@@ -374,10 +410,27 @@ int mingw_open (const char *filename, int oflags, ...)
 		 * again *without* the O_CREAT flag (that corresponds to the
 		 * CREATE_ALWAYS flag of CreateFile()).
 		 */
-		if (fd < 0 && errno == EACCES)
-			fd = _wopen(wfilename, oflags & ~O_CREAT, mode);
-		if (fd >= 0 && set_hidden_flag(wfilename, 1))
+		if (handle == INVALID_HANDLE_VALUE &&
+		    GetLastError() == ERROR_ACCESS_DENIED &&
+		    (dwCreationDisposition & CREATE_ALWAYS))
+			handle = CreateFileW(wfilename, dwDesiredAccess,
+					     dwShareMode, NULL, OPEN_EXISTING,
+					     dwFlagsAndAttributes, 0);
+		if (handle != INVALID_HANDLE_VALUE &&
+		    set_hidden_flag(wfilename, 1))
 			warning("could not mark '%s' as hidden.", filename);
+	}
+	if (handle == INVALID_HANDLE_VALUE) {
+		errno = err_win_to_posix(GetLastError());
+		return -1;
+	}
+	fd = _open_osfhandle((intptr_t)handle, oflags);
+	/* fd = _wopen(wfilename, oflags, mode); */
+
+	if (fd < 0 && (oflags & O_ACCMODE) != O_RDONLY && errno == EACCES) {
+		DWORD attrs = GetFileAttributesW(wfilename);
+		if (attrs != INVALID_FILE_ATTRIBUTES && (attrs & FILE_ATTRIBUTE_DIRECTORY))
+			errno = EISDIR;
 	}
 	return fd;
 }
