@@ -1306,13 +1306,13 @@ static int packed_transaction_finish(struct ref_store *ref_store,
 	char *packed_refs_path;
 
 	packed_refs_path = get_locked_file_path(&refs->lock);
+	clear_snapshot(refs);
 	if (rename_tempfile(&refs->tempfile, packed_refs_path)) {
 		strbuf_addf(err, "error replacing %s: %s",
 			    refs->path, strerror(errno));
 		goto cleanup;
 	}
 
-	clear_snapshot(refs);
 	ret = 0;
 
 cleanup:
