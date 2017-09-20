@@ -643,9 +643,11 @@ else
 		# Enable DEP
 		BASIC_LDFLAGS += -Wl,--nxcompat
 		# Enable ASLR (unless debugging)
+ifndef DEBUG
 		ifneq (,$(findstring -O,$(CFLAGS)))
 			BASIC_LDFLAGS += -Wl,--dynamicbase
 		endif
+endif
 		ifeq (MINGW32,$(MSYSTEM))
 			prefix = /mingw32
 			BASIC_LDFLAGS += -Wl,--pic-executable,-e,_mainCRTStartup
