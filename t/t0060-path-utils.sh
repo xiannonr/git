@@ -349,4 +349,27 @@ test_submodule_relative_url "(null)" "ssh://hostname:22/repo" "../subrepo" "ssh:
 test_submodule_relative_url "(null)" "user@host:path/to/repo" "../subrepo" "user@host:path/to/subrepo"
 test_submodule_relative_url "(null)" "user@host:repo" "../subrepo" "user@host:subrepo"
 
+test_expect_success MINGW 'mingw_pathconv()' '
+	test-path-utils mingw_pathconv <<-\EOF &&
+	\\?\C:\git\abc;C:/git///abc
+	\\?\C:\;C:/git/abc/../../
+	\\?\C:\;C:/git/abc/../..
+	\\?\C:\;C:\\.
+	\\?\C:\;C:\\..
+	\\?\C:\a1;C:\\/\\../a1
+	\\?\C:\..a1\;C:\\/\\..a1/
+	\\server\share;//server\share
+	\\server\share;//server/./share
+	\\server\share;//server/../share
+	EOF
+	drive="$(pwd)" &&
+	case "$drive" in
+	[A-Za-z]:*)
+		test-path-utils mingw_pathconv <<-EOF
+		\\\\?\\${drive%%:*}:\\absolute\\wo\\drive;/absolute/wo/drive
+		EOF
+		;;
+	esac
+'
+
 test_done

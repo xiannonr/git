@@ -170,6 +170,37 @@ static struct test_data dirname_data[] = {
 	{ NULL,              NULL     }
 };
 
+static int test_mingw_pathconv(void)
+{
+#ifndef __WIN32__
+	die("test_mingw_pathconv only supported on Windows");
+#else
+	struct strbuf buf = STRBUF_INIT;
+	wchar_t out[MAX_LONG_PATH], expect[MAX_LONG_PATH];
+
+	while (!strbuf_getline(&buf, stdin)) {
+		char *semicolon = strchr(buf.buf, ';');
+		if (!buf.len)
+			continue;
+		if (!semicolon)
+			die("Missing separator: '%s'", buf.buf);
+		if (xutftowcsn(expect, buf.buf,
+			       MAX_LONG_PATH, semicolon - buf.buf) < 0)
+			die("Could not convert '%s' to UTF-16", buf.buf);
+		if (mingw_pathconv(semicolon + 1, out) < 0)
+			die("Could not convert '%s' to UTF-16", semicolon + 1);
+		if (wcscmp(out, expect))
+			die("'%s' => '%S' (expected '%S')",
+			    buf.buf, out, expect);
+		else
+			printf("'%s' => '%S' as expected\n",
+			       semicolon + 1, out);
+	}
+
+	return 0;
+#endif
+}
+
 int cmd_main(int argc, const char **argv)
 {
 	if (argc == 3 && !strcmp(argv[1], "normalize_path_copy")) {
@@ -269,6 +300,9 @@ int cmd_main(int argc, const char **argv)
 
 	if (argc == 2 && !strcmp(argv[1], "dirname"))
 		return test_function(dirname_data, posix_dirname, argv[1]);
+
+	if (argc == 2 && !strcmp(argv[1], "mingw_pathconv"))
+		return test_mingw_pathconv();
 
 	fprintf(stderr, "%s: unknown function name: %s\n", argv[0],
 		argv[1] ? argv[1] : "(there was none)");
