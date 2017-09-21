@@ -259,7 +259,13 @@ int mingw_core_config(const char *var, const char *value, void *cb)
 	}
 
 	if (!strcmp(var, "core.longpaths")) {
-		core_long_paths = git_config_bool(var, value);
+		core_long_paths = git_config_maybe_bool(var, value);
+		if (core_long_paths < 0) {
+			if (value && !strcmp(value, "quick"))
+				core_long_paths = 2;
+			else
+				die(_("core.longpaths='%s' is invalid"), value);
+		}
 		return 0;
 	}
 
@@ -672,6 +678,7 @@ int mingw_access(const char *filename, int mode)
 }
 
 /* cached length of current directory for handle_long_path */
+static wchar_t current_directory[MAX_LONG_PATH];
 static int current_directory_len = 0;
 
 int mingw_chdir(const char *dirname)
@@ -700,7 +707,8 @@ int mingw_chdir(const char *dirname)
 	}
 
 	result = _wchdir(normalize_ntpath(wdirname));
-	current_directory_len = GetCurrentDirectoryW(0, NULL);
+	current_directory_len =
+		GetCurrentDirectoryW(MAX_LONG_PATH, current_directory);
 	return result;
 }
 
@@ -3359,7 +3367,8 @@ int msc_startup(int argc, wchar_t **w_argv, wchar_t **w_env)
 	winansi_init();
 
 	/* init length of current directory for handle_long_path */
-	current_directory_len = GetCurrentDirectoryW(0, NULL);
+	current_directory_len =
+		GetCurrentDirectoryW(MAX_LONG_PATH, current_directory);
 
 	/* invoke the real main() using our utf8 version of argv. */
 	exit_status = msc_main(argc, my_utf8_argv);
@@ -3452,7 +3461,8 @@ void mingw_startup(void)
 	winansi_init();
 
 	/* init length of current directory for handle_long_path */
-	current_directory_len = GetCurrentDirectoryW(0, NULL);
+	current_directory_len =
+		GetCurrentDirectoryW(MAX_LONG_PATH, current_directory);
 }
 
 #endif
@@ -3482,4 +3492,275 @@ const char *program_data_config(void)
 		initialized = 1;
 	}
 	return *path.buf ? path.buf : NULL;
+}
+
+/* Quick long-path conversion */
+
+static inline int wisdirsep(wchar_t w)
+{
+	return w == L'\\' || w == L'/';
+}
+
+/*
+ * This function normalizes the remainder of paths, after the \\?\ prefix
+ * and the drive prefix or the UNC host part.
+ *
+ * It normalizes . and .. accordingly. To prevent from overshooting when
+ * looking for the parent directory, the `ceiling` parameter defines the
+ * offset of the first component, or negative if the ceiling is still to be
+ * determined: -1 if the next seen dir separator defines the ceiling, -2 if
+ * the dir separator after the next one should define the ceiling.
+ */
+static int pathconv_rest(wchar_t *result, int offset, const char *path,
+		int ceiling)
+{
+	wchar_t *p, *q, *slash;
+
+	if (!MultiByteToWideChar(CP_UTF8, 0, path, -1,
+				result + offset, MAX_LONG_PATH - offset)) {
+		errno = ENAMETOOLONG;
+		return -1;
+	}
+
+	slash = result + offset - 1;
+
+	/* normalize ., .. and / */
+	for (p = result + offset, q = p; *p; p++)
+		if (wisdirsep(*p)) {
+			/* beginning of a UNC path? */
+			if (p == result && wisdirsep(p[1])) {
+				*(q++) = L'\\';
+				p++;
+			}
+			*(q++) = L'\\';
+			/* condense runs of slashes */
+			while (wisdirsep(p[1]))
+				p++;
+			slash = p;
+			if (ceiling < 0 && !(++ceiling))
+				ceiling = q - result;
+		} else if (*p == L'.' && slash + 1 == p) {
+			/* single . means: same directory */
+			if (wisdirsep(p[1]))
+				slash = ++p;
+			else if (!p[1])
+				q = slash;
+			/* .. means: parent directory */
+			else if (p[1] == L'.' && (!p[2] || wisdirsep(p[2]))) {
+				unsigned int i = q - result;
+
+				/* search for parent directory */
+				while (--i > (unsigned int)ceiling) {
+					if (wisdirsep(result[i - 1])) {
+						q = result + i;
+						break;
+					}
+				}
+				if (i <= ceiling)
+					q = result + ceiling;
+
+				p++;
+				if (p[1])
+					slash = ++p;
+			} else
+				*(q++) = *p;
+		} else
+			*(q++) = *p;
+
+	/* Do not strip dir separator e.g. off of C:\ */
+	if (q - result < ceiling)
+		q = result + ceiling;
+
+	*q = L'\0';
+
+	return q - result;
+}
+
+#undef USE_PSEUDO_ROOT
+#undef HANDLE_SLASH_DRIVE_SLASH_PATH
+#undef HANDLE_SLASH_TMP
+
+/*
+ * Converts a UTF-8 path into a long \\?\-prefixed path (except if the result
+ * is NUL).
+ *
+ * Does *not* validate the path components, but resolves . and .. components.
+ *
+ * Expects the `result` parameter to point to a buffer of length MAX_LONG_PATH.
+ */
+int mingw_pathconv(const char *path, wchar_t *result)
+{
+#ifdef USE_PSEUDO_ROOT
+	static wchar_t pseudo_root[PATH_MAX];
+	static int pseudo_root_len;
+#endif
+
+	if (!path) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	if (path[0] != '/') {
+		/* regular absolute path with drive prefix */
+		if (isalpha(path[0]) && path[1] == ':') {
+			wcscpy(result, L"\\\\?\\");
+			if (!is_dir_sep(path[2])) {
+				/* We do not handle drive-relative paths */
+				errno = EINVAL;
+				return -1;
+			}
+			return pathconv_rest(result, 4, path, -1);
+		}
+
+		/* relative path */
+		if (path[0] != '\\') {
+			DWORD len;
+
+			/* NUL is special */
+			if (!strcasecmp(path, "NUL"))
+				return pathconv_rest(result, 0, path, 0);
+
+			wcscpy(result, L"\\\\?\\");
+			if (current_directory_len + 6 >= MAX_LONG_PATH) {
+				errno = ENAMETOOLONG;
+				return -1;
+			}
+			if (!wcsncmp(current_directory, L"\\\\?\\", 4)) {
+				/* cwd already has \\?\ prefix */
+				wcscpy(result + 4, current_directory + 4);
+				len = current_directory_len;
+			} else {
+				wcscpy(result + 4, current_directory);
+				len = current_directory_len + 4;
+			}
+			if (len < 6 || !iswalpha(result[4]) ||
+					result[5] != L':') {
+				fprintf(stderr, "cwd lacks drive\n");
+				errno = EINVAL;
+				return -1;
+			}
+			result[len] = L'\\';
+			return pathconv_rest(result, len + 1, path, 7);
+		}
+
+		/* UNC path */
+		if (path[1] == '\\')
+			return pathconv_rest(result, 0, path, -2);
+
+		/* absolute path missing drive prefix */
+#ifndef USE_PSEUDO_ROOT
+absolute_path_wo_drive:
+#endif
+		wcscpy(result, L"\\\\?\\");
+		if (!wcsncmp(current_directory, L"\\\\?\\", 4)) {
+			result[4] = current_directory[4];
+			result[5] = current_directory[5];
+		} else {
+			result[4] = current_directory[0];
+			result[5] = current_directory[1];
+		}
+		if (!iswalpha(result[4]) || result[5] != L':') {
+			fprintf(stderr, "Current directory lacks drive\n");
+			errno = EINVAL;
+			return -1;
+		}
+		return pathconv_rest(result, 6, path, 7);
+	}
+
+	/* UNC path with forward slashes */
+	if (path[1] == '/')
+		return pathconv_rest(result, 0, path, -2);
+
+#ifdef HANDLE_SLASH_DRIVE_SLASH_PATH
+	/* MINGW-style /<drive>/<path> */
+	if (isalpha(path[1]) && path[2] == '/') {
+		wcscpy(result, L"\\\\?\\");
+		result[4] = path[1];
+		result[5] = ':';
+		return pathconv_rest(result, 6, path + 2, 7);
+	}
+#endif
+
+#ifdef HANDLE_SLASH_TMP
+	/* /tmp/ is mapped to %TEMP% */
+	if (!_strnicmp(path + 1, "tmp/", 4)) {
+		wchar_t *temp = _wgetenv(L"TEMP");
+		size_t len = wcslen(temp);
+
+		if (!iswalpha(temp[0]) || temp[1] != L':') {
+			fprintf(stderr, "TEMP lacks drive: '%S'\n", temp);
+			errno = EINVAL;
+			return -1;
+		}
+		if (len + 6 >= MAX_LONG_PATH) {
+			errno = ENAMETOOLONG;
+			return -1;
+		}
+		wcscpy(result, L"\\\\?\\");
+		wcscpy(result + 4, temp);
+		if (result[len + 3] != L'\\')
+			result[len++ + 4] = L'\\';
+		for (path += 5; is_dir_sep(*path); path++)
+			; /* strip dir separators */
+		return pathconv_rest(result, len + 4, path + 5, len + 4);
+	}
+#endif
+
+	if (!strcmp(path + 1, "dev/null"))
+		return pathconv_rest(result, 0, "NUL", 0);
+
+#ifndef USE_PSEUDO_ROOT
+	goto absolute_path_wo_drive;
+#else
+	if (!*pseudo_root) {
+		wchar_t *exec_path = _wpgmptr;
+		size_t len = wcslen(exec_path);
+
+		/* skip \\?\ prefix, if any */
+		if (!wcsncmp(exec_path, L"\\\\?\\", 4)) {
+			exec_path += 4;
+			len -= 4;
+		}
+
+		if (len > 5 && !_wcsnicmp(exec_path + len - 4, L".exe", 4)) {
+			len -= 3;
+			while (--len && !wisdirsep(exec_path[len]))
+				; /* do nothing */
+			if (len > 4 && wisdirsep(exec_path[len - 4]) &&
+			    !_wcsnicmp(exec_path + len - 3, L"bin", 3)) {
+				len -= 4;
+				if (len > 8 && wisdirsep(exec_path[len - 8]) &&
+				    iswdigit(exec_path[len - 1]) &&
+				    iswdigit(exec_path[len - 2]) &&
+				    !_wcsnicmp(exec_path + len - 7,
+					       L"mingw", 5))
+					len -= 8;
+			}
+		}
+
+		if (len > MAX_LONG_PATH)
+			len = MAX_LONG_PATH;
+		else if (!len) {
+			exec_path = L"C:\\";
+			len = 2;
+		}
+
+		wcscpy(pseudo_root, L"\\\\?\\");
+		pseudo_root_len = len + 4;
+		if (pseudo_root_len >= MAX_LONG_PATH) {
+			errno = ENAMETOOLONG;
+			return -1;
+		}
+		wcsncpy(pseudo_root + 4, exec_path, len);
+		if (pseudo_root_len + 1 < MAX_LONG_PATH &&
+				pseudo_root[pseudo_root_len - 1] != L'\\')
+			pseudo_root[pseudo_root_len++] = L'\\';
+	}
+
+	for (path++; is_dir_sep(*path); path++)
+		; /* strip dir separators */
+	memcpy(result, pseudo_root, pseudo_root_len * sizeof(wchar_t));
+	return pathconv_rest(result, pseudo_root_len, path + 1,
+			     pseudo_root_len);
+#endif
 }

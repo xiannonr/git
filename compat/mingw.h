@@ -651,8 +651,11 @@ static inline int xutftowcs_path(wchar_t *wcs, const char *utf)
  * long. The 'core.longpaths' git-config option controls whether the path
  * is only checked or expanded to a long path.
  */
+extern int mingw_pathconv(const char *path, wchar_t *result);
 static inline int xutftowcs_long_path(wchar_t *wcs, const char *utf)
 {
+	if (core_long_paths == 2) /* core.longpats = quick */
+		return mingw_pathconv(utf, wcs);
 	return xutftowcs_path_ex(wcs, utf, MAX_LONG_PATH, -1, MAX_PATH,
 			core_long_paths);
 }
