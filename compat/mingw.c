@@ -265,7 +265,7 @@ int mingw_core_config(const char *var, const char *value, void *cb)
 
 	if (!strcmp(var, "core.unsetenvvars")) {
 		free(unset_environment_variables);
-		unset_environment_variables = xstrdup(value);
+		unset_environment_variables = xstrdup_or_null(value);
 		return 0;
 	}
 
