@@ -1,5 +1,6 @@
 #include "cache.h"
 #include "string-list.h"
+#include "trace.h"
 
 /*
  * A "string_list_each_func_t" function that normalizes an entry from
@@ -201,6 +202,25 @@ static int test_mingw_pathconv(void)
 #endif
 }
 
+static int longpaths_stat_perf(const char *path)
+{
+	int i, j;
+	struct stat st;
+	uint64_t start, stop;
+
+	for (i = 0; i < 9; i++) {
+		core_long_paths = (i % 3);
+		start = getnanotime();
+		for (j = 0; j < 300000; j++)
+			if (stat(path, &st))
+				die_errno("Could not stat '%s'", path);
+		stop = getnanotime();
+		fprintf(stderr, "%d: %"PRIuMAX"\n",
+			i, (uintmax_t)(stop - start));
+	}
+	return 0;
+}
+
 int cmd_main(int argc, const char **argv)
 {
 	if (argc == 3 && !strcmp(argv[1], "normalize_path_copy")) {
@@ -303,6 +323,9 @@ int cmd_main(int argc, const char **argv)
 
 	if (argc == 2 && !strcmp(argv[1], "mingw_pathconv"))
 		return test_mingw_pathconv();
+
+	if (argc == 3 && !strcmp(argv[1], "longpaths-stat-perf"))
+		return longpaths_stat_perf(argv[2]);
 
 	fprintf(stderr, "%s: unknown function name: %s\n", argv[0],
 		argv[1] ? argv[1] : "(there was none)");
