@@ -530,6 +530,12 @@ extern const char *program_data_config(void);
  */
 #define MAX_LONG_PATH 4096
 
+/*
+ * We ship with a manifest that says that Git for Windows is long paths-aware.
+ */
+#undef MAX_PATH
+#define MAX_PATH MAX_LONG_PATH
+
 /**
  * Handles paths that would exceed the MAX_PATH limit of Windows Unicode APIs.
  *
