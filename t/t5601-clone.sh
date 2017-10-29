@@ -391,6 +391,7 @@ test_expect_success 'simple does not support port' '
 
 test_expect_success 'uplink is treated as simple' '
 	copy_ssh_wrapper_as "$TRASH_DIRECTORY/uplink" &&
+	test_when_finished "rm \"$TRASH_DIRECTORY/uplink$X\"" &&
 	test_must_fail git clone "[myhost:123]:src" ssh-bracket-clone-uplink &&
 	git clone "myhost:src" ssh-clone-uplink &&
 	expect_ssh myhost src
