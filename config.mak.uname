@@ -635,6 +635,15 @@ ifneq (,$(findstring MINGW,$(uname_S)))
 	NATIVE_CRLF = YesPlease
 	X = .exe
 	SPARSE_FLAGS = -Wno-one-bit-signed-bitfield
+ifneq (,$(DEBUG_FILE_LOCKS))
+	BACKTRACE_SOURCES := $(patsubst %,compat/libbacktrace/%,atomic.c \
+		alloc.c dwarf.c state.c fileline.c posix.c pecoff.c sort.c \
+		read.c)
+	BACKTRACE_OBJS := $(patsubst %.c,%.o,$(BACKTRACE_SOURCES))
+	COMPAT_OBJS += $(BACKTRACE_OBJS)
+$(BACKTRACE_OBJS): EXTRA_CPPFLAGS = -I compat/libbacktrace
+	COMPAT_CFLAGS += -DDEBUG_FILE_LOCKS
+endif
 ifneq (,$(wildcard ../THIS_IS_MSYSGIT))
 	htmldir = share/doc/git/$(firstword $(subst -, ,$(GIT_VERSION)))/html
 	prefix =
@@ -652,8 +661,10 @@ else
 		# Enable DEP
 		BASIC_LDFLAGS += -Wl,--nxcompat
 		# Enable ASLR (unless debugging)
+		ifeq (,$(DEBUG_FILE_LOCKS))
 		ifneq (,$(findstring -O,$(CFLAGS)))
 			BASIC_LDFLAGS += -Wl,--dynamicbase
+		endif
 		endif
 		ifeq (MINGW32,$(MSYSTEM))
 			prefix = /mingw32

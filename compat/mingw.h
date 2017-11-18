@@ -245,6 +245,14 @@ int mingw_fflush(FILE *stream);
 ssize_t mingw_write(int fd, const void *buf, size_t len);
 #define write mingw_write
 
+#ifdef DEBUG_FILE_LOCKS
+int mingw_close(int fd);
+#define close mingw_close
+
+int mingw_fclose(FILE *stream);
+#define fclose mingw_fclose
+#endif
+
 int mingw_access(const char *filename, int mode);
 #undef access
 #define access mingw_access
