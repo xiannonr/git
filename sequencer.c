@@ -1305,6 +1305,7 @@ enum todo_command {
 	TODO_EXEC,
 	TODO_LABEL,
 	TODO_RESET,
+	TODO_MERGE,
 	/* commands that do nothing but are counted for reporting progress */
 	TODO_NOOP,
 	TODO_DROP,
@@ -1325,6 +1326,7 @@ static struct {
 	{ 'x', "exec" },
 	{ 'l', "label" },
 	{ 't', "reset" },
+	{ 'm', "merge" },
 	{ 0,   "noop" },
 	{ 'd', "drop" },
 	{ 0,   NULL }
@@ -1752,9 +1754,14 @@ static int read_and_refresh_cache(struct replay_opts *opts)
 	return 0;
 }
 
+enum todo_item_flags {
+	TODO_EDIT_MERGE_MSG = 1
+};
+
 struct todo_item {
 	enum todo_command command;
 	struct commit *commit;
+	unsigned int flags;
 	const char *arg;
 	int arg_len;
 	size_t offset_in_buf;
@@ -1788,6 +1795,8 @@ static int parse_insn_line(struct todo_item *item, const char *bol, char *eol)
 	struct object_id commit_oid;
 	char *end_of_object_name;
 	int i, saved, status, padding;
+
+	item->flags = 0;
 
 	/* left-trim */
 	bol += strspn(bol, " \t");
@@ -1836,6 +1845,21 @@ static int parse_insn_line(struct todo_item *item, const char *bol, char *eol)
 		item->arg = bol;
 		item->arg_len = (int)(eol - bol);
 		return 0;
+	}
+
+	if (item->command == TODO_MERGE) {
+		if (skip_prefix(bol, "-C", &bol))
+			bol += strspn(bol, " \t");
+		else if (skip_prefix(bol, "-c", &bol)) {
+			bol += strspn(bol, " \t");
+			item->flags |= TODO_EDIT_MERGE_MSG;
+		} else {
+			item->flags |= TODO_EDIT_MERGE_MSG;
+			item->commit = NULL;
+			item->arg = bol;
+			item->arg_len = (int)(eol - bol);
+			return 0;
+		}
 	}
 
 	end_of_object_name = (char *) bol + strcspn(bol, " \t\n");
@@ -2632,6 +2656,141 @@ static int do_reset(const char *name, int len, struct replay_opts *opts)
 	return ret;
 }
 
+static int do_merge(struct commit *commit, const char *arg, int arg_len,
+		    int flags, struct replay_opts *opts)
+{
+	int run_commit_flags = (flags & TODO_EDIT_MERGE_MSG) ?
+		EDIT_MSG | VERIFY_MSG : 0;
+	struct strbuf ref_name = STRBUF_INIT;
+	struct commit *head_commit, *merge_commit, *i;
+	struct commit_list *bases, *j, *reversed = NULL;
+	struct merge_options o;
+	int merge_arg_len, oneline_offset, ret;
+	static struct lock_file lock;
+	const char *p;
+
+	oneline_offset = arg_len;
+	merge_arg_len = strcspn(arg, " \t\n");
+	p = arg + merge_arg_len;
+	p += strspn(p, " \t\n");
+	if (*p == '#' && (!p[1] || isspace(p[1]))) {
+		p += 1 + strspn(p + 1, " \t\n");
+		oneline_offset = p - arg;
+	} else if (p - arg < arg_len)
+		BUG("octopus merges are not supported yet: '%s'", p);
+
+	strbuf_addf(&ref_name, "refs/rewritten/%.*s", merge_arg_len, arg);
+	merge_commit = lookup_commit_reference_by_name(ref_name.buf);
+	if (!merge_commit) {
+		/* fall back to non-rewritten ref or commit */
+		strbuf_splice(&ref_name, 0, strlen("refs/rewritten/"), "", 0);
+		merge_commit = lookup_commit_reference_by_name(ref_name.buf);
+	}
+	if (!merge_commit) {
+		error(_("could not resolve '%s'"), ref_name.buf);
+		strbuf_release(&ref_name);
+		return -1;
+	}
+
+	if (hold_locked_index(&lock, LOCK_REPORT_ON_ERROR) < 0)
+		return -1;
+
+	head_commit = lookup_commit_reference_by_name("HEAD");
+	if (!head_commit) {
+		rollback_lock_file(&lock);
+		return error(_("cannot merge without a current revision"));
+	}
+
+	if (commit) {
+		const char *message = get_commit_buffer(commit, NULL);
+		const char *body;
+		int len;
+
+		if (!message) {
+			rollback_lock_file(&lock);
+			return error(_("could not get commit message of '%s'"),
+				     oid_to_hex(&commit->object.oid));
+		}
+		write_author_script(message);
+		find_commit_subject(message, &body);
+		len = strlen(body);
+		if (write_message(body, len, git_path_merge_msg(), 0) < 0) {
+			error_errno(_("could not write '%s'"),
+				    git_path_merge_msg());
+			unuse_commit_buffer(commit, message);
+			rollback_lock_file(&lock);
+			return -1;
+		}
+		unuse_commit_buffer(commit, message);
+	} else {
+		struct strbuf buf = STRBUF_INIT;
+		int len;
+
+		strbuf_addf(&buf, "author %s", git_author_info(0));
+		write_author_script(buf.buf);
+		strbuf_reset(&buf);
+
+		if (oneline_offset < arg_len) {
+			p = arg + oneline_offset;
+			len = arg_len - oneline_offset;
+		} else {
+			strbuf_addf(&buf, "Merge branch '%.*s'",
+				    merge_arg_len, arg);
+			p = buf.buf;
+			len = buf.len;
+		}
+
+		if (write_message(p, len, git_path_merge_msg(), 0) < 0) {
+			error_errno(_("could not write '%s'"),
+				    git_path_merge_msg());
+			strbuf_release(&buf);
+			rollback_lock_file(&lock);
+			return -1;
+		}
+		strbuf_release(&buf);
+	}
+
+	write_message(oid_to_hex(&merge_commit->object.oid), GIT_SHA1_HEXSZ,
+		      git_path_merge_head(), 0);
+	write_message("no-ff", 5, git_path_merge_mode(), 0);
+
+	bases = get_merge_bases(head_commit, merge_commit);
+	for (j = bases; j; j = j->next)
+		commit_list_insert(j->item, &reversed);
+	free_commit_list(bases);
+
+	read_cache();
+	init_merge_options(&o);
+	o.branch1 = "HEAD";
+	o.branch2 = ref_name.buf;
+	o.buffer_output = 2;
+
+	ret = merge_recursive(&o, head_commit, merge_commit, reversed, &i);
+	if (!ret)
+		rerere(opts->allow_rerere_auto);
+	if (ret <= 0)
+		fputs(o.obuf.buf, stdout);
+	strbuf_release(&o.obuf);
+	if (ret < 0) {
+		strbuf_release(&ref_name);
+		rollback_lock_file(&lock);
+		return error(_("conflicts while merging '%.*s'"),
+			     merge_arg_len, arg);
+	}
+
+	if (active_cache_changed &&
+	    write_locked_index(&the_index, &lock, COMMIT_LOCK)) {
+		strbuf_release(&ref_name);
+		return error(_("merge: Unable to write new index file"));
+	}
+	rollback_lock_file(&lock);
+
+	ret = run_git_commit(git_path_merge_msg(), opts, run_commit_flags);
+	strbuf_release(&ref_name);
+
+	return ret;
+}
+
 static int is_final_fixup(struct todo_list *todo_list)
 {
 	int i = todo_list->current;
@@ -2820,6 +2979,9 @@ static int pick_commits(struct todo_list *todo_list, struct replay_opts *opts)
 			res = do_label(item->arg, item->arg_len);
 		else if (item->command == TODO_RESET)
 			res = do_reset(item->arg, item->arg_len, opts);
+		else if (item->command == TODO_MERGE)
+			res = do_merge(item->commit, item->arg, item->arg_len,
+				       item->flags, opts);
 		else if (!is_noop(item->command))
 			return error(_("unknown command %d"), item->command);
 
@@ -3302,8 +3464,16 @@ int transform_todos(unsigned flags)
 					  short_commit_name(item->commit) :
 					  oid_to_hex(&item->commit->object.oid);
 
+			if (item->command == TODO_MERGE) {
+				if (item->flags & TODO_EDIT_MERGE_MSG)
+					strbuf_addstr(&buf, " -c");
+				else
+					strbuf_addstr(&buf, " -C");
+			}
+
 			strbuf_addf(&buf, " %s", oid);
 		}
+
 		/* add all the rest */
 		if (!item->arg_len)
 			strbuf_addch(&buf, '\n');
