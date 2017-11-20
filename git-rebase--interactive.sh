@@ -165,6 +165,7 @@ d, drop = remove commit
 l, label = label current HEAD with a name
 t, reset = reset HEAD to a label
 b, bud = reset HEAD to the revision labeled 'onto'
+m, merge = create a merge commit using a given commit's message
 
 These lines can be re-ordered; they are executed from top to bottom.
 " | git stripspace --comment-lines >>"$todo"
