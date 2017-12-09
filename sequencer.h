@@ -49,6 +49,14 @@ int sequencer_remove_state(struct replay_opts *opts);
 #define TODO_LIST_SHORTEN_IDS (1U << 1)
 #define TODO_LIST_ABBREVIATE_CMDS (1U << 2)
 #define TODO_LIST_RECREATE_MERGES (1U << 3)
+/*
+ * When recreating merges, commits that do have the base commit as ancestor
+ * ("cousins") are rebased onto the new base by default. If those commits
+ * should keep their original branch point, this flag needs to be passed.
+ *
+ * This flag only makes sense when <base> and <onto> are different.
+ */
+#define TODO_LIST_NO_REBASE_COUSINS (1U << 4)
 int sequencer_make_script(FILE *out, int argc, const char **argv,
 			  unsigned flags);
 

@@ -901,6 +901,7 @@ if test t != "$preserve_merges"
 then
 	git rebase--helper --make-script ${keep_empty:+--keep-empty} \
 		${recreate_merges:+--recreate-merges} \
+		${no_rebase_cousins:+--no-rebase-cousins} \
 		$revisions ${restrict_revision+^$restrict_revision} >"$todo" ||
 	die "$(gettext "Could not generate todo list")"
 else
