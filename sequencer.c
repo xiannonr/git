@@ -3061,6 +3061,9 @@ reschedule:
 				       item->flags, opts);
 			if (res < 0)
 				goto reschedule;
+			if (item->commit)
+				record_in_rewritten(&item->commit->object.oid,
+						    peek_command(todo_list, 1));
 		} else if (!is_noop(item->command))
 			return error(_("unknown command %d"), item->command);
 
