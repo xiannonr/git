@@ -2452,11 +2452,14 @@ static int pick_commits(struct todo_list *todo_list, struct replay_opts *opts)
 		else if (item->command == TODO_RESET)
 			res = do_reset(item->arg, item->arg_len, opts);
 		else if (item->command == TODO_MERGE ||
-			 item->command == TODO_MERGE_AND_EDIT)
+			 item->command == TODO_MERGE_AND_EDIT) {
 			res = do_merge(item->commit, item->arg, item->arg_len,
 				       item->command == TODO_MERGE_AND_EDIT ?
 				       EDIT_MSG | VERIFY_MSG : 0, opts);
-		else if (!is_noop(item->command))
+			if (item->commit)
+				record_in_rewritten(&item->commit->object.oid,
+						    peek_command(todo_list, 1));
+		} else if (!is_noop(item->command))
 			return error(_("unknown command %d"), item->command);
 
 		todo_list->current++;
