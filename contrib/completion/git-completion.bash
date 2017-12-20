@@ -2182,7 +2182,7 @@ _git_config ()
 		return
 		;;
 	branch.*.rebase)
-		__gitcomp "false true preserve interactive"
+		__gitcomp "false true recreate preserve interactive"
 		return
 		;;
 	remote.pushdefault)
