@@ -2665,7 +2665,7 @@ static int do_merge(struct commit *commit, const char *arg, int arg_len,
 	struct commit *head_commit, *merge_commit, *i;
 	struct commit_list *bases, *j, *reversed = NULL;
 	struct merge_options o;
-	int merge_arg_len, oneline_offset, ret;
+	int merge_arg_len, oneline_offset, can_fast_forward, ret;
 	static struct lock_file lock;
 	const char *p;
 
@@ -2748,6 +2748,37 @@ static int do_merge(struct commit *commit, const char *arg, int arg_len,
 			return -1;
 		}
 		strbuf_release(&buf);
+	}
+
+	/*
+	 * If HEAD is not identical to the first parent of the original merge
+	 * commit, we cannot fast-forward.
+	 */
+	can_fast_forward = opts->allow_ff && commit && commit->parents &&
+		!oidcmp(&commit->parents->item->object.oid,
+			&head_commit->object.oid);
+
+	/*
+	 * If the merge head is different from the original one, we cannot
+	 * fast-forward.
+	 */
+	if (can_fast_forward) {
+		struct commit_list *second_parent = commit->parents->next;
+
+		if (second_parent && !second_parent->next &&
+		    oidcmp(&merge_commit->object.oid,
+			   &second_parent->item->object.oid))
+			can_fast_forward = 0;
+	}
+
+	if (can_fast_forward && commit->parents->next &&
+	    !commit->parents->next->next &&
+	    !oidcmp(&commit->parents->next->item->object.oid,
+		    &merge_commit->object.oid)) {
+		strbuf_release(&ref_name);
+		rollback_lock_file(&lock);
+		return fast_forward_to(&commit->object.oid,
+				       &head_commit->object.oid, 0, opts);
 	}
 
 	write_message(oid_to_hex(&merge_commit->object.oid), GIT_SHA1_HEXSZ,
