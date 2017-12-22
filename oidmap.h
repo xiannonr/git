@@ -21,7 +21,11 @@ struct oidmap {
 	struct hashmap map;
 };
 
-#define OIDMAP_INIT { { NULL } }
+/*
+ * This macro initializes the data structure only incompletely, just enough
+ * to call oidmap_get() on an empty map. Use oidmap_init() instead.
+ */
+#define OIDMAP_INIT_INCOMPLETELY { { NULL } }
 
 /*
  * Initializes an oidmap structure.

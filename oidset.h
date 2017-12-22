@@ -22,7 +22,12 @@ struct oidset {
 	struct oidmap map;
 };
 
-#define OIDSET_INIT { OIDMAP_INIT }
+/*
+ * It is okay to initialize the map incompletely here because oidset_insert()
+ * will call oidset_init() (which will call oidmap_init()), and
+ * oidset_contains() works as intended even before oidset_init() was called.
+ */
+#define OIDSET_INIT { OIDMAP_INIT_INCOMPLETELY }
 
 /**
  * Returns true iff `set` contains `oid`.
