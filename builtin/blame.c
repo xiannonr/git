@@ -323,6 +323,7 @@ static const char *format_time(timestamp_t time, const char *tz_str,
 #define OUTPUT_SHOW_EMAIL	0400
 #define OUTPUT_LINE_PORCELAIN 	01000
 #define OUTPUT_COLOR_LINE	02000
+#define OUTPUT_COLOR_FIELDS	04000
 
 static void emit_porcelain_details(struct blame_origin *suspect, int repeat)
 {
@@ -370,7 +371,56 @@ static void emit_porcelain(struct blame_scoreboard *sb, struct blame_entry *ent,
 		putchar('\n');
 }
 
-static void emit_other(struct blame_scoreboard *sb, struct blame_entry *ent, int opt)
+static int had_same_field_previously(int opt, int field,
+			  struct blame_entry *ent,
+			  struct blame_entry *prev)
+{
+	struct commit_info ci, prev_ci;
+
+	switch (field) {
+	case OUTPUT_SHOW_SCORE:
+		return ent->score == prev->score;
+	case OUTPUT_SHOW_NAME:
+		return prev->suspect &&
+			!strcmp(ent->suspect->path, prev->suspect->path);
+	case OUTPUT_SHOW_NUMBER:
+		return ent->s_lno == prev->s_lno + prev->num_lines - 1;
+
+	case OUTPUT_NO_AUTHOR:
+		get_commit_info(ent->suspect->commit, &ci, 1);
+		get_commit_info(prev->suspect->commit, &prev_ci, 1);
+		return ((opt & OUTPUT_SHOW_EMAIL) &&
+			!strcmp(ci.author_mail.buf, prev_ci.author_mail.buf)) ||
+			!strcmp(ci.author.buf, prev_ci.author.buf);
+	default:
+		BUG("unknown field");
+	}
+	return 0;
+}
+
+static void setup_field_color(int opt, int cnt, int field,
+			      struct blame_entry *ent,
+			      struct blame_entry *prev,
+			      const char **use_color,
+			      const char **reset_color)
+{
+	if (!(opt & OUTPUT_COLOR_FIELDS))
+		return;
+
+	if ((cnt > 0 ||
+	     (prev && had_same_field_previously(opt, field, ent, prev)))) {
+		*use_color = repeated_meta_color;
+		*reset_color = GIT_COLOR_RESET;
+	} else {
+		*use_color = "";
+		*reset_color = "";
+	}
+}
+
+static void emit_other(struct blame_scoreboard *sb,
+		       struct blame_entry *ent,
+		       struct blame_entry *prev,
+		       int opt)
 {
 	int cnt;
 	const char *cp;
@@ -414,18 +464,27 @@ static void emit_other(struct blame_scoreboard *sb, struct blame_entry *ent, int
 					   show_raw_time),
 			       ent->lno + 1 + cnt);
 		} else {
-			if (opt & OUTPUT_SHOW_SCORE)
+			if (opt & OUTPUT_SHOW_SCORE) {
+				setup_field_color(opt, cnt, OUTPUT_SHOW_SCORE,
+						  ent, prev, &color, &reset);
 				printf(" %s%*d %02d%s", color,
 				       max_score_digits, ent->score,
 				       ent->suspect->refcnt, reset);
-			if (opt & OUTPUT_SHOW_NAME)
+			}
+			if (opt & OUTPUT_SHOW_NAME) {
+				setup_field_color(opt, cnt, OUTPUT_SHOW_NAME,
+						   ent, prev, &color, &reset);
 				printf(" %s%-*.*s%s", color, longest_file,
 						      longest_file,
 						      suspect->path,
 						      reset);
-			if (opt & OUTPUT_SHOW_NUMBER)
+			}
+			if (opt & OUTPUT_SHOW_NUMBER) {
+				setup_field_color(opt, cnt, OUTPUT_SHOW_NUMBER,
+						  ent, prev, &color, &reset);
 				printf(" %s%*d%s", color, max_orig_digits,
 				       ent->s_lno + 1 + cnt, reset);
+			}
 			if (!(opt & OUTPUT_NO_AUTHOR)) {
 				const char *name;
 				int pad;
@@ -434,6 +493,8 @@ static void emit_other(struct blame_scoreboard *sb, struct blame_entry *ent, int
 				else
 					name = ci.author.buf;
 				pad = longest_author - utf8_strwidth(name);
+				setup_field_color(opt, cnt, OUTPUT_NO_AUTHOR,
+						  ent, prev, &color, &reset);
 				printf(" %s(%s%*s %10s%s", color,
 				       name, pad, "",
 				       format_time(ci.author_time,
@@ -459,7 +520,7 @@ static void emit_other(struct blame_scoreboard *sb, struct blame_entry *ent, int
 
 static void output(struct blame_scoreboard *sb, int option)
 {
-	struct blame_entry *ent;
+	struct blame_entry *ent, *prev = NULL;
 
 	if (option & OUTPUT_PORCELAIN) {
 		for (ent = sb->ent; ent; ent = ent->next) {
@@ -481,7 +542,8 @@ static void output(struct blame_scoreboard *sb, int option)
 		if (option & OUTPUT_PORCELAIN)
 			emit_porcelain(sb, ent, option);
 		else {
-			emit_other(sb, ent, option);
+			emit_other(sb, ent, prev, option);
+			prev = ent;
 		}
 	}
 }
@@ -699,6 +761,7 @@ int cmd_blame(int argc, const char **argv, const char *prefix)
 		OPT_BIT('e', "show-email", &output_option, N_("Show author email instead of name (Default: off)"), OUTPUT_SHOW_EMAIL),
 		OPT_BIT('w', NULL, &xdl_opts, N_("Ignore whitespace differences"), XDF_IGNORE_WHITESPACE),
 		OPT_BIT(0, "color-lines", &output_option, N_("color redundant metadata from previous line differently"), OUTPUT_COLOR_LINE),
+		OPT_BIT(0, "color-fields", &output_option, N_("color redundant metadata fields from previous line differently"), OUTPUT_COLOR_FIELDS),
 
 		/*
 		 * The following two options are parsed by parse_revision_opt()
@@ -756,6 +819,10 @@ parse_done:
 	xdl_opts |= revs.diffopt.xdl_opts & XDF_INDENT_HEURISTIC;
 	revs.diffopt.flags.follow_renames = 0;
 	argc = parse_options_end(&ctx);
+
+	if ((output_option & OUTPUT_COLOR_LINE) &&
+	    (output_option & OUTPUT_COLOR_FIELDS))
+		die(_("cannot ask for colored lines and fields at the same time"));
 
 	if (incremental || (output_option & OUTPUT_PORCELAIN)) {
 		if (show_progress > 0)
@@ -960,8 +1027,8 @@ parse_done:
 
 	if (!(output_option & OUTPUT_PORCELAIN)) {
 		find_alignment(&sb, &output_option);
-		if ((output_option & OUTPUT_COLOR_LINE) &&
-		    !repeated_meta_color)
+		if (!repeated_meta_color &&
+		    (output_option & (OUTPUT_COLOR_LINE | OUTPUT_COLOR_FIELDS)))
 			repeated_meta_color = GIT_COLOR_DARK;
 	}
 
