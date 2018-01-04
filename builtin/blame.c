@@ -24,6 +24,7 @@
 #include "dir.h"
 #include "progress.h"
 #include "blame.h"
+#include "string-list.h"
 
 static char blame_usage[] = N_("git blame [<options>] [<rev-opts>] [<rev>] [--] <file>");
 
@@ -324,6 +325,7 @@ static const char *format_time(timestamp_t time, const char *tz_str,
 #define OUTPUT_LINE_PORCELAIN 	01000
 #define OUTPUT_COLOR_LINE	02000
 #define OUTPUT_COLOR_FIELDS	04000
+#define OUTPUT_HEATED_LINES	010000
 
 static void emit_porcelain_details(struct blame_origin *suspect, int repeat)
 {
@@ -417,6 +419,61 @@ static void setup_field_color(int opt, int cnt, int field,
 	}
 }
 
+static struct color_field {
+	timestamp_t hop;
+	char col[COLOR_MAXLEN];
+} *colorfield;
+static int colorfield_nr, colorfield_alloc;
+
+static void parse_color_fields(const char *s)
+{
+	struct string_list l = STRING_LIST_INIT_DUP;
+	struct string_list_item *item;
+	enum { EXPECT_DATE, EXPECT_COLOR } next = EXPECT_COLOR;
+
+	/* Ideally this would be stripped and split at the same time? */
+	string_list_split(&l, s, ',', -1);
+	ALLOC_GROW(colorfield, colorfield_nr + 1, colorfield_alloc);
+
+	for_each_string_list_item(item, &l) {
+		switch (next) {
+		case EXPECT_DATE:
+			colorfield[colorfield_nr].hop = approxidate(item->string);
+			next = EXPECT_COLOR;
+			colorfield_nr++;
+			ALLOC_GROW(colorfield, colorfield_nr + 1, colorfield_alloc);
+			break;
+		case EXPECT_COLOR:
+			if (color_parse(item->string, colorfield[colorfield_nr].col))
+				die(_("expecting a color: %s"), item->string);
+			next = EXPECT_DATE;
+			break;
+		}
+	}
+
+	if (next == EXPECT_COLOR)
+		die (_("must end with a color"));
+
+	colorfield[colorfield_nr].hop = TIME_MAX;
+}
+
+static void setup_default_colorfield(void)
+{
+	parse_color_fields("blue,12 month ago,white,1 month ago,red");
+}
+
+static void determine_line_heat(struct blame_entry *ent, const char **dest_color)
+{
+	int i = 0;
+	struct commit_info ci;
+	get_commit_info(ent->suspect->commit, &ci, 1);
+
+	while (i < colorfield_nr && ci.author_time > colorfield[i].hop)
+		i++;
+
+	*dest_color = colorfield[i].col;
+}
+
 static void emit_other(struct blame_scoreboard *sb,
 		       struct blame_entry *ent,
 		       struct blame_entry *prev,
@@ -424,6 +481,7 @@ static void emit_other(struct blame_scoreboard *sb,
 {
 	int cnt;
 	const char *cp;
+	const char *heatcolor = NULL;
 	struct blame_origin *suspect = ent->suspect;
 	struct commit_info ci;
 	char hex[GIT_MAX_HEXSZ + 1];
@@ -433,6 +491,10 @@ static void emit_other(struct blame_scoreboard *sb,
 	oid_to_hex_r(hex, &suspect->commit->object.oid);
 
 	cp = blame_nth_line(sb, ent->lno);
+
+	if (opt & OUTPUT_HEATED_LINES)
+		determine_line_heat(ent, &heatcolor);
+
 	for (cnt = 0; cnt < ent->num_lines; cnt++) {
 		char ch;
 		int length = (opt & OUTPUT_LONG_OBJECT_NAME) ? GIT_SHA1_HEXSZ : abbrev;
@@ -488,6 +550,7 @@ static void emit_other(struct blame_scoreboard *sb,
 			if (!(opt & OUTPUT_NO_AUTHOR)) {
 				const char *name;
 				int pad;
+				int hcolor = opt & OUTPUT_HEATED_LINES;
 				if (opt & OUTPUT_SHOW_EMAIL)
 					name = ci.author_mail.buf;
 				else
@@ -495,7 +558,10 @@ static void emit_other(struct blame_scoreboard *sb,
 				pad = longest_author - utf8_strwidth(name);
 				setup_field_color(opt, cnt, OUTPUT_NO_AUTHOR,
 						  ent, prev, &color, &reset);
-				printf(" %s(%s%*s %10s%s", color,
+				if (hcolor)
+					reset = GIT_COLOR_RESET;
+				printf(" %s(%s%*s %10s%s",
+				       hcolor ? heatcolor : color,
 				       name, pad, "",
 				       format_time(ci.author_time,
 						   ci.author_tz.buf,
@@ -686,6 +752,10 @@ static int git_blame_config(const char *var, const char *value, void *cb)
 				value);
 		return 0;
 	}
+	if (!strcmp(var, "color.blame.highlightrecent")) {
+		parse_color_fields(value);
+		return 0;
+	}
 
 	if (git_diff_heuristic_config(var, value, cb) < 0)
 		return -1;
@@ -762,6 +832,7 @@ int cmd_blame(int argc, const char **argv, const char *prefix)
 		OPT_BIT('w', NULL, &xdl_opts, N_("Ignore whitespace differences"), XDF_IGNORE_WHITESPACE),
 		OPT_BIT(0, "color-lines", &output_option, N_("color redundant metadata from previous line differently"), OUTPUT_COLOR_LINE),
 		OPT_BIT(0, "color-fields", &output_option, N_("color redundant metadata fields from previous line differently"), OUTPUT_COLOR_FIELDS),
+		OPT_BIT(0, "heated-lines", &output_option, N_("color lines by age"), OUTPUT_HEATED_LINES),
 
 		/*
 		 * The following two options are parsed by parse_revision_opt()
@@ -786,6 +857,7 @@ int cmd_blame(int argc, const char **argv, const char *prefix)
 	unsigned int range_i;
 	long anchor;
 
+	setup_default_colorfield();
 	git_config(git_blame_config, &output_option);
 	init_revisions(&revs, NULL);
 	revs.date_mode = blame_date_mode;
