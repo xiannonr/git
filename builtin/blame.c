@@ -7,6 +7,7 @@
 
 #include "cache.h"
 #include "config.h"
+#include "color.h"
 #include "builtin.h"
 #include "commit.h"
 #include "diff.h"
@@ -46,6 +47,7 @@ static int xdl_opts;
 static int abbrev = -1;
 static int no_whole_file_rename;
 static int show_progress;
+static char *repeated_meta_color;
 
 static struct date_mode blame_date_mode = { DATE_ISO8601 };
 static size_t blame_date_width;
@@ -316,10 +318,11 @@ static const char *format_time(timestamp_t time, const char *tz_str,
 #define OUTPUT_PORCELAIN	010
 #define OUTPUT_SHOW_NAME	020
 #define OUTPUT_SHOW_NUMBER	040
-#define OUTPUT_SHOW_SCORE      0100
-#define OUTPUT_NO_AUTHOR       0200
+#define OUTPUT_SHOW_SCORE	0100
+#define OUTPUT_NO_AUTHOR	0200
 #define OUTPUT_SHOW_EMAIL	0400
-#define OUTPUT_LINE_PORCELAIN 01000
+#define OUTPUT_LINE_PORCELAIN 	01000
+#define OUTPUT_COLOR_LINE	02000
 
 static void emit_porcelain_details(struct blame_origin *suspect, int repeat)
 {
@@ -383,6 +386,7 @@ static void emit_other(struct blame_scoreboard *sb, struct blame_entry *ent, int
 	for (cnt = 0; cnt < ent->num_lines; cnt++) {
 		char ch;
 		int length = (opt & OUTPUT_LONG_OBJECT_NAME) ? GIT_SHA1_HEXSZ : abbrev;
+		const char *color = "", *reset = "";
 
 		if (suspect->commit->object.flags & UNINTERESTING) {
 			if (blank_boundary)
@@ -393,7 +397,12 @@ static void emit_other(struct blame_scoreboard *sb, struct blame_entry *ent, int
 			}
 		}
 
-		printf("%.*s", length, hex);
+		if ((opt & OUTPUT_COLOR_LINE) && cnt > 0) {
+			color = repeated_meta_color;
+			reset = GIT_COLOR_RESET;
+		}
+
+		printf("%s%.*s%s", color, length, hex, reset);
 		if (opt & OUTPUT_ANNOTATE_COMPAT) {
 			const char *name;
 			if (opt & OUTPUT_SHOW_EMAIL)
@@ -406,16 +415,17 @@ static void emit_other(struct blame_scoreboard *sb, struct blame_entry *ent, int
 			       ent->lno + 1 + cnt);
 		} else {
 			if (opt & OUTPUT_SHOW_SCORE)
-				printf(" %*d %02d",
+				printf(" %s%*d %02d%s", color,
 				       max_score_digits, ent->score,
-				       ent->suspect->refcnt);
+				       ent->suspect->refcnt, reset);
 			if (opt & OUTPUT_SHOW_NAME)
-				printf(" %-*.*s", longest_file, longest_file,
-				       suspect->path);
+				printf(" %s%-*.*s%s", color, longest_file,
+						      longest_file,
+						      suspect->path,
+						      reset);
 			if (opt & OUTPUT_SHOW_NUMBER)
-				printf(" %*d", max_orig_digits,
-				       ent->s_lno + 1 + cnt);
-
+				printf(" %s%*d%s", color, max_orig_digits,
+				       ent->s_lno + 1 + cnt, reset);
 			if (!(opt & OUTPUT_NO_AUTHOR)) {
 				const char *name;
 				int pad;
@@ -424,11 +434,12 @@ static void emit_other(struct blame_scoreboard *sb, struct blame_entry *ent, int
 				else
 					name = ci.author.buf;
 				pad = longest_author - utf8_strwidth(name);
-				printf(" (%s%*s %10s",
+				printf(" %s(%s%*s %10s%s", color,
 				       name, pad, "",
 				       format_time(ci.author_time,
 						   ci.author_tz.buf,
-						   show_raw_time));
+						   show_raw_time),
+				       reset);
 			}
 			printf(" %*d) ",
 			       max_digits, ent->lno + 1 + cnt);
@@ -607,6 +618,12 @@ static int git_blame_config(const char *var, const char *value, void *cb)
 		parse_date_format(value, &blame_date_mode);
 		return 0;
 	}
+	if (!strcmp(var, "color.blame.repeatedmeta")) {
+		if (color_parse_mem(value, strlen(value), repeated_meta_color))
+			warning(_("invalid color '%s' in color.blame.repeatedMeta"),
+				value);
+		return 0;
+	}
 
 	if (git_diff_heuristic_config(var, value, cb) < 0)
 		return -1;
@@ -681,6 +698,7 @@ int cmd_blame(int argc, const char **argv, const char *prefix)
 		OPT_BIT('s', NULL, &output_option, N_("Suppress author name and timestamp (Default: off)"), OUTPUT_NO_AUTHOR),
 		OPT_BIT('e', "show-email", &output_option, N_("Show author email instead of name (Default: off)"), OUTPUT_SHOW_EMAIL),
 		OPT_BIT('w', NULL, &xdl_opts, N_("Ignore whitespace differences"), XDF_IGNORE_WHITESPACE),
+		OPT_BIT(0, "color-lines", &output_option, N_("color redundant metadata from previous line differently"), OUTPUT_COLOR_LINE),
 
 		/*
 		 * The following two options are parsed by parse_revision_opt()
@@ -940,8 +958,12 @@ parse_done:
 
 	blame_coalesce(&sb);
 
-	if (!(output_option & OUTPUT_PORCELAIN))
+	if (!(output_option & OUTPUT_PORCELAIN)) {
 		find_alignment(&sb, &output_option);
+		if ((output_option & OUTPUT_COLOR_LINE) &&
+		    !repeated_meta_color)
+			repeated_meta_color = GIT_COLOR_DARK;
+	}
 
 	output(&sb, output_option);
 	free((void *)sb.final_buf);
