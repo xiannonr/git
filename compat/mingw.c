@@ -1758,7 +1758,21 @@ static pid_t mingw_spawnve_fd(const char *cmd, const char **argv, char **deltaen
 	 */
 	if (!ret && restrict_handle_inheritance && stdhandles_count) {
 		DWORD err = GetLastError();
-		if (debug_1481) warning("error: %d", (int)err);
+		if (debug_1481) {
+			int ii;
+
+			error("error: %d", (int)err);
+			error("#stdhandles: %d", (int)stdhandles_count);
+			for (ii = 0; ii < stdhandles_count; ii++) {
+				DWORD fl;
+				error("handle #%d: %p (file type %x, get handle"
+				      " info %d: %x)", ii, stdhandles[ii],
+				      (int)GetFileType(stdhandles[ii]),
+				      (int)GetHandleInformation(stdhandles[ii],
+								&fl),
+				      (int)fl);
+			}
+		}
 		if (err == ERROR_NO_SYSTEM_RESOURCES ||
 		    err == ERROR_INVALID_HANDLE || debug_1481) {
 			restrict_handle_inheritance = 0;
