@@ -9,6 +9,8 @@
 #include "win32.h"
 #include "win32/lazyload.h"
 
+extern int debug_1481;
+
 static int fd_is_interactive[3] = { 0, 0, 0 };
 #define FD_CONSOLE 0x1
 #define FD_SWAPPED 0x2
@@ -660,6 +662,11 @@ void winansi_init(void)
  */
 HANDLE winansi_get_osfhandle(int fd)
 {
+	if (debug_1481)
+		warning("get_osf_handle for %d (fd_is_interactive %x %x): "
+			"%p (%p %p)",
+			fd, fd_is_interactive[1], fd_is_interactive[2],
+			(void *)_get_osfhandle(fd), hconsole1, hconsole2);
 	if (fd == 1 && (fd_is_interactive[1] & FD_SWAPPED))
 		return hconsole1;
 	if (fd == 2 && (fd_is_interactive[2] & FD_SWAPPED))
