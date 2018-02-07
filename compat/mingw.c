@@ -1662,12 +1662,12 @@ static pid_t mingw_spawnve_fd(const char *cmd, const char **argv, char **deltaen
 	si.StartupInfo.hStdError = winansi_get_osfhandle(fherr);
 
 	/* The list of handles cannot contain duplicates */
-	if (si.StartupInfo.hStdInput != INVALID_HANDLE_VALUE)
+	if ((intptr_t)si.StartupInfo.hStdInput >= 0)
 		stdhandles[stdhandles_count++] = si.StartupInfo.hStdInput;
-	if (si.StartupInfo.hStdOutput != INVALID_HANDLE_VALUE &&
+	if ((intptr_t)si.StartupInfo.hStdOutput >= 0 &&
 	    si.StartupInfo.hStdOutput != si.StartupInfo.hStdInput)
 		stdhandles[stdhandles_count++] = si.StartupInfo.hStdOutput;
-	if (si.StartupInfo.hStdError != INVALID_HANDLE_VALUE &&
+	if ((intptr_t)si.StartupInfo.hStdError >= 0 &&
 	    si.StartupInfo.hStdError != si.StartupInfo.hStdInput &&
 	    si.StartupInfo.hStdError != si.StartupInfo.hStdOutput)
 		stdhandles[stdhandles_count++] = si.StartupInfo.hStdError;
