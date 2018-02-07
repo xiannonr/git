@@ -243,9 +243,15 @@ static enum hide_dotfiles_type hide_dotfiles = HIDE_DOTFILES_DOTGITONLY;
 static char *unset_environment_variables;
 int core_fscache;
 int core_long_paths;
+int debug_1481;
 
 int mingw_core_config(const char *var, const char *value, void *cb)
 {
+	if (!strcmp(var, "debug.issue1481")) {
+		debug_1481 = git_config_bool(var, value);
+		return 0;
+	}
+
 	if (!strcmp(var, "core.hidedotfiles")) {
 		if (value && !strcasecmp(value, "dotgitonly"))
 			hide_dotfiles = HIDE_DOTFILES_DOTGITONLY;
@@ -1752,15 +1758,18 @@ static pid_t mingw_spawnve_fd(const char *cmd, const char **argv, char **deltaen
 	 */
 	if (!ret && restrict_handle_inheritance && stdhandles_count) {
 		DWORD err = GetLastError();
+		if (debug_1481) warning("error: %d", (int)err);
 		if (err == ERROR_NO_SYSTEM_RESOURCES ||
-		    err == ERROR_INVALID_HANDLE) {
+		    err == ERROR_INVALID_HANDLE || debug_1481) {
 			restrict_handle_inheritance = 0;
 			flags &= ~EXTENDED_STARTUPINFO_PRESENT;
 			ret = CreateProcessW(*wcmd ? wcmd : NULL, wargs, NULL,
 					     NULL, TRUE, flags, wenvblk,
 					     dir ? wdir : NULL,
 					     &si.StartupInfo, &pi);
+			if (debug_1481) warning("spawn2 %s, err: %d", ret ? "successful" : "failed", (int)GetLastError());
 		}
+		else error("spawn2 not even attempted");
 	}
 
 	if (!ret)
