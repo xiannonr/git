@@ -1750,14 +1750,17 @@ static pid_t mingw_spawnve_fd(const char *cmd, const char **argv, char **deltaen
 	 * handle inheritance. This is still better than failing to create
 	 * processes.
 	 */
-	if (!ret && GetLastError() == ERROR_NO_SYSTEM_RESOURCES &&
-	    restrict_handle_inheritance && stdhandles_count) {
-		restrict_handle_inheritance = 0;
-		flags &= ~EXTENDED_STARTUPINFO_PRESENT;
-		ret = CreateProcessW(*wcmd ? wcmd : NULL, wargs, NULL, NULL,
-			     stdhandles_count ? TRUE : FALSE,
-			     flags, wenvblk, dir ? wdir : NULL,
-			     &si.StartupInfo, &pi);
+	if (!ret && restrict_handle_inheritance && stdhandles_count) {
+		DWORD err = GetLastError();
+		if (err == ERROR_NO_SYSTEM_RESOURCES ||
+		    err == ERROR_INVALID_HANDLE) {
+			restrict_handle_inheritance = 0;
+			flags &= ~EXTENDED_STARTUPINFO_PRESENT;
+			ret = CreateProcessW(*wcmd ? wcmd : NULL, wargs, NULL,
+					     NULL, TRUE, flags, wenvblk,
+					     dir ? wdir : NULL,
+					     &si.StartupInfo, &pi);
+		}
 	}
 
 	if (!ret)
