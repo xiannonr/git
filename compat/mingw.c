@@ -247,7 +247,7 @@ int debug_1481;
 
 int mingw_core_config(const char *var, const char *value, void *cb)
 {
-	if (!strcmp(var, "debug.issue1481")) {
+	if (!strcmp(var, "core.debug1481")) {
 		debug_1481 = git_config_bool(var, value);
 		return 0;
 	}
