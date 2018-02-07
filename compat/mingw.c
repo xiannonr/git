@@ -1756,6 +1756,10 @@ static pid_t mingw_spawnve_fd(const char *cmd, const char **argv, char **deltaen
 	 * handle inheritance. This is still better than failing to create
 	 * processes.
 	 */
+	if (debug_1481)
+		warning("ret: %d, restrict %d, #count: %d, err: %d",
+			(int)ret, restrict_handle_inheritance,
+			(int)stdhandles_count, (int)GetLastError());
 	if (!ret && restrict_handle_inheritance && stdhandles_count) {
 		DWORD err = GetLastError();
 		if (debug_1481) {
