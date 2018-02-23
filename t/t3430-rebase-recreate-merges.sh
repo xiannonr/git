@@ -143,6 +143,29 @@ test_expect_success 'with a branch tip that was cherry-picked already' '
 	EOF
 '
 
+test_expect_success 'do not rebase cousins unless asked for' '
+	write_script copy-editor.sh <<-\EOF &&
+	cp "$1" "$(git rev-parse --git-path ORIGINAL-TODO)"
+	EOF
+
+	test_config sequence.editor \""$PWD"/copy-editor.sh\" &&
+	git checkout -b cousins master &&
+	before="$(git rev-parse --verify HEAD)" &&
+	test_tick &&
+	git rebase -i --recreate-merges HEAD^ &&
+	test_cmp_rev HEAD $before &&
+	test_tick &&
+	git rebase -i --recreate-merges=rebase-cousins HEAD^ &&
+	test_cmp_graph HEAD^.. <<-\EOF
+	*   Merge the topic branch '\''onebranch'\''
+	|\
+	| * D
+	| * G
+	|/
+	o H
+	EOF
+'
+
 test_expect_success 'refs/rewritten/* is worktree-local' '
 	git worktree add wt &&
 	cat >wt/script-from-scratch <<-\EOF &&
