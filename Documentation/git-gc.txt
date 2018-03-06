@@ -59,6 +59,11 @@ then existing packs (except those marked with a `.keep` file)
 are consolidated into a single pack by using the `-A` option of
 'git repack'. Setting `gc.autoPackLimit` to 0 disables
 automatic consolidation of packs.
++
+If the physical amount of memory is considered not enough for `git
+repack` to run smoothly, `--keep-base-pack` is enabled. This could be
+overridden by setting `gc.bigBasePackThreshold` which only enables
+`--keep-base-pack` when the base pack is larger the specified limit.
 
 --prune=<date>::
 	Prune loose objects older than date (default is 2 weeks ago,
@@ -77,6 +82,10 @@ automatic consolidation of packs.
 --force::
 	Force `git gc` to run even if there may be another `git gc`
 	instance running on this repository.
+
+--keep-base-pack::
+	All packs except the base pack are consolidated into a single
+	pack. The largest pack is considered the base pack.
 
 Configuration
 -------------
@@ -166,6 +175,10 @@ However, these features fall short of a complete solution, so users who
 run commands concurrently have to live with some risk of corruption (which
 seems to be low in practice) unless they turn off automatic garbage
 collection with 'git config gc.auto 0'.
+
+Set environment variable `GIT_TRACE` in order to see the memory usage
+estimation in `git gc --auto` that determines whether the base pack is
+kept.
 
 HOOKS
 -----
