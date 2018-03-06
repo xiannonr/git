@@ -196,5 +196,24 @@ test_expect_success 'objects made unreachable by grafts only are kept' '
 	git cat-file -t $H1
 '
 
+test_expect_success 'repack --keep-pack' '
+	test_create_repo keep-pack &&
+	(
+		cd keep-pack &&
+		for cmit in one two three four; do
+			test_commit $cmit &&
+			git repack -d
+		done &&
+		( cd .git/objects/pack && ls *.pack ) >pack-list &&
+		test_line_count = 4 pack-list &&
+		KEEP1=`head -n1 pack-list` &&
+		KEEP4=`tail -n1 pack-list` &&
+		git repack -a -d --keep-pack $KEEP1 --keep-pack $KEEP4 &&
+		ls .git/objects/pack/*.pack >new-counts &&
+		test_line_count = 3 new-counts &&
+		git fsck
+	)
+'
+
 test_done
 
