@@ -234,7 +234,7 @@ static inline unsigned long total_ram(void)
 
 	memInfo.dwLength = sizeof(MEMORYSTATUSEX);
 	if (GlobalMemoryStatusEx(&memInfo))
-		return memInfo;ullTotalPhys;
+		return memInfo.ullTotalPhys;
 #else
 	fprintf(stderr, _("unrecognized platform, assuming %lu GB RAM\n"),
 		default_ram);
