@@ -622,7 +622,7 @@ else
 		HAVE_LIBCHARSET_H = YesPlease
 		NO_GETTEXT =
 		USE_GETTEXT_SCHEME = fallthrough
-		USE_LIBPCRE= YesPlease
+		USE_LIBPCRE2 = YesPlease
 		NO_LIBPCRE1_JIT = UnfortunatelyYes
 		NO_CURL =
 		USE_NED_ALLOCATOR = YesPlease
