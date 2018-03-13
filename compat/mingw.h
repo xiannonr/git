@@ -262,12 +262,11 @@ char *mingw_getcwd(char *pointer, int len);
 #define getcwd mingw_getcwd
 
 #ifdef NO_UNSETENV
-#error "NO_UNSETENV is incompatible with the MinGW startup code!"
+#error "NO_UNSETENV is incompatible with the Windows-specific startup code!"
 #endif
 
-#if defined(_MSC_VER)
 /*
- * We bind *env() routines (even the mingw_ ones) to private msc_ versions.
+ * We bind *env() routines (even the mingw_ ones) to private mingw_ versions.
  * These talk to the CRT using UNICODE/wchar_t, but maintain the original
  * narrow-char API.
  *
@@ -276,7 +275,7 @@ char *mingw_getcwd(char *pointer, int len);
  * (and secretly updates both when you set one or the other), but it uses CP_ACP
  * to do the conversion rather than CP_UTF8.
  *
- * Since everything in the git code base is UTF8, we define the msc_ routines
+ * Since everything in the git code base is UTF8, we define the mingw_ routines
  * to access the CRT using the UNICODE routines and manually convert them to
  * UTF8.  This also avoids round-trip problems.
  *
@@ -285,32 +284,16 @@ char *mingw_getcwd(char *pointer, int len);
  * to the CRT (/MT).
  *
  * We also use "wmain(argc,argv,env)" and get the initial UNICODE setup for us.
- * This avoids the need for the msc_startup() to import and convert the
- * inherited environment.
+ * This avoids the need for the mingw_startup()/msc_startup() to import and
+ * convert the inherited environment.
  *
- * We require NO_SETENV (and let gitsetenv() call our msc_putenv).
+ * We require NO_SETENV (and let gitsetenv() call our mingw_putenv).
  */
-#define getenv       msc_getenv
-#define putenv       msc_putenv
-#define unsetenv     msc_putenv
-#define mingw_getenv msc_getenv
-#define mingw_putenv msc_putenv
-char *msc_getenv(const char *name);
-int   msc_putenv(const char *name);
-
-#ifndef NO_SETENV
-#error "NO_SETENV is required for MSC startup code!"
-#endif
-
-#else
-
+#define getenv       mingw_getenv
+#define putenv       mingw_putenv
+#define unsetenv     mingw_putenv
 char *mingw_getenv(const char *name);
-#define getenv mingw_getenv
-int mingw_putenv(const char *namevalue);
-#define putenv mingw_putenv
-#define unsetenv mingw_putenv
-
-#endif
+int   mingw_putenv(const char *name);
 
 int mingw_gethostname(char *host, int namelen);
 #define gethostname mingw_gethostname

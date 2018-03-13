@@ -1310,9 +1310,7 @@ static char *path_lookup(const char *cmd, int exe_only)
 	return prog;
 }
 
-#if defined(_MSC_VER)
-
-/* We need a stable sort */
+/* We need a stable sort to convert the environment between UTF-16 <-> UTF-8 */
 #ifndef INTERNAL_QSORT
 #include "qsort.c"
 #endif
@@ -1357,13 +1355,12 @@ static wchar_t *make_environment_block(char **deltaenv)
 	 * as a function that returns a pointer to a mostly static table.
 	 * Grab the pointer and cache it for the duration of our loop.
 	 */
-	const wchar_t *wenv = GetEnvironmentStringsW(), *p;
+	wchar_t *wenv = GetEnvironmentStringsW(), *p;
 	size_t delta_size = 0, size = 1; /* for extra NUL at the end */
 
 	wchar_t **array = NULL;
 	size_t alloc = 0, nr = 0, i;
 
-	const char *p2;
 	wchar_t *wdeltaenv;
 
 	wchar_t *result, *p3;
@@ -1448,56 +1445,6 @@ static wchar_t *make_environment_block(char **deltaenv)
 	FreeEnvironmentStringsW(wenv);
 	return result;
 }
-
-#else
-
-static int do_putenv(char **env, const char *name, int size, int free_old);
-
-/* used number of elements of environ array, including terminating NULL */
-static int environ_size = 0;
-/* allocated size of environ array, in bytes */
-static int environ_alloc = 0;
-/* used as a indicator when the environment has been changed outside mingw.c */
-static char **saved_environ;
-
-static void maybe_reinitialize_environ(void);
-
-/*
- * Create environment block suitable for CreateProcess. Merges current
- * process environment and the supplied environment changes.
- */
-static wchar_t *make_environment_block(char **deltaenv)
-{
-	wchar_t *wenvblk = NULL;
-	char **tmpenv;
-	int i = 0, size, wenvsz = 0, wenvpos = 0;
-
-	maybe_reinitialize_environ();
-	size = environ_size;
-
-	while (deltaenv && deltaenv[i] && *deltaenv[i])
-		i++;
-
-	/* copy the environment, leaving space for changes */
-	ALLOC_ARRAY(tmpenv, size + i);
-	memcpy(tmpenv, environ, size * sizeof(char*));
-
-	/* merge supplied environment changes into the temporary environment */
-	for (i = 0; deltaenv && deltaenv[i] && *deltaenv[i]; i++)
-		size = do_putenv(tmpenv, deltaenv[i], size, 0);
-
-	/* create environment block from temporary environment */
-	for (i = 0; tmpenv[i] && *tmpenv[i]; i++) {
-		size = 2 * strlen(tmpenv[i]) + 2; /* +2 for final \0 */
-		ALLOC_GROW(wenvblk, (wenvpos + size) * sizeof(wchar_t), wenvsz);
-		wenvpos += xutftowcs(&wenvblk[wenvpos], tmpenv[i], size) + 1;
-	}
-	/* add final \0 terminator */
-	wenvblk[wenvpos] = 0;
-	free(tmpenv);
-	return wenvblk;
-}
-#endif
 
 static void do_unset_environment_variables(void)
 {
@@ -1978,8 +1925,6 @@ int mingw_kill(pid_t pid, int sig)
 	return -1;
 }
 
-#if defined(_MSC_VER)
-
 /* UTF8 versions of getenv and putenv (and unsetenv).
  * Internally, they use the CRT's stock UNICODE routines
  * to avoid data loss.
@@ -1988,7 +1933,7 @@ int mingw_kill(pid_t pid, int sig)
  * the CRT variables.  We also DO NOT try to manage/replace
  * the CRT storage.
  */
-char *msc_getenv(const char *name)
+char *mingw_getenv(const char *name)
 {
 	int len_key, len_value;
 	wchar_t *w_key;
@@ -2018,7 +1963,7 @@ char *msc_getenv(const char *name)
 	return value;
 }
 
-int msc_putenv(const char *name)
+int mingw_putenv(const char *name)
 {
 	int len, result;
 	char *equal;
@@ -2039,138 +1984,6 @@ int msc_putenv(const char *name)
 	free(wide);
 	return result;
 }
-
-#else
-
-/*
- * Compare environment entries by key (i.e. stopping at '=' or '\0').
- */
-static int compareenv(const void *v1, const void *v2)
-{
-	const char *e1 = *(const char**)v1;
-	const char *e2 = *(const char**)v2;
-
-	for (;;) {
-		int c1 = *e1++;
-		int c2 = *e2++;
-		c1 = (c1 == '=') ? 0 : tolower(c1);
-		c2 = (c2 == '=') ? 0 : tolower(c2);
-		if (c1 > c2)
-			return 1;
-		if (c1 < c2)
-			return -1;
-		if (c1 == 0)
-			return 0;
-	}
-}
-
-/*
- * Functions implemented outside Git are able to modify the environment,
- * too. For example, cURL's curl_global_init() function sets the CHARSET
- * environment variable (at least in certain circumstances).
- *
- * Therefore we need to be *really* careful *not* to assume that we have
- * sole control over the environment and reinitalize it when necessary.
- */
-static void maybe_reinitialize_environ(void)
-{
-	int i;
-
-	if (!saved_environ) {
-		warning("MinGW environment not initialized yet");
-		return;
-	}
-
-	if (environ_size <= 0)
-		return;
-
-	if (saved_environ != environ)
-		/* We have *no* idea how much space was allocated outside */
-		environ_alloc = 0;
-	else if (!environ[environ_size - 1])
-		return; /* still consistent */
-
-	for (i = 0; environ[i] && *environ[i]; i++)
-		; /* continue counting */
-	environ[i] = NULL;
-	environ_size = i + 1;
-
-	/* sort environment for O(log n) getenv / putenv */
-	qsort(environ, i, sizeof(char*), compareenv);
-}
-
-static int bsearchenv(char **env, const char *name, size_t size)
-{
-	unsigned low = 0, high = size;
-	while (low < high) {
-		unsigned mid = low + ((high - low) >> 1);
-		int cmp = compareenv(&env[mid], &name);
-		if (cmp < 0)
-			low = mid + 1;
-		else if (cmp > 0)
-			high = mid;
-		else
-			return mid;
-	}
-	return ~low; /* not found, return 1's complement of insert position */
-}
-
-/*
- * If name contains '=', then sets the variable, otherwise it unsets it
- * Size includes the terminating NULL. Env must have room for size + 1 entries
- * (in case of insert). Returns the new size. Optionally frees removed entries.
- */
-static int do_putenv(char **env, const char *name, int size, int free_old)
-{
-	int i = size <= 0 ? -1 : bsearchenv(env, name, size - 1);
-
-	/* optionally free removed / replaced entry */
-	if (i >= 0 && free_old)
-		free(env[i]);
-
-	if (strchr(name, '=')) {
-		/* if new value ('key=value') is specified, insert or replace entry */
-		if (i < 0) {
-			i = ~i;
-			memmove(&env[i + 1], &env[i], (size - i) * sizeof(char*));
-			size++;
-		}
-		env[i] = (char*) name;
-	} else if (i >= 0) {
-		/* otherwise ('key') remove existing entry */
-		size--;
-		memmove(&env[i], &env[i + 1], (size - i) * sizeof(char*));
-	}
-	return size;
-}
-
-char *mingw_getenv(const char *name)
-{
-	char *value;
-	int pos;
-
-	if (environ_size <= 0)
-		return NULL;
-
-	maybe_reinitialize_environ();
-	pos = bsearchenv(environ, name, environ_size - 1);
-
-	if (pos < 0)
-		return NULL;
-	value = strchr(environ[pos], '=');
-	return value ? &value[1] : NULL;
-}
-
-int mingw_putenv(const char *namevalue)
-{
-	maybe_reinitialize_environ();
-	ALLOC_GROW(environ, (environ_size + 1) * sizeof(char*), environ_alloc);
-	saved_environ = environ;
-	environ_size = do_putenv(environ, namevalue, environ_size, 1);
-	return 0;
-}
-
-#endif
 
 /*
  * Note, this isn't a complete replacement for getaddrinfo. It assumes
@@ -3457,17 +3270,6 @@ void mingw_startup(void)
 	maxlen = wcslen(_wpgmptr);
 	for (i = 1; i < argc; i++)
 		maxlen = max(maxlen, wcslen(wargv[i]));
-	for (i = 0; wenv[i]; i++)
-		maxlen = max(maxlen, wcslen(wenv[i]));
-
-	/*
-	 * nedmalloc can't free CRT memory, allocate resizable environment
-	 * list. Note that xmalloc / xmemdupz etc. call getenv, so we cannot
-	 * use it while initializing the environment itself.
-	 */
-	environ_size = i + 1;
-	environ_alloc = alloc_nr(environ_size * sizeof(char*));
-	saved_environ = environ = malloc_startup(environ_alloc);
 
 	/* allocate buffer (wchar_t encodes to max 3 UTF-8 bytes) */
 	maxlen = 3 * maxlen + 1;
@@ -3477,13 +3279,7 @@ void mingw_startup(void)
 	__argv[0] = wcstoutfdup_startup(buffer, _wpgmptr, maxlen);
 	for (i = 1; i < argc; i++)
 		__argv[i] = wcstoutfdup_startup(buffer, wargv[i], maxlen);
-	for (i = 0; wenv[i]; i++)
-		environ[i] = wcstoutfdup_startup(buffer, wenv[i], maxlen);
-	environ[i] = NULL;
 	free(buffer);
-
-	/* sort environment for O(log n) getenv / putenv */
-	qsort(environ, i, sizeof(char*), compareenv);
 
 	/* fix Windows specific environment settings */
 	setup_windows_environment();
