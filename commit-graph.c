@@ -182,7 +182,7 @@ cleanup_fail:
 }
 
 /* global storage */
-struct commit_graph *commit_graph = NULL;
+static struct commit_graph *commit_graph = NULL;
 
 static void prepare_commit_graph_one(const char *obj_dir)
 {
