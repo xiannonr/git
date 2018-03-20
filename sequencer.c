@@ -2497,16 +2497,16 @@ int sequencer_make_script(FILE *out, int argc, const char **argv,
 	while ((commit = get_revision(&revs))) {
 		int is_empty  = is_original_commit_empty(commit);
 
+		if (!is_empty && (commit->object.flags & PATCHSAME))
+			continue;
 		strbuf_reset(&buf);
 		if (!keep_empty && is_empty)
 			strbuf_addf(&buf, "%c ", comment_line_char);
-		if (is_empty || !(commit->object.flags & PATCHSAME)) {
-			strbuf_addf(&buf, "%s %s ", insn,
-				    oid_to_hex(&commit->object.oid));
-			pretty_print_commit(&pp, commit, &buf);
-			strbuf_addch(&buf, '\n');
-			fputs(buf.buf, out);
-		}
+		strbuf_addf(&buf, "%s %s ", insn,
+			    oid_to_hex(&commit->object.oid));
+		pretty_print_commit(&pp, commit, &buf);
+		strbuf_addch(&buf, '\n');
+		fputs(buf.buf, out);
 	}
 	strbuf_release(&buf);
 	return 0;
