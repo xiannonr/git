@@ -28,7 +28,6 @@ struct add_opts {
 	int checkout;
 	int keep_locked;
 	const char *new_branch;
-	int force_new_branch;
 };
 
 static int show_only;
@@ -405,8 +404,7 @@ static int add(int ac, const char **av, const char *prefix)
 	if (!strcmp(branch, "-"))
 		branch = "@{-1}";
 
-	opts.force_new_branch = !!new_branch_force;
-	if (opts.force_new_branch) {
+	if (new_branch_force) {
 		struct strbuf symref = STRBUF_INIT;
 
 		opts.new_branch = new_branch_force;
@@ -450,7 +448,7 @@ static int add(int ac, const char **av, const char *prefix)
 		struct child_process cp = CHILD_PROCESS_INIT;
 		cp.git_cmd = 1;
 		argv_array_push(&cp.args, "branch");
-		if (opts.force_new_branch)
+		if (new_branch_force)
 			argv_array_push(&cp.args, "--force");
 		argv_array_push(&cp.args, opts.new_branch);
 		argv_array_push(&cp.args, branch);
