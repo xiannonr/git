@@ -201,12 +201,12 @@ test_expect_success '"add" with <branch> omitted' '
 test_expect_success '"add" checks out existing branch of dwimd name' '
 	test_commit c1 &&
 	test_commit c2 &&
-	git branch precious HEAD~1 &&
-	git worktree add precious &&
-	test_cmp_rev HEAD~1 precious &&
+	git branch dwim HEAD~1 &&
+	git worktree add dwim &&
+	test_cmp_rev HEAD~1 dwim &&
 	(
-		cd precious &&
-		test_cmp_rev precious HEAD
+		cd dwim &&
+		test_cmp_rev dwim HEAD
 	)
 '
 
