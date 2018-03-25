@@ -28,6 +28,7 @@ struct add_opts {
 	int checkout;
 	int keep_locked;
 	const char *new_branch;
+	int checkout_existing_branch;
 };
 
 static int show_only;
@@ -317,7 +318,10 @@ static int add_worktree(const char *path, const char *refname,
 	if (ret)
 		goto done;
 
-	if (opts->new_branch)
+	if (opts->checkout_existing_branch)
+		fprintf_ln(stderr, _("checking out branch '%s'"),
+			   refname);
+	else if (opts->new_branch)
 		fprintf_ln(stderr, _("creating branch '%s'"), opts->new_branch);
 
 	fprintf(stderr, _("new worktree HEAD is now at %s"),
@@ -370,7 +374,18 @@ static const char *dwim_branch(const char *path, struct add_opts *opts)
 {
 	int n;
 	const char *s = worktree_basename(path, &n);
-	opts->new_branch = xstrndup(s, n);
+	const char *branchname = xstrndup(s, n);
+	struct strbuf ref = STRBUF_INIT;
+
+	if (!strbuf_check_branch_ref(&ref, branchname) &&
+	    ref_exists(ref.buf)) {
+		opts->checkout_existing_branch = 1;
+		strbuf_release(&ref);
+		UNLEAK(branchname);
+		return branchname;
+	}
+
+	opts->new_branch = branchname;
 	if (guess_remote) {
 		struct object_id oid;
 		const char *remote =
