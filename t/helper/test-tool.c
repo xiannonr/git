@@ -3,7 +3,7 @@
 
 struct test_cmd {
 	const char *name;
-	int (*main)(int argc, const char **argv);
+	int (*fn)(int argc, const char **argv);
 };
 
 static struct test_cmd cmds[] = {
@@ -55,7 +55,7 @@ int cmd_main(int argc, const char **argv)
 		if (!strcmp(cmds[i].name, argv[1])) {
 			argv++;
 			argc--;
-			return cmds[i].main(argc, argv);
+			return cmds[i].fn(argc, argv);
 		}
 	}
 	die("There is no test named '%s'", argv[1]);
