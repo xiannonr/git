@@ -653,13 +653,15 @@ static int get_base_var(struct strbuf *name)
 	}
 }
 
-static int git_parse_source(config_fn_t fn, void *data)
+static int git_parse_source(config_fn_t fn, void *data,
+			    int include_section_headers)
 {
 	int comment = 0;
 	int baselen = 0;
 	struct strbuf *var = &cf->var;
 	int error_return = 0;
 	char *error_msg = NULL;
+	int saw_section_header = 0;
 
 	/* U+FEFF Byte Order Mark in UTF8 */
 	const char *bomptr = utf8_bom;
@@ -685,6 +687,16 @@ static int git_parse_source(config_fn_t fn, void *data)
 			if (cf->eof)
 				return 0;
 			comment = 0;
+			if (saw_section_header) {
+				if (include_section_headers) {
+					cf->linenr--;
+					error_return = fn(var->buf, NULL, data);
+					if (error_return < 0)
+						break;
+					cf->linenr++;
+				}
+				saw_section_header = 0;
+			}
 			continue;
 		}
 		if (comment || isspace(c))
@@ -700,6 +712,7 @@ static int git_parse_source(config_fn_t fn, void *data)
 				break;
 			strbuf_addch(var, '.');
 			baselen = var->len;
+			saw_section_header = 1;
 			continue;
 		}
 		if (!isalpha(c))
@@ -1398,7 +1411,8 @@ int git_default_config(const char *var, const char *value, void *dummy)
  * fgetc, ungetc, ftell of top need to be initialized before calling
  * this function.
  */
-static int do_config_from(struct config_source *top, config_fn_t fn, void *data)
+static int do_config_from(struct config_source *top, config_fn_t fn, void *data,
+			  int include_section_headers)
 {
 	int ret;
 
@@ -1410,7 +1424,7 @@ static int do_config_from(struct config_source *top, config_fn_t fn, void *data)
 	strbuf_init(&top->var, 1024);
 	cf = top;
 
-	ret = git_parse_source(fn, data);
+	ret = git_parse_source(fn, data, include_section_headers);
 
 	/* pop config-file parsing state stack */
 	strbuf_release(&top->value);
@@ -1423,7 +1437,7 @@ static int do_config_from(struct config_source *top, config_fn_t fn, void *data)
 static int do_config_from_file(config_fn_t fn,
 		const enum config_origin_type origin_type,
 		const char *name, const char *path, FILE *f,
-		void *data)
+		void *data, int include_section_headers)
 {
 	struct config_source top;
 
@@ -1436,12 +1450,12 @@ static int do_config_from_file(config_fn_t fn,
 	top.do_ungetc = config_file_ungetc;
 	top.do_ftell = config_file_ftell;
 
-	return do_config_from(&top, fn, data);
+	return do_config_from(&top, fn, data, include_section_headers);
 }
 
 static int git_config_from_stdin(config_fn_t fn, void *data)
 {
-	return do_config_from_file(fn, CONFIG_ORIGIN_STDIN, "", NULL, stdin, data);
+	return do_config_from_file(fn, CONFIG_ORIGIN_STDIN, "", NULL, stdin, data, 0);
 }
 
 int git_config_from_file(config_fn_t fn, const char *filename, void *data)
@@ -1452,7 +1466,7 @@ int git_config_from_file(config_fn_t fn, const char *filename, void *data)
 	f = fopen_or_warn(filename, "r");
 	if (f) {
 		flockfile(f);
-		ret = do_config_from_file(fn, CONFIG_ORIGIN_FILE, filename, filename, f, data);
+		ret = do_config_from_file(fn, CONFIG_ORIGIN_FILE, filename, filename, f, data, 0);
 		funlockfile(f);
 		fclose(f);
 	}
@@ -1475,7 +1489,7 @@ int git_config_from_mem(config_fn_t fn, const enum config_origin_type origin_typ
 	top.do_ungetc = config_buf_ungetc;
 	top.do_ftell = config_buf_ftell;
 
-	return do_config_from(&top, fn, data);
+	return do_config_from(&top, fn, data, 0);
 }
 
 int git_config_from_blob_oid(config_fn_t fn,
@@ -2743,7 +2757,7 @@ int git_config_set_multivar_in_file_gently(const char *config_filename,
 		f = fopen_or_warn(config_filename, "r");
 		if (!f || do_config_from_file(store_aux, CONFIG_ORIGIN_FILE,
 					      config_filename, config_filename,
-					      f, NULL)) {
+					      f, NULL, 1)) {
 			error("invalid config file %s", config_filename);
 			if (store.value_regex != NULL &&
 			    store.value_regex != CONFIG_REGEX_NONE) {
