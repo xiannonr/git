@@ -2706,6 +2706,7 @@ int git_config_set_multivar_in_file_gently(const char *config_filename,
 		struct stat st;
 		size_t copy_begin, copy_end;
 		int i, new_line = 0;
+		FILE *f;
 
 		if (value_regex == NULL)
 			store.value_regex = NULL;
@@ -2739,7 +2740,10 @@ int git_config_set_multivar_in_file_gently(const char *config_filename,
 		 * As a side effect, we make sure to transform only a valid
 		 * existing config file.
 		 */
-		if (git_config_from_file(store_aux, config_filename, NULL)) {
+		f = fopen_or_warn(config_filename, "r");
+		if (!f || do_config_from_file(store_aux, CONFIG_ORIGIN_FILE,
+					      config_filename, config_filename,
+					      f, NULL)) {
 			error("invalid config file %s", config_filename);
 			if (store.value_regex != NULL &&
 			    store.value_regex != CONFIG_REGEX_NONE) {
@@ -2747,8 +2751,11 @@ int git_config_set_multivar_in_file_gently(const char *config_filename,
 				free(store.value_regex);
 			}
 			ret = CONFIG_INVALID_FILE;
+			if (f)
+				fclose(f);
 			goto out_free;
-		}
+		} else
+			fclose(f);
 
 		if (store.value_regex != NULL &&
 		    store.value_regex != CONFIG_REGEX_NONE) {
