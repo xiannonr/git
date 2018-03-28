@@ -2429,6 +2429,177 @@ contline:
 	return offset;
 }
 
+/*
+ * This function determines whether the offset is in a line that starts with a
+ * comment character.
+ *
+ * Note: it does *not* report when a regular line (section header, config
+ * setting) *ends* in a comment.
+ */
+static int is_in_comment_line(const char *contents, size_t offset)
+{
+	int comment = 0;
+
+	while (offset > 0)
+		switch (contents[--offset]) {
+		case ';':
+		case '#':
+			comment = 1;
+			break;
+		case '\n':
+			break;
+		case ' ':
+		case '\t':
+			continue;
+		default:
+			comment = 0;
+		}
+
+	return comment;
+}
+
+/*
+ * If we are about to unset the last key(s) in a section, and if there are
+ * no comments surrounding (or included in) the section, we will want to
+ * extend begin/end to remove the entire section.
+ *
+ * Note: the parameter `i_ptr` points to the index into the store.offset
+ * array, reflecting the end offset of the respective entry to be deleted.
+ * This index may be incremented if a section has more than one entry (which
+ * all are to be removed).
+ */
+static void maybe_remove_section(const char *contents, size_t size,
+				 const char *section_name,
+				 size_t section_name_len,
+				 size_t *begin, int *i_ptr, int *new_line)
+{
+	size_t begin2, end2;
+	int seen_section = 0, dummy, i = *i_ptr;
+
+	/*
+	 * First, make sure that this is the last key in the section, and that
+	 * there are no comments that are possibly about the current section.
+	 */
+next_entry:
+	for (end2 = store.offset[i]; end2 < size; end2++) {
+		switch (contents[end2]) {
+		case ' ':
+		case '\t':
+		case '\n':
+			continue;
+		case '\r':
+			if (++end2 < size && contents[end2] == '\n')
+				continue;
+			break;
+		case '[':
+			/* If the section name is repeated, continue */
+			if (end2 + 1 + section_name_len < size &&
+			    contents[end2 + section_name_len] == ']' &&
+			    !memcmp(contents + end2 + 1, section_name,
+				    section_name_len)) {
+				end2 += section_name_len;
+				continue;
+			}
+			goto look_before;
+		case ';':
+		case '#':
+			/* There is a comment, cannot remove this section */
+			return;
+		default:
+			/* There are other keys in that section */
+			break;
+		}
+
+		/*
+		 * Uh oh... we found something else in this section. But do
+		 * we want to remove this, too?
+		 */
+		if (++i >= store.seen)
+			return;
+
+		begin2 = find_beginning_of_line(contents, size, store.offset[i],
+						&dummy);
+		if (begin2 > end2)
+			return;
+
+		/* Looks like we want to remove the next one, too... */
+		goto next_entry;
+	}
+
+look_before:
+	/*
+	 * Now, ensure that this is the first key, and that there are no
+	 * comments before the entry nor before the section header.
+	 */
+	for (begin2 = *begin; begin2 > 0; )
+		switch (contents[begin2 - 1]) {
+		case ' ':
+		case '\t':
+			begin2--;
+			continue;
+		case '\n':
+			if (--begin2 > 0 && contents[begin2 - 1] == '\r')
+				begin2--;
+			continue;
+		case ']':
+			if (begin2 > section_name_len + 1 &&
+			    contents[begin2 - section_name_len - 2] == '[' &&
+			    !memcmp(contents + begin2 - section_name_len - 1,
+				    section_name, section_name_len)) {
+				begin2 -= section_name_len + 2;
+				seen_section = 1;
+				continue;
+			}
+
+			/*
+			 * It looks like a section header, but it could be a
+			 * comment instead...
+			 */
+			if (is_in_comment_line(contents, begin2))
+				return;
+
+			/*
+			 * We encountered the previous section header: This
+			 * really was the only entry, so remove the entire
+			 * section.
+			 */
+			if (contents[begin2] != '\n') {
+				begin2--;
+				*new_line = 1;
+			}
+
+			store.offset[i] = end2;
+			*begin = begin2;
+			*i_ptr = i;
+			return;
+		default:
+			/*
+			 * Any other character means it is either a comment or
+			 * a config setting; if it is a comment, we do not want
+			 * to remove this section. If it is a config setting,
+			 * we only want to remove this section if this is
+			 * already the next section.
+			 */
+			if (seen_section &&
+			    !is_in_comment_line(contents, begin2)) {
+				if (contents[begin2] != '\n') {
+					begin2--;
+					*new_line = 1;
+				}
+
+				store.offset[i] = end2;
+				*begin = begin2;
+				*i_ptr = i;
+			}
+			return;
+		}
+
+	/* This section extends to the beginning of the file. */
+	store.offset[i] = end2;
+	*begin = begin2;
+	*i_ptr = i;
+}
+
 int git_config_set_in_file_gently(const char *config_filename,
 				  const char *key, const char *value)
 {
@@ -2626,10 +2797,18 @@ int git_config_set_multivar_in_file_gently(const char *config_filename,
 				store.offset[i] = copy_end = contents_sz;
 			} else if (store.state != KEY_SEEN) {
 				copy_end = store.offset[i];
-			} else
+			} else {
 				copy_end = find_beginning_of_line(
 					contents, contents_sz,
 					store.offset[i], &new_line);
+				if (!value)
+					maybe_remove_section(contents,
+							     contents_sz,
+							     section_name,
+							     store.baselen,
+							     &copy_end, &i,
+							     &new_line);
+			}
 
 			if (copy_end > 0 && contents[copy_end-1] != '\n')
 				new_line = 1;
