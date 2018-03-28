@@ -2486,12 +2486,14 @@ int git_config_set_multivar_in_file_gently(const char *config_filename,
 	struct lock_file lock = LOCK_INIT;
 	char *filename_buf = NULL;
 	char *contents = NULL;
+	char *section_name = NULL;
 	size_t contents_sz;
 
 	/* parse-key returns negative; flip the sign to feed exit(3) */
-	ret = 0 - git_config_parse_key(key, &store.key, &store.baselen);
+	ret = 0 - git_config_parse_key(key, &section_name, &store.baselen);
 	if (ret)
 		goto out_free;
+	store.key = section_name;
 
 	store.multi_replace = multi_replace;
 
@@ -2505,7 +2507,6 @@ int git_config_set_multivar_in_file_gently(const char *config_filename,
 	fd = hold_lock_file_for_update(&lock, config_filename, 0);
 	if (fd < 0) {
 		error_errno("could not lock config file %s", config_filename);
-		free(store.key);
 		ret = CONFIG_NO_LOCK;
 		goto out_free;
 	}
@@ -2515,8 +2516,6 @@ int git_config_set_multivar_in_file_gently(const char *config_filename,
 	 */
 	in_fd = open(config_filename, O_RDONLY);
 	if ( in_fd < 0 ) {
-		free(store.key);
-
 		if ( ENOENT != errno ) {
 			error_errno("opening %s", config_filename);
 			ret = CONFIG_INVALID_FILE; /* same as "invalid config file" */
@@ -2571,7 +2570,6 @@ int git_config_set_multivar_in_file_gently(const char *config_filename,
 		 */
 		if (git_config_from_file(store_aux, config_filename, NULL)) {
 			error("invalid config file %s", config_filename);
-			free(store.key);
 			if (store.value_regex != NULL &&
 			    store.value_regex != CONFIG_REGEX_NONE) {
 				regfree(store.value_regex);
@@ -2581,7 +2579,6 @@ int git_config_set_multivar_in_file_gently(const char *config_filename,
 			goto out_free;
 		}
 
-		free(store.key);
 		if (store.value_regex != NULL &&
 		    store.value_regex != CONFIG_REGEX_NONE) {
 			regfree(store.value_regex);
@@ -2682,6 +2679,7 @@ int git_config_set_multivar_in_file_gently(const char *config_filename,
 
 out_free:
 	rollback_lock_file(&lock);
+	free(section_name);
 	free(filename_buf);
 	if (contents)
 		munmap(contents, contents_sz);
