@@ -517,7 +517,6 @@ lib = lib
 # DESTDIR =
 pathsep = :
 
-bindir_relative = $(patsubst $(prefix)/%,%,$(bindir))
 mandir_relative = $(patsubst $(prefix)/%,%,$(mandir))
 infodir_relative = $(patsubst $(prefix)/%,%,$(infodir))
 gitexecdir_relative = $(patsubst $(prefix)/%,%,$(gitexecdir))
