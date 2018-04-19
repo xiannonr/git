@@ -9,14 +9,17 @@ these commits have no parents.
 *********************************************************
 
 The basic idea is to write the SHA-1s of shallow commits into
-$GIT_DIR/shallow, and handle its contents like the contents
-of $GIT_DIR/info/grafts (with the difference that shallow
-cannot contain parent information).
+$GIT_DIR/shallow, and handle its contents similar to replace
+refs (with the difference that shallow does not actually
+create those replace refs) and very much like the deprecated
+graft file (with the difference that shallow commits will
+always have their parents grafted away, not replaced by
+different parents).
 
-This information is stored in a new file instead of grafts, or
-even the config, since the user should not touch that file
-at all (even throughout development of the shallow clone, it
-was never manually edited!).
+This information is stored in a special-purpose file because the
+user should not touch that file at all (even throughout
+development of the shallow clone, it was never manually
+edited!).
 
 Each line contains exactly one SHA-1. When read, a commit_graft
 will be constructed, which has nr_parent < 0 to make it easier
