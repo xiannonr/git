@@ -494,7 +494,6 @@ static int convert_graft_file(int force)
 	fclose(fp);
 
 	strbuf_release(&buf);
-	argv_array_clear(&args);
 
 	if (!err.len)
 		return unlink_or_warn(graft_file);
