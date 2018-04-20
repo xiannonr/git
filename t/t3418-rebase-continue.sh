@@ -88,7 +88,7 @@ test_expect_success 'rebase passes merge strategy options correctly' '
 	git rebase --continue
 '
 
-test_expect_failure '--continue after failed fixup cleans commit message' '
+test_expect_success '--continue after failed fixup cleans commit message' '
 	git checkout -b with-conflicting-fixup &&
 	test_commit wants-fixup &&
 	test_commit "fixup! wants-fixup" wants-fixup.t 1 wants-fixup-1 &&

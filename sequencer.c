@@ -2781,17 +2781,12 @@ static int continue_single_pick(void)
 
 static int commit_staged_changes(struct replay_opts *opts)
 {
-	unsigned int flags = ALLOW_EMPTY | EDIT_MSG;
+	unsigned int flags = ALLOW_EMPTY | EDIT_MSG, is_fixup = 0, is_clean;
 
 	if (has_unstaged_changes(1))
 		return error(_("cannot rebase: You have unstaged changes."));
-	if (!has_uncommitted_changes(0)) {
-		const char *cherry_pick_head = git_path_cherry_pick_head();
 
-		if (file_exists(cherry_pick_head) && unlink(cherry_pick_head))
-			return error(_("could not remove CHERRY_PICK_HEAD"));
-		return 0;
-	}
+	is_clean = !has_uncommitted_changes(0);
 
 	if (file_exists(rebase_path_amend())) {
 		struct strbuf rev = STRBUF_INIT;
@@ -2804,14 +2799,39 @@ static int commit_staged_changes(struct replay_opts *opts)
 		if (get_oid_hex(rev.buf, &to_amend))
 			return error(_("invalid contents: '%s'"),
 				rebase_path_amend());
-		if (oidcmp(&head, &to_amend))
+		if (!is_clean && oidcmp(&head, &to_amend))
 			return error(_("\nYou have uncommitted changes in your "
 				       "working tree. Please, commit them\n"
 				       "first and then run 'git rebase "
 				       "--continue' again."));
+		if (is_clean && !oidcmp(&head, &to_amend)) {
+			strbuf_reset(&rev);
+			/*
+			 * Clean tree, but we may need to finalize a
+			 * fixup/squash chain. A failed fixup/squash leaves the
+			 * file amend-type in rebase-merge/; It is okay if that
+			 * file is missing, in which case there is no such
+			 * chain to finalize.
+			 */
+			read_oneliner(&rev, rebase_path_amend_type(), 0);
+			if (!strcmp("squash", rev.buf))
+				is_fixup = TODO_SQUASH;
+			else if (!strcmp("fixup", rev.buf)) {
+				is_fixup = TODO_FIXUP;
+				flags = (flags & ~EDIT_MSG) | CLEANUP_MSG;
+			}
+		}
 
 		strbuf_release(&rev);
 		flags |= AMEND_MSG;
+	}
+
+	if (is_clean && !is_fixup) {
+		const char *cherry_pick_head = git_path_cherry_pick_head();
+
+		if (file_exists(cherry_pick_head) && unlink(cherry_pick_head))
+			return error(_("could not remove CHERRY_PICK_HEAD"));
+		return 0;
 	}
 
 	if (run_git_commit(rebase_path_message(), opts, flags))
