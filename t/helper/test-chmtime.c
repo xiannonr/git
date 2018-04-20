@@ -25,7 +25,7 @@
  *
  * To print only the mtime use --get:
  *
- *	test-chmtime --get file
+ *	test-tool chmtime --get file
  *
  * To set the mtime to current time:
  *
@@ -33,7 +33,7 @@
  *
  * To set the file mtime offset to +1 and print the new value:
  *
- *	test-chmtime --get +1 file
+ *	test-tool chmtime --get +1 file
  *
  */
 #include "test-tool.h"
