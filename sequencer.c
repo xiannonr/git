@@ -107,6 +107,13 @@ static GIT_PATH_FUNC(rebase_path_author_script, "rebase-merge/author-script")
  */
 static GIT_PATH_FUNC(rebase_path_amend, "rebase-merge/amend")
 /*
+ * If there was a merge conflict in a fixup/squash series, we need to
+ * record the type so that a `git rebase --skip` can clean up the commit
+ * message as appropriate. This file will contain that type (`fixup` or
+ * `squash`), and not exist otherwise.
+ */
+static GIT_PATH_FUNC(rebase_path_amend_type, "rebase-merge/amend-type")
+/*
  * When we stop at a given patch via the "edit" command, this file contains
  * the abbreviated commit name of the corresponding patch.
  */
@@ -2406,10 +2413,21 @@ static int error_with_patch(struct commit *commit,
 static int error_failed_squash(struct commit *commit,
 	struct replay_opts *opts, int subject_len, const char *subject)
 {
+	const char *amend_type = "squash";
+
 	if (rename(rebase_path_squash_msg(), rebase_path_message()))
 		return error(_("could not rename '%s' to '%s'"),
 			rebase_path_squash_msg(), rebase_path_message());
-	unlink(rebase_path_fixup_msg());
+
+	if (file_exists(rebase_path_fixup_msg())) {
+		unlink(rebase_path_fixup_msg());
+		amend_type = "fixup";
+	}
+	if (write_message(amend_type, strlen(amend_type),
+		       rebase_path_amend_type(), 0))
+		return error(_("could not write '%s'"),
+			     rebase_path_amend_type());
+
 	unlink(git_path_merge_msg());
 	if (copy_file(git_path_merge_msg(), rebase_path_message(), 0666))
 		return error(_("could not copy '%s' to '%s'"),
@@ -2586,6 +2604,7 @@ static int pick_commits(struct todo_list *todo_list, struct replay_opts *opts)
 			unlink(rebase_path_author_script());
 			unlink(rebase_path_stopped_sha());
 			unlink(rebase_path_amend());
+			unlink(rebase_path_amend_type());
 			delete_ref(NULL, "REBASE_HEAD", NULL, REF_NO_DEREF);
 		}
 		if (item->command <= TODO_SQUASH) {
@@ -2813,6 +2832,7 @@ static int commit_staged_changes(struct replay_opts *opts)
 	if (run_git_commit(rebase_path_message(), opts, flags))
 		return error(_("could not commit staged changes."));
 	unlink(rebase_path_amend());
+	unlink(rebase_path_amend_type());
 	return 0;
 }
 
