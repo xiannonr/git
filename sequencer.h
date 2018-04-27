@@ -35,10 +35,14 @@ struct replay_opts {
 	char **xopts;
 	size_t xopts_nr, xopts_alloc;
 
+	/* Used by fixup/squash */
+	struct strbuf current_fixups;
+	int current_fixup_count;
+
 	/* Only used by REPLAY_NONE */
 	struct rev_info *revs;
 };
-#define REPLAY_OPTS_INIT { -1 }
+#define REPLAY_OPTS_INIT { .action = -1, .current_fixups = STRBUF_INIT }
 
 int sequencer_pick_revisions(struct replay_opts *opts);
 int sequencer_continue(struct replay_opts *opts);
