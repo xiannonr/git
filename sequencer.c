@@ -647,6 +647,8 @@ static int run_git_commit(const char *defmsg, struct replay_opts *opts,
 		argv_array_push(&cmd.args, "-s");
 	if (defmsg)
 		argv_array_pushl(&cmd.args, "-F", defmsg, NULL);
+	else if (!edit)
+		argv_array_pushl(&cmd.args, "-C", "HEAD", NULL);
 	if (cleanup_commit_message)
 		argv_array_push(&cmd.args, "--cleanup=strip");
 	if (edit)
