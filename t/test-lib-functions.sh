@@ -616,7 +616,7 @@ list_contains () {
 #   ok=<signal-name>[,<...>]:
 #     Don't treat an exit caused by the given signal as error.
 #     Multiple signals can be specified as a comma separated list.
-#     Currently recognized signal names are: sigpipe, success.
+#     Currently recognized signal names are: sigabrt, sigpipe, success.
 #     (Don't use 'success', use 'test_might_fail' instead.)
 
 test_must_fail () {
@@ -636,6 +636,9 @@ test_must_fail () {
 		echo >&4 "test_must_fail: command succeeded: $*"
 		return 1
 	elif test_match_signal 13 $exit_code && list_contains "$_test_ok" sigpipe
+	then
+		return 0
+	elif test_match_signal 6 $exit_code && list_contains "$_test_ok" sigabrt
 	then
 		return 0
 	elif test $exit_code -gt 129 && test $exit_code -le 192
