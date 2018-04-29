@@ -16,7 +16,7 @@ test_expect_success 'setup' '
 '
 
 test_expect_success 'pack_refs() not allowed' '
-	test_must_fail $RUN pack-refs 3
+	test_must_fail ok=sigabrt $RUN pack-refs 3
 '
 
 test_expect_success 'peel_ref(new-tag)' '
@@ -27,15 +27,18 @@ test_expect_success 'peel_ref(new-tag)' '
 '
 
 test_expect_success 'create_symref() not allowed' '
-	test_must_fail $RUN create-symref FOO refs/heads/master nothing
+	test_must_fail ok=sigabrt \
+		$RUN create-symref FOO refs/heads/master nothing
 '
 
 test_expect_success 'delete_refs() not allowed' '
-	test_must_fail $RUN delete-refs 0 nothing FOO refs/tags/new-tag
+	test_must_fail ok=sigabrt \
+		$RUN delete-refs 0 nothing FOO refs/tags/new-tag
 '
 
 test_expect_success 'rename_refs() not allowed' '
-	test_must_fail $RUN rename-ref refs/heads/master refs/heads/new-master
+	test_must_fail ok=sigabrt \
+		$RUN rename-ref refs/heads/master refs/heads/new-master
 '
 
 test_expect_success 'for_each_ref(refs/heads/)' '
@@ -91,11 +94,11 @@ test_expect_success 'reflog_exists(HEAD)' '
 '
 
 test_expect_success 'delete_reflog() not allowed' '
-	test_must_fail $RUN delete-reflog HEAD
+	test_must_fail ok=sigabrt $RUN delete-reflog HEAD
 '
 
 test_expect_success 'create-reflog() not allowed' '
-	test_must_fail $RUN create-reflog HEAD 1
+	test_must_fail ok=sigabrt $RUN create-reflog HEAD 1
 '
 
 test_done
