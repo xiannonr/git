@@ -124,6 +124,7 @@ test_expect_success '--skip after failed fixup cleans commit message' '
 '
 
 test_expect_success 'setup rerere database' '
+	git checkout topic &&
 	rm -fr .git/rebase-* &&
 	git reset --hard commit-new-file-F3-on-topic-branch &&
 	git checkout master &&
