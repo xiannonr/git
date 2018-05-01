@@ -2345,7 +2345,7 @@ static int commit_staged_changes(struct replay_opts *opts,
 				 * We need to update the squash message to skip
 				 * the latest commit message.
 				 */
-				struct commit *commit;
+				struct commit *commit = NULL;
 				const char *path = rebase_path_squash_msg();
 
 				if (parse_head(&commit) ||
