@@ -2276,7 +2276,7 @@ static int commit_staged_changes(struct replay_opts *opts,
 		 * the commit message and if there was a squash, let the user
 		 * edit it.
 		 */
-		if (is_clean && !oidcmp(&head, &to_amend) &&
+		if (is_clean && !hashcmp(head, to_amend) &&
 		    opts->current_fixup_count > 0 &&
 		    file_exists(rebase_path_stopped_sha())) {
 			const char *p = opts->current_fixups.buf;
