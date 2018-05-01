@@ -696,7 +696,7 @@ static int parse_head(struct commit **head)
 	if (get_oid("HEAD", &oid)) {
 		current_head = NULL;
 	} else {
-		current_head = lookup_commit_reference(&oid);
+		current_head = lookup_commit_reference(oid.hash);
 		if (!current_head)
 			return error(_("could not parse HEAD"));
 		if (oidcmp(&oid, &current_head->object.oid)) {
