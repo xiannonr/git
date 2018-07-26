@@ -573,13 +573,14 @@ missing_author:
 static int read_env_script(struct argv_array *env)
 {
 	struct strbuf script = STRBUF_INIT;
-	int i, count = 0;
+	int i, count = 0, sq_bug;
 	const char *p2;
 	char *p;
 
 	if (strbuf_read_file(&script, rebase_path_author_script(), 256) <= 0)
 		return -1;
 
+	sq_bug = script.len && script.buf[script.len - 1] != '\'';
 	for (p = script.buf; *p; p++)
 		/*
 		 * write_author_script() used to escape "'" incorrectly as
@@ -587,8 +588,9 @@ static int read_env_script(struct argv_array *env)
 		 * version the incorrect version in case git was upgraded while
 		 * rebase was stopped.
 		 */
-		if (skip_prefix(p, "'\\''", &p2) ||
-		    skip_prefix(p, "'\\\\''", &p2))
+		if (sq_bug && skip_prefix(p, "'\\\\''", &p2))
+			strbuf_splice(&script, p - script.buf, p2 - p, "'", 1);
+		else if (skip_prefix(p, "'\\''", &p2))
 			strbuf_splice(&script, p - script.buf, p2 - p, "'", 1);
 		else if (*p == '\'')
 			strbuf_splice(&script, p-- - script.buf, 1, "", 0);
