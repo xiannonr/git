@@ -2277,14 +2277,6 @@ static int WSAAPI getnameinfo_stub(const struct sockaddr *sa, socklen_t salen,
 	return 0;
 }
 
-static HMODULE ipv6_dll = NULL;
-static void (WSAAPI *ipv6_freeaddrinfo)(struct addrinfo *res);
-static int (WSAAPI *ipv6_getaddrinfo)(const char *node, const char *service,
-				      const struct addrinfo *hints,
-				      struct addrinfo **res);
-static int (WSAAPI *ipv6_getnameinfo)(const struct sockaddr *sa, socklen_t salen,
-				      char *host, DWORD hostlen,
-				      char *serv, DWORD servlen, int flags);
 /*
  * gai_strerror is an inline function in the ws2tcpip.h header, so we
  * don't need to try to load that one dynamically.
@@ -2293,20 +2285,12 @@ static int (WSAAPI *ipv6_getnameinfo)(const struct sockaddr *sa, socklen_t salen
 static void socket_cleanup(void)
 {
 	WSACleanup();
-	if (ipv6_dll)
-		FreeLibrary(ipv6_dll);
-	ipv6_dll = NULL;
-	ipv6_freeaddrinfo = freeaddrinfo_stub;
-	ipv6_getaddrinfo = getaddrinfo_stub;
-	ipv6_getnameinfo = getnameinfo_stub;
 }
 
 static void ensure_socket_initialization(void)
 {
 	WSADATA wsa;
 	static int initialized = 0;
-	const char *libraries[] = { "ws2_32.dll", "wship6.dll", NULL };
-	const char **name;
 
 	if (initialized)
 		return;
@@ -2314,34 +2298,6 @@ static void ensure_socket_initialization(void)
 	if (WSAStartup(MAKEWORD(2,2), &wsa))
 		die("unable to initialize winsock subsystem, error %d",
 			WSAGetLastError());
-
-	for (name = libraries; *name; name++) {
-		ipv6_dll = LoadLibraryExA(*name, NULL,
-					  LOAD_LIBRARY_SEARCH_SYSTEM32);
-		if (!ipv6_dll)
-			continue;
-
-		ipv6_freeaddrinfo = (void (WSAAPI *)(struct addrinfo *))
-			GetProcAddress(ipv6_dll, "freeaddrinfo");
-		ipv6_getaddrinfo = (int (WSAAPI *)(const char *, const char *,
-						   const struct addrinfo *,
-						   struct addrinfo **))
-			GetProcAddress(ipv6_dll, "getaddrinfo");
-		ipv6_getnameinfo = (int (WSAAPI *)(const struct sockaddr *,
-						   socklen_t, char *, DWORD,
-						   char *, DWORD, int))
-			GetProcAddress(ipv6_dll, "getnameinfo");
-		if (!ipv6_freeaddrinfo || !ipv6_getaddrinfo || !ipv6_getnameinfo) {
-			FreeLibrary(ipv6_dll);
-			ipv6_dll = NULL;
-		} else
-			break;
-	}
-	if (!ipv6_freeaddrinfo || !ipv6_getaddrinfo || !ipv6_getnameinfo) {
-		ipv6_freeaddrinfo = freeaddrinfo_stub;
-		ipv6_getaddrinfo = getaddrinfo_stub;
-		ipv6_getnameinfo = getnameinfo_stub;
-	}
 
 	atexit(socket_cleanup);
 	initialized = 1;
@@ -2363,14 +2319,14 @@ struct hostent *mingw_gethostbyname(const char *host)
 
 void mingw_freeaddrinfo(struct addrinfo *res)
 {
-	ipv6_freeaddrinfo(res);
+	freeaddrinfo(res);
 }
 
 int mingw_getaddrinfo(const char *node, const char *service,
 		      const struct addrinfo *hints, struct addrinfo **res)
 {
 	ensure_socket_initialization();
-	return ipv6_getaddrinfo(node, service, hints, res);
+	return getaddrinfo(node, service, hints, res);
 }
 
 int mingw_getnameinfo(const struct sockaddr *sa, socklen_t salen,
@@ -2378,7 +2334,7 @@ int mingw_getnameinfo(const struct sockaddr *sa, socklen_t salen,
 		      int flags)
 {
 	ensure_socket_initialization();
-	return ipv6_getnameinfo(sa, salen, host, hostlen, serv, servlen, flags);
+	return getnameinfo(sa, salen, host, hostlen, serv, servlen, flags);
 }
 
 int mingw_socket(int domain, int type, int protocol)
