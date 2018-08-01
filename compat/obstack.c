@@ -113,14 +113,14 @@ compat_symbol (libc, _obstack_compat, _obstack, GLIBC_2_0);
 # define CALL_CHUNKFUN(h, size) \
   (((h) -> use_extra_arg) \
    ? (*(h)->chunkfun) ((h)->extra_arg, (size)) \
-   : (*(struct _obstack_chunk *(*) (long)) (h)->chunkfun) ((size)))
+   : (*(struct _obstack_chunk *(*) (long)) (void *) (h)->chunkfun) ((size)))
 
 # define CALL_FREEFUN(h, old_chunk) \
   do { \
     if ((h) -> use_extra_arg) \
       (*(h)->freefun) ((h)->extra_arg, (old_chunk)); \
     else \
-      (*(void (*) (void *)) (h)->freefun) ((old_chunk)); \
+      (*(void (*) (void *)) (void *) (h)->freefun) ((old_chunk)); \
   } while (0)
 
 
@@ -159,8 +159,8 @@ _obstack_begin (struct obstack *h,
       size = 4096 - extra;
     }
 
-  h->chunkfun = (struct _obstack_chunk * (*)(void *, long)) chunkfun;
-  h->freefun = (void (*) (void *, struct _obstack_chunk *)) freefun;
+  h->chunkfun = (struct _obstack_chunk * (*)(void *, long)) (void *) chunkfun;
+  h->freefun = (void (*) (void *, struct _obstack_chunk *)) (void *) freefun;
   h->chunk_size = size;
   h->alignment_mask = alignment - 1;
   h->use_extra_arg = 0;

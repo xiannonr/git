@@ -214,31 +214,32 @@ extern void (*obstack_alloc_failed_handler) (void);
 #define obstack_alignment_mask(h) ((h)->alignment_mask)
 
 /* To prevent prototype warnings provide complete argument list.  */
-#define obstack_init(h)						\
-  _obstack_begin ((h), 0, 0,					\
-		  (void *(*) (long)) obstack_chunk_alloc,	\
-		  (void (*) (void *)) obstack_chunk_free)
+#define obstack_init(h)							\
+  _obstack_begin ((h), 0, 0,						\
+		  (void *(*) (long)) (void *) obstack_chunk_alloc,	\
+		  (void (*) (void *)) (void *) obstack_chunk_free)
 
-#define obstack_begin(h, size)					\
-  _obstack_begin ((h), (size), 0,				\
-		  (void *(*) (long)) obstack_chunk_alloc,	\
-		  (void (*) (void *)) obstack_chunk_free)
+#define obstack_begin(h, size)						\
+  _obstack_begin ((h), (size), 0,					\
+		  (void *(*) (long)) (void *) obstack_chunk_alloc,	\
+		  (void (*) (void *)) (void *) obstack_chunk_free)
 
 #define obstack_specify_allocation(h, size, alignment, chunkfun, freefun)  \
   _obstack_begin ((h), (size), (alignment),				   \
-		  (void *(*) (long)) (chunkfun),			   \
-		  (void (*) (void *)) (freefun))
+		  (void *(*) (long)) (void *) (chunkfun),		   \
+		  (void (*) (void *)) (void *) (freefun))
 
 #define obstack_specify_allocation_with_arg(h, size, alignment, chunkfun, freefun, arg) \
   _obstack_begin_1 ((h), (size), (alignment),				\
-		    (void *(*) (void *, long)) (chunkfun),		\
-		    (void (*) (void *, void *)) (freefun), (arg))
+		    (void *(*) (void *, long)) (void *) (chunkfun),	\
+		    (void (*) (void *, void *)) (void *) (freefun), (arg))
 
 #define obstack_chunkfun(h, newchunkfun) \
-  ((h) -> chunkfun = (struct _obstack_chunk *(*)(void *, long)) (newchunkfun))
+  ((h) -> chunkfun = (struct _obstack_chunk *(*)(void *, long)) (void *) \
+		      (newchunkfun))
 
 #define obstack_freefun(h, newfreefun) \
-  ((h) -> freefun = (void (*)(void *, struct _obstack_chunk *)) (newfreefun))
+  ((h) -> freefun = (void (*)(void *, struct _obstack_chunk *)) (void *) (newfreefun))
 
 #define obstack_1grow_fast(h,achar) (*((h)->next_free)++ = (achar))
 
