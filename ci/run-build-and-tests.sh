@@ -8,6 +8,8 @@
 ln -s "$cache_dir/.prove" t/.prove
 
 make --jobs=2
+(cd t && sh t9800-git-p4-basic.sh -i -v -x)
+exit
 make --quiet test
 if test "$jobname" = "linux-gcc"
 then

@@ -181,6 +181,13 @@ retry_until_fail () {
 	timeout=$(($(time_in_seconds) + $RETRY_TIMEOUT))
 	until ! "$@" 2>/dev/null || test $(time_in_seconds) -gt $timeout
 	do
+		case "$*" in
+		"kill "*)
+			p="$*"
+			ps ax | grep "${p##* }"
+			ps ax | grep p4
+			;;
+		esac
 		sleep 1
 	done
 }
