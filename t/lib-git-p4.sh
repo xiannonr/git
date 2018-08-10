@@ -142,7 +142,7 @@ start_p4d () {
 		return 1
 	fi
 
-	p4 configure monitor 2
+	p4 configure set monitor=2
 
 	# build a p4 user so author@example.com has an entry
 	p4_add_user author
