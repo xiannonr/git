@@ -194,7 +194,7 @@ retry_until_fail () {
 
 kill_p4d () {
 	pid=$(cat "$pidfile")
-	retry_until_fail kill $pid
+	retry_until_fail p4d -c "kill $pid"
 	retry_until_fail kill -9 $pid
 	# complain if it would not die
 	test_must_fail kill $pid >/dev/null 2>&1 &&
