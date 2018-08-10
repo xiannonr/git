@@ -198,6 +198,8 @@ kill_p4d () {
 	pid=$(cat "$pidfile")
 	p4 monitor show -l -a -e
 	p4 monitor terminate $pid && return
+	echo "UID: $UID"
+	p4 admin stop && return
 	retry_until_fail p4d -c "kill -9 $pid"
 	retry_until_fail kill -9 $pid
 	# complain if it would not die
