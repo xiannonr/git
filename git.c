@@ -412,7 +412,7 @@ static int run_builtin(struct cmd_struct *p, int argc, const char **argv)
 	if (!help && p->option & NEED_WORK_TREE)
 		setup_work_tree();
 
-	trace_argv_printf(argv, "trace: built-in: git");
+	trace_argv_printf(argv, "trace: built-in: (pid: %d) git", (int)getpid());
 
 	validate_cache_entries(&the_index);
 	status = p->fn(argc, argv, prefix);
