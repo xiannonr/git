@@ -98,6 +98,7 @@ start_p4d () {
 		{
 			p4d -q -p $P4DPORT "$@" &
 			echo $! >"$pidfile"
+	pstree -p
 		}
 	) &&
 
@@ -204,13 +205,13 @@ kill_p4d () {
 	echo "UID: $UID"
 	ps alx | grep -w git
 	pstree -p
-	p4 admin stop && {
-		wait "$pid"
-		ps alx | grep "$pid"
-		ps alx | grep defunct
-		#retry_until_fail kill -9 $watchdog_pid
+	if p4 admin stop && wait "$pid" &&
+		# process might have turned into a zombie
+		test Z = "$(ps --no-headers -eo state -q "$pid")"
+	then
+		retry_until_fail kill -9 $watchdog_pid
 		return
-	}
+	fi
 	retry_until_fail p4d -c "kill -9 $pid"
 	retry_until_fail kill -9 $pid
 	# complain if it would not die
