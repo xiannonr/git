@@ -4152,3 +4152,9 @@ if __name__ == '__main__':
     except DieException as e:
         sys.stderr.write(str(e) + "\n")
         sys.exit(1)
+    except Exception as e:
+        sys.stderr.write('Caught something: %s\n' % str(e))
+        sys.exit(1)
+    except:
+        sys.stderr.write('Huh? Caught something\n')
+        sys.exit(1)
