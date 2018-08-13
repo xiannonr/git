@@ -204,7 +204,7 @@ kill_p4d () {
 	p4 admin stop && {
 		ps ax | grep "$pid"
 		ps ax | grep p4
-		retry_until_fail kill -9 $watchdog_pid
+		#retry_until_fail kill -9 $watchdog_pid
 		return
 	}
 	retry_until_fail p4d -c "kill -9 $pid"
