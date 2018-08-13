@@ -201,7 +201,8 @@ kill_p4d () {
 	p4 monitor show -l -a -e
 	p4 monitor terminate $pid && return
 	echo "UID: $UID"
-	ps ax | grep -w git
+	ps Afx | grep -w git
+	pstree -p
 	p4 admin stop && {
 		wait "$pid"
 		ps ax | grep "$pid"
