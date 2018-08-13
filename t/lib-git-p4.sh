@@ -112,8 +112,8 @@ start_p4d () {
 	timeout=$(($(time_in_seconds) + $P4D_TIMEOUT))
 	while true
 	do
-		ps ax | grep "$pid"
-		ps ax | grep defunct
+		ps alx | grep "$pid"
+		ps alx | grep defunct
 		if test $(time_in_seconds) -gt $timeout
 		then
 			kill -9 $pid
@@ -189,8 +189,8 @@ retry_until_fail () {
 		case "$*" in
 		*"kill "*)
 			p="$*"
-			ps ax | grep "${p##* }"
-			ps ax | grep defunct
+			ps alx | grep "${p##* }"
+			ps alx | grep defunct
 			;;
 		esac
 		sleep 1
@@ -202,12 +202,12 @@ kill_p4d () {
 	p4 monitor show -l -a -e
 	p4 monitor terminate $pid && return
 	echo "UID: $UID"
-	ps Afx | grep -w git
+	ps alx | grep -w git
 	pstree -p
 	p4 admin stop && {
 		wait "$pid"
-		ps ax | grep "$pid"
-		ps ax | grep defunct
+		ps alx | grep "$pid"
+		ps alx | grep defunct
 		#retry_until_fail kill -9 $watchdog_pid
 		return
 	}
