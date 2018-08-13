@@ -202,6 +202,7 @@ kill_p4d () {
 	p4 monitor terminate $pid && return
 	echo "UID: $UID"
 	p4 admin stop && {
+		wait "$pid"
 		ps ax | grep "$pid"
 		ps ax | grep p4
 		#retry_until_fail kill -9 $watchdog_pid
