@@ -112,7 +112,7 @@ start_p4d () {
 	while true
 	do
 		ps ax | grep "$pid"
-		ps ax | grep p4
+		ps ax | grep defunct
 		if test $(time_in_seconds) -gt $timeout
 		then
 			kill -9 $pid
@@ -189,7 +189,7 @@ retry_until_fail () {
 		*"kill "*)
 			p="$*"
 			ps ax | grep "${p##* }"
-			ps ax | grep p4
+			ps ax | grep defunct
 			;;
 		esac
 		sleep 1
@@ -204,7 +204,7 @@ kill_p4d () {
 	p4 admin stop && {
 		wait "$pid"
 		ps ax | grep "$pid"
-		ps ax | grep p4
+		ps ax | grep defunct
 		#retry_until_fail kill -9 $watchdog_pid
 		return
 	}
