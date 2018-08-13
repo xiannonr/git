@@ -111,6 +111,8 @@ start_p4d () {
 	timeout=$(($(time_in_seconds) + $P4D_TIMEOUT))
 	while true
 	do
+		ps ax | grep "$pid"
+		ps ax | grep p4
 		if test $(time_in_seconds) -gt $timeout
 		then
 			kill -9 $pid
@@ -200,6 +202,8 @@ kill_p4d () {
 	p4 monitor terminate $pid && return
 	echo "UID: $UID"
 	p4 admin stop && {
+		ps ax | grep "$pid"
+		ps ax | grep p4
 		retry_until_fail kill -9 $watchdog_pid
 		return
 	}
