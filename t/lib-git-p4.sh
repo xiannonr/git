@@ -208,6 +208,7 @@ kill_p4d () {
 	p4 admin stop
 	# The p4d process might have turned into a zombie
 	wait "$pid"
+	sleep 2
 	if test Z = "$(ps --no-headers -eo state -q "$pid")"
 	then
 		retry_until_fail kill -9 $watchdog_pid
