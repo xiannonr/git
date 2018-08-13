@@ -173,7 +173,7 @@ def write_pipe(c, stdin):
 
     expand = isinstance(c,basestring)
     p = subprocess.Popen(c, stdin=subprocess.PIPE, shell=expand)
-    sys.stderr.write('running cmd %c as pid %d\n' % (str(c), p.pid))
+    sys.stderr.write('running cmd %s as pid %d\n' % (str(c), p.pid))
     pipe = p.stdin
     val = pipe.write(stdin)
     pipe.close()
@@ -196,7 +196,7 @@ def read_pipe_full(c):
 
     expand = isinstance(c,basestring)
     p = subprocess.Popen(c, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=expand)
-    sys.stderr.write('running cmd %c as pid %d\n' % (str(c), p.pid))
+    sys.stderr.write('running cmd %s as pid %d\n' % (str(c), p.pid))
     (out, err) = p.communicate()
     p.wait()
     return (p.returncode, out, err)
@@ -234,7 +234,7 @@ def read_pipe_lines(c):
 
     expand = isinstance(c, basestring)
     p = subprocess.Popen(c, stdout=subprocess.PIPE, shell=expand)
-    sys.stderr.write('running cmd %c as pid %d\n' % (str(c), p.pid))
+    sys.stderr.write('running cmd %s as pid %d\n' % (str(c), p.pid))
     pipe = p.stdout
     val = pipe.readlines()
     if pipe.close() or p.wait():
@@ -254,7 +254,7 @@ def p4_has_command(cmd):
     real_cmd = p4_build_cmd(["help", cmd])
     p = subprocess.Popen(real_cmd, stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE)
-    sys.stderr.write('running cmd %c as pid %d\n' % (str(c), p.pid))
+    sys.stderr.write('running cmd %s as pid %d\n' % (str(c), p.pid))
     p.communicate()
     p.wait()
     return p.returncode == 0
@@ -269,7 +269,7 @@ def p4_has_move_command():
         return False
     cmd = p4_build_cmd(["move", "-k", "@from", "@to"])
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    sys.stderr.write('running cmd %c as pid %d\n' % (str(c), p.pid))
+    sys.stderr.write('running cmd %s as pid %d\n' % (str(c), p.pid))
     (out, err) = p.communicate()
     p.wait()
     # return code will be 1 in either case
@@ -646,7 +646,7 @@ def p4CmdList(cmd, stdin=None, stdin_mode='w+b', cb=None, skip_info=False,
                           stdin=stdin_file,
                           stdout=subprocess.PIPE)
 
-    sys.stderr.write('running cmd %c as pid %d\n' % (str(c), p4.pid))
+    sys.stderr.write('running cmd %s as pid %d\n' % (str(c), p4.pid))
     result = []
     try:
         while True:
@@ -782,7 +782,7 @@ def extractSettingsGitLog(log):
 def gitBranchExists(branch):
     proc = subprocess.Popen(["git", "rev-parse", branch],
                             stderr=subprocess.PIPE, stdout=subprocess.PIPE);
-    sys.stderr.write('running cmd %c as pid %d\n' % (str(c), proc.pid))
+    sys.stderr.write('running cmd %s as pid %d\n' % (str(c), proc.pid))
     return proc.wait() == 0;
 
 def gitUpdateRef(ref, newvalue):
@@ -868,7 +868,7 @@ def branch_exists(branch):
 
     cmd = [ "git", "rev-parse", "--symbolic", "--verify", branch ]
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    sys.stderr.write('running cmd %c as pid %d\n' % (str(c), p.pid))
+    sys.stderr.write('running cmd %s as pid %d\n' % (str(c), p.pid))
     out, _ = p.communicate()
     if p.returncode:
         return False
@@ -1256,7 +1256,7 @@ class GitLFS(LargeFileSystem):
             ['git', 'lfs', 'pointer', '--file=' + contentFile],
             stdout=subprocess.PIPE
         )
-        sys.stderr.write('running cmd %c as pid %d\n' % (str(c), pointerProcess.pid))
+        sys.stderr.write('running cmd %s as pid %d\n' % (str(c), pointerProcess.pid))
         pointerFile = pointerProcess.stdout.read()
         if pointerProcess.wait():
             os.remove(contentFile)
@@ -1283,7 +1283,7 @@ class GitLFS(LargeFileSystem):
         uploadProcess = subprocess.Popen(
             ['git', 'lfs', 'push', '--object-id', 'origin', os.path.basename(localLargeFile)]
         )
-        sys.stderr.write('running cmd %c as pid %d\n' % (str(c), uploadProcess.pid))
+        sys.stderr.write('running cmd %s as pid %d\n' % (str(c), uploadProcess.pid))
         if uploadProcess.wait():
             die('git-lfs push command failed. Did you define a remote?')
 
@@ -3535,7 +3535,7 @@ class P4Sync(Command, P4UserMap):
                                               stdin=subprocess.PIPE,
                                               stdout=subprocess.PIPE,
                                               stderr=subprocess.PIPE);
-        sys.stderr.write('running cmd %c as pid %d\n' % (str(c), self.importProcess.pid))
+        sys.stderr.write('running cmd %s as pid %d\n' % (str(c), self.importProcess.pid))
         self.gitOutput = self.importProcess.stdout
         self.gitStream = self.importProcess.stdin
         self.gitError = self.importProcess.stderr
