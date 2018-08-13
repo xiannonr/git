@@ -205,9 +205,9 @@ kill_p4d () {
 	echo "UID: $UID"
 	ps alx | grep -w git
 	pstree -p
-	if p4 admin stop && wait "$pid" &&
-		# process might have turned into a zombie
-		test Z = "$(ps --no-headers -eo state -q "$pid")"
+	p4 admin stop
+	# The p4d process might have turned into a zombie
+	if wait "$pid" && test Z = "$(ps --no-headers -eo state -q "$pid")"
 	then
 		retry_until_fail kill -9 $watchdog_pid
 		return
