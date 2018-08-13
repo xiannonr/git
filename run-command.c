@@ -634,6 +634,9 @@ static void trace_run_command(const struct child_process *cp)
 		strbuf_addstr(&buf, " git");
 	sq_quote_argv_pretty(&buf, cp->argv);
 
+	if (cp->pid >= 0)
+		strbuf_addf(&buf, " (pid: %d)", (int)cp->pid);
+
 	trace_printf("%s", buf.buf);
 	strbuf_release(&buf);
 }
@@ -928,6 +931,7 @@ fail_pipe:
 		return -1;
 	}
 
+	trace_run_command(cmd);
 	if (need_in)
 		close(fdin[0]);
 	else if (cmd->in)

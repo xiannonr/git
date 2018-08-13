@@ -90,6 +90,7 @@ TMPDIR="$TRASH_DIRECTORY"
 export TMPDIR
 
 start_p4d () {
+	export GIT_TRACE=1
 	mkdir -p "$db" "$cli" "$git" &&
 	rm -f "$pidfile" &&
 	(
