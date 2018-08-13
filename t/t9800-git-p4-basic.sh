@@ -51,7 +51,7 @@ test_expect_success 'git p4 sync uninitialized repo' '
 	(
 		cd "$git" &&
 		test_must_fail git p4 sync 2>errs &&
-		test_i18ngrep "Perhaps you never did" errs
+		test_i18ngrep "Perhaps you never did" errs && cat errs
 	)
 '
 
