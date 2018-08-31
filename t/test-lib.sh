@@ -443,16 +443,7 @@ trap 'exit $?' INT
 test_ok_ () {
 	if test -n "$write_junit_xml"
 	then
-		if test -z "$GIT_TEST_TEE_OUTPUT_FILE"
-		then
-			write_junit_xml_testcase "$*"
-		else
-			junit_insert="$(xml_attr_encode \
-				"$(cat "$GIT_TEST_TEE_OUTPUT_FILE")")"
-			>"$GIT_TEST_TEE_OUTPUT_FILE"
-			write_junit_xml_testcase "$*" \
-				"<system-err>$junit_insert</system-err>"
-		fi
+		write_junit_xml_testcase "$*"
 	fi
 	test_success=$(($test_success + 1))
 	say_color "" "ok $test_count - $@"
@@ -478,6 +469,9 @@ test_failure_ () {
 			"$(cat "$GIT_TEST_TEE_OUTPUT_FILE")")"
 		>"$GIT_TEST_TEE_OUTPUT_FILE"
 		junit_insert="$junit_insert</failure>"
+		junit_insert="$junit_insert<system-err>$(xml_attr_encode \
+			"$(cat "$GIT_TEST_TEE_OUTPUT_FILE.err")")</system-err>"
+		>"$GIT_TEST_TEE_OUTPUT_FILE.err"
 		write_junit_xml_testcase "$1" "      $junit_insert"
 	fi
 	test_failure=$(($test_failure + 1))
@@ -762,9 +756,12 @@ test_start_ () {
 	then
 		junit_start=$(test-tool date getnanos)
 
-		# truncate output
-		test -z "$GIT_TEST_TEE_OUTPUT_FILE" ||
-		>"$GIT_TEST_TEE_OUTPUT_FILE"
+		# append to future <system-err>; truncate output
+		test -z "$GIT_TEST_TEE_OUTPUT_FILE" || {
+			cat "$GIT_TEST_TEE_OUTPUT_FILE" \
+				>>"$GIT_TEST_TEE_OUTPUT_FILE.err"
+			>"$GIT_TEST_TEE_OUTPUT_FILE"
+		}
 	fi
 }
 
