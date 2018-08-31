@@ -443,7 +443,16 @@ trap 'exit $?' INT
 test_ok_ () {
 	if test -n "$write_junit_xml"
 	then
-		write_junit_xml_testcase "$*"
+		if test -z "$GIT_TEST_TEE_OUTPUT_FILE"
+		then
+			write_junit_xml_testcase "$*"
+		else
+			junit_insert="$(xml_attr_encode \
+				"$(cat "$GIT_TEST_TEE_OUTPUT_FILE")")"
+			>"$GIT_TEST_TEE_OUTPUT_FILE"
+			write_junit_xml_testcase "$*" \
+				"<system-err>$junit_insert</system-err>"
+		fi
 	fi
 	test_success=$(($test_success + 1))
 	say_color "" "ok $test_count - $@"
