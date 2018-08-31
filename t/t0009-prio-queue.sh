@@ -34,6 +34,12 @@ test_expect_success 'mixed put and get' '
 	test_cmp expect actual
 '
 
+test_expect_success 'intentional failure' '
+	ls -la &&
+	false &&
+	echo Hello world
+'
+
 cat >expect <<'EOF'
 1
 2
@@ -45,6 +51,12 @@ EOF
 test_expect_success 'notice empty queue' '
 	test-tool prio-queue 1 2 get get get 1 2 get get get >actual &&
 	test_cmp expect actual
+'
+
+test_expect_success 'intentional failure' '
+	ls -la &&
+	false &&
+	echo Hello world
 '
 
 test_done
