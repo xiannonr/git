@@ -867,7 +867,7 @@ static CURL *get_curl_handle(void)
 			 get_curl_allowed_protocols(-1));
 #else
 	warning("protocol restrictions not applied to curl redirects because\n"
-		"your curl version is too old (>= 7.19.4)");
+		"your libcurl version is too old (< 7.19.4)");
 #endif
 	if (getenv("GIT_CURL_VERBOSE"))
 		curl_easy_setopt(result, CURLOPT_VERBOSE, 1L);
