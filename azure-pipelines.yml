@@ -17,7 +17,7 @@ phases:
 
        export CC=clang || exit 1
 
-       ci/install-dependencies.sh
+       ci/install-dependencies.sh || exit 1
        ci/run-build-and-tests.sh || {
            ci/print-test-failures.sh
            exit 1
@@ -48,7 +48,7 @@ phases:
        sudo apt-get update &&
        sudo apt-get -y install git gcc make libssl-dev libcurl4-openssl-dev libexpat-dev tcl tk gettext git-email zlib1g-dev apache2-bin || exit 1
 
-       ci/install-dependencies.sh
+       ci/install-dependencies.sh || exit 1
        ci/run-build-and-tests.sh || {
            ci/print-test-failures.sh
            exit 1
@@ -78,7 +78,7 @@ phases:
 
        export CC=clang
 
-       ci/install-dependencies.sh
+       ci/install-dependencies.sh || exit 1
        ci/run-build-and-tests.sh || {
            ci/print-test-failures.sh
            exit 1
@@ -106,7 +106,7 @@ phases:
   - bash: |
        test "$GITFILESHAREPWD" = '$(gitfileshare.pwd)' || ci/mount-fileshare.sh //gitfileshare.file.core.windows.net/test-cache gitfileshare "$GITFILESHAREPWD" "$HOME/test-cache" || exit 1
 
-       ci/install-dependencies.sh
+       ci/install-dependencies.sh || exit 1
        ci/run-build-and-tests.sh || {
            ci/print-test-failures.sh
            exit 1
